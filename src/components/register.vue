@@ -17,7 +17,34 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
+export default {
+  name: 'register',
+  data () {
+    return {
+      cell: '',
+      pwd: ''
+    }
+  },
+  mounted () {
+  },
+  computed: {
 
+  },
+  methods: {
+    login: function () {
+      this.axios.post(this.url.api.login, {
+        cell: this.cell,
+        loginPwd: this.pwd
+      }).then(function (res) {
+        console.log(res)
+      })
+      this.$router.push({ path: '/index' })
+    },
+    toCodeLogin: function () {
+      this.$router.push({ path: '/codeLogin' })
+    }
+  }
+}
 </script>
 <style lang="scss" rel="stylesheet/scss">
   .loginPart{

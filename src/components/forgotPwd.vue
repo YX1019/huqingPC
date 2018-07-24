@@ -1,37 +1,37 @@
 <template>
   <div class="loginPart">
     <div class="loginCont clearfix">
-     <div class="loginLf"><img src="../common/img/login.png"/></div>
-     <div class="loginRg">
-       <h1>用户登录</h1>
-       <div class="loginInfo">
-         <p><label>手机号:</label><input type="text" v-model="cell"/> </p>
-         <p><label>密码:</label><input type="password" v-model="pwd"/> </p>
-         <div class="loginBtn">
-           <button @click="login()">用户登录</button><span style="display: inline-block;vertical-align: middle;"><i class="iconfont wechatIcon" @click="toCodeLogin()">&#xe615;</i></span>
-       </div>
-     </div>
-       <div class="loginBottom">
-         <a @click="toReg()">免费注册</a><a @click="toForgotPwd()">忘记密码?</a>
-       </div>
+      <div class="loginLf"><img src="../common/img/login.png"/></div>
+      <div class="loginRg">
+        <h1>找回密码</h1>
+        <div class="loginInfo">
+          <p><label>手机号:</label><input type="text"/> </p>
+          <p><label>验证码:</label><input type="text"/><input type="button" v-model="btnTxt" :disabled="disabled" class="sendPwd" :class="{'btnGray' : disabled }" @click="getAuthCode()"/> </p>
+          <p><label>密码:</label><input type="password"/> </p>
+          <div class="loginBtn">
+            <button>确认</button><router-link to="login"><span style="display: inline-block;vertical-align: middle;color: #095dbb;" @click="tologin();">返回登录</span></router-link>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
   </div>
 </template>
 <script type="text/ecmascript-6">
-// import { mapActions, mapState } from 'vuex'
 export default {
-  name: '',
+  name: 'forgotPwd',
   data () {
     return {
+      disabled: false,
       cell: '',
-      pwd: ''
+      pwd: '',
+      time: 60,
+      btnTxt: '发送验证码'
     }
   },
   mounted () {
   },
   computed: {
-    // ...mapState(['Login'])
+
   },
   methods: {
     login: function () {
@@ -41,46 +41,27 @@ export default {
       }).then(function (res) {
         console.log(res)
       })
-      var name = '亲爱的我'
-      this.$store.commit('changeLogin', true)
-      this.$store.commit('changeName', name)
-      window.localStorage.setItem('isLogin', true)
-      this.$router.push({ path: '/index' })
-      // location.reload()
+      this.$router.push({path: '/index'})
     },
-    toCodeLogin: function () {
-      this.$router.push({ path: '/codeLogin' })
+    tologin: function () {
+      this.$router.push({path: '/login'})
     },
-    toReg: function () {
-      this.$router.push({ path: '/register' })
-    },
-    toForgotPwd: function () {
-      this.$router.push({ path: '/forgotPwd' })
+    getAuthCode: function () {
+      if (this.time > 0) {
+        this.disabled = true
+        this.time--
+        this.btnTxt = this.time + 's后重新获取'
+        setTimeout(this.getAuthCode, 1000)
+      } else {
+        this.time = 0
+        this.btnTxt = '获取验证码'
+        this.disabled = false
+      }
     }
   }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">
-  .loginBottom{
-    width:100%;
-    height: 82px;
-    line-height: 82px;
-    text-align: center;
-    a{
-      color: #151515;
-      font-size:14px;
-      cursor: pointer;
-      &:first-child{
-        color:#095dbb;
-        margin-right: 70px;
-      }
-    }
-  }
-  .wechatIcon{
-    font-size:30px;
-    color: #13ce66;
-    cursor: pointer;
-  }
   .loginPart{
     width:100%;
     height: auto;
@@ -144,7 +125,6 @@ export default {
         height: 35px;
         box-sizing: border-box;
         border:1px solid #dcdcdc;
-        padding: 0 10px;
       }
     }
   }
@@ -156,6 +136,10 @@ export default {
     border:1px solid #dd0011;
     margin-left: 10px;
     background: #fff;
+  }
+  .loginInfo p input.sendPwd.btnGray{
+    color: #ccc;
+    border:1px solid #ccc;
   }
   .loginBtn{
     width:100%;
@@ -172,4 +156,5 @@ export default {
       margin-right: 30px;
     }
   }
+
 </style>

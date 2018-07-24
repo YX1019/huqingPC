@@ -17,6 +17,12 @@ export default {
     top,
     foot,
     rightNav
+  },
+  data () {
+    return {
+    }
+  },
+  created () {
   }
 }
 </script>

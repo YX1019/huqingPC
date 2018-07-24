@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import login from '@/components/login'
 import codeLogin from '@/components/codeLogin'
 import register from '@/components/register'
+import forgotPwd from '@/components/forgotPwd'
 import index from '@/components/index'
 import store from '@/components/store'
 import shopcart from '@/components/shopcart'
@@ -52,6 +53,11 @@ export default new Router({
       path: '/register',
       name: 'register',
       component: register
+    },
+    {
+      path: '/forgotPwd',
+      name: 'forgotPwd',
+      component: forgotPwd
     },
     {
       path: '/index',

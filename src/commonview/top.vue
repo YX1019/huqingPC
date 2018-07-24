@@ -1,8 +1,15 @@
 <template>
   <div class="hqTop">
   <div class="top">
-     <div class="top_lf lf">您好，欢迎光临胡庆余堂网上商城<span class="line">|</span><router-link to="login"><a>登录</a></router-link><span class="line">|</span><router-link to="register"><a>快速注册</a></router-link></div>
-     <div class="top_rg rg"><div class="lf"><i class="iconfont red">&#xe887;</i>购物车<span class="red">0</span>件<i class="iconfont">&#xe60b;</i></div><span class="line lf">|</span>
+     <div class="top_lf lf">您好，欢迎光临胡庆余堂网上商城<span class="line">|</span><a v-show="!isLogin" @click="toLogin();">登录</a><span class="line" v-show="!isLogin">|</span><a v-show="!isLogin" @click="toRegister();">快速注册</a><span v-show="isLogin">{{name}}</span> <span class="line" v-show="isLogin">|</span><span v-show="isLogin" style="cursor: pointer" @click="loginOut()">退出</span></div>
+     <div class="top_rg rg"><div class="lf" style="position: relative;" :class="{'cartDiv': isShowCart}"><i class="iconfont red">&#xe887;</i>购物车<span class="red">0</span>件<i class="iconfont">&#xe60b;</i>
+       <div class="smallCart" v-show="isShowCart">
+         <div class="smallCartItem" v-for="item in 2" :key="item">
+           <span class="smallCart_lf">益母草</span><span class="smallCart_Rg">50.00元×1</span>
+         </div>
+         <div style="border-top:1px solid #ccc;margin: 0 10px;"><button class="lookCart">查看我的购物车</button></div>
+       </div>
+     </div><span class="line lf">|</span>
        <router-link to="collect"><div class="lf">收藏夹<i class="iconfont">&#xe60b;</i></div></router-link><span class="line lf">|</span><router-link to="personal"><div class="lf">用户中心<i class="iconfont">&#xe60b;</i></div></router-link></div>
   </div>
   <div class="header">
@@ -28,14 +35,23 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
 export default {
   name: 'HelloWorld',
+  props: ['childState'],
   data () {
     return {
       msg: 'Welcome to Your Vue.js App',
       isActive: 0,
-      menuList: [{name: '首页'}, {name: '商城'}, {name: '我的优惠'}, {name: '活动信息'}, {name: '新闻公告'}, {name: '养生知识'}]
+      menuList: [{name: '首页'}, {name: '商城'}, {name: '我的优惠'}, {name: '活动信息'}, {name: '新闻公告'}, {name: '养生知识'}],
+      isShowCart: false
     }
+  },
+  created () {
+    console.log(this.$store.state.isLogin, this.$store.state.name)
+  },
+  computed: {
+    ...mapState(['isLogin', 'name']) // 引入vuex 里的变量
   },
   methods: {
     linkPage: function (index) {
@@ -50,7 +66,20 @@ export default {
         this.$router.push({ path: '/news' })
       }
       console.log(index)
+    },
+    loginOut: function () {
+      this.$store.commit('changeLogin', false)
+      window.localStorage.removeItem('isLogin')
+    },
+    toLogin: function () {
+      this.$router.push({ path: '/login' })
+    },
+    toRegister: function () {
+      this.$router.push({ path: '/register' })
     }
+  },
+  watch: {
+
   }
 }
 </script>
@@ -65,14 +94,16 @@ export default {
   }
   .top{
     width:$pageWidth;
-    height:54px;
-    line-height:54px;
+    height: 34px;
+    line-height: 34px;
+    padding: 10px 0;
     margin: 0 auto;
     font-size:14px;
     color: #383838;
   }
   .top_lf a{
     color: #e70012;
+    cursor: pointer;
   }
   .top_rg a{
     color:#383838;
@@ -172,4 +203,51 @@ export default {
 .red{
   color: $red;
 }
+  .smallCart{
+    position: absolute;
+    top: 34px;
+    left:0;
+    width:270px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-top: 0;
+  }
+  .cartDiv{
+    border-top: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+  }
+  .smallCartItem{
+    width:100%;
+    height: auto;
+    &:first-child{
+      .smallCart_Rg{
+        border-top: 1px solid #ccc;
+      }
+    }
+  }
+
+  .smallCart_lf{
+    width:98px;
+    display: inline-block;
+    box-sizing: border-box;
+    padding-left: 10px;
+  }
+  .smallCart_Rg{
+    width:calc(100% - 98px);
+    display: inline-block;
+    text-align: right;
+    padding-right: 10px;
+    box-sizing: border-box;
+    color: #d81e06;
+  }
+  .lookCart{
+    margin: 5px 0;
+    float: right;
+    background: #d81e06;
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 5px;
+  }
 </style>

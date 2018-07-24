@@ -133,6 +133,8 @@ export default {
       isActive: 0
     }
   },
+  created () {
+  },
   mounted () {
     this.setSize()
     const that = this
