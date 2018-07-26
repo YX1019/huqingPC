@@ -49,6 +49,16 @@
         <div><button><i></i>加入收藏</button><button class="rg"><i></i>放入购物车</button></div>
       </li>
     </ul>
+    <div style="width: 100%;height: 50px;text-align: center;margin-bottom: 30px;">
+      <el-pagination
+        background
+        @current-change="handleCurrentChange"
+        layout="prev, pager, next"
+        :total="totalNum"
+        :current-page.sync="pageNo"
+        :page-size="pageSize">
+      </el-pagination>
+    </div>
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -57,7 +67,22 @@ export default {
   data () {
     return {
       active: 0,
-      isShowColligate: false
+      isShowColligate: false,
+      pageNo: 1,
+      totalNum: 5,
+      pageSize: 10,
+      goodsList: [],
+      teamId: '', // 搜索条件
+      productName: '',
+      fatherCate: '',
+      childCate: '',
+      fatherEfectCate: '',
+      childEfectCate: '',
+      salesSort: '',
+      priceSort: '',
+      leastPrice: '',
+      mostPrice: '',
+      proType: '' // 搜索条件结束
     }
   },
   methods: {
@@ -69,6 +94,30 @@ export default {
     },
     closeColligate: function () {
       this.isShowColligate = false
+    },
+    handleCurrentChange: function (val) {
+      console.log(val)
+    },
+    getProList: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('cell', _this.cell);
+      params.append('loginPwd', _this.pwd);
+      params.append('token', '1');
+      this.axios({
+        method: 'post',
+        url: this.url.api.login,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+
+        }
+      })
     }
   }
 }

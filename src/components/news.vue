@@ -21,13 +21,28 @@
      <li v-for="item in 20" :key="item"><a><span class="newsList_lf"><i>●</i>推荐几款秋季解暑养生粥</span><span class="newsList_rg">2018-08-21</span></a></li>
    </ul>
   </div>
+  <div style="width: 100%;height: 50px;text-align: center;clear: both">
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="total"
+      @current-change="handleCurrentChange"
+      :current-page.sync="pageNo"
+      :page-size="pageSize"
+      >
+    </el-pagination>
+  </div>
 </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      total: 5, // 总条数
+      pageNo: 1,
+      pageSize: 10
+    }
   },
   methods: {}
 }

@@ -27,11 +27,10 @@
     <h1 class="title">新闻通知</h1>
     <div class="newsCont">
     <el-carousel :interval="4000" type="card" height="320px" arrow="always">
-      <el-carousel-item v-for="item in 6" :key="item">
+      <el-carousel-item v-for="item in newsBannerList" :key="item.knowId">
         <div class="newsItem">
-          <div class="newsItemLf"><h1>胡庆余堂</h1><h3>正宗意味着品质，意味着诚信，
-            意味着放心之选。</h3><p>2018-06-12</p></div>
-          <div class="newsItemRg"><img src="../common/img/newImg.jpg"/></div>
+          <div class="newsItemLf"><h1>{{item.title}}</h1><h3>{{item.subTitle}}</h3><p>{{item.time}}</p></div>
+          <div class="newsItemRg"><img :src="item.imgList[0]"/></div>
         </div>
       </el-carousel-item>
     </el-carousel>
@@ -44,7 +43,7 @@
         <div class="v_show">
           <div class="v_cont">
             <ul>
-              <li v-bind:index="index" v-for="(item,index) in 5" :key="item"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></li>
+              <li v-bind:index="index" v-for="(item,index) in knowBannerList" :key="item.knowId"><img :src="item.imgList[0]"/><p>{{item.title}}</p></li>
               <!--<li index="1" style="background:#ff0">[第2讲]</li>-->
               <!--<li index="2" style="background:#f0f">[第3讲]</li>-->
               <!--<li index="3" style="background:#999">[第4讲]</li>-->
@@ -57,7 +56,7 @@
             <a href="javascript:void(0)"><i class="iconfont">&#xe629;</i></a>
           </div>
           <ul class="circle">
-            <li @click="toAnypage(index)" v-for="(item,index) in 5" :class="{'circle-cur':index==isActive}" :key="item"></li>
+            <li @click="toAnypage(index)" v-for="(item,index) in knowBannerList" :class="{'circle-cur':index==isActive}" :key="item.knowId"></li>
             <!--<li @click="toAnypage()">2</li>-->
             <!--<li @click="toAnypage()">3</li>-->
             <!--<li @click="toAnypage()">4</li>-->
@@ -74,12 +73,12 @@
     <h1 class="title">精选商品</h1>
     <div class="productCont">
     <ul class="productList clearfix">
-      <li v-for="item in 6" :key="item">
+      <li v-for="item in pickGoodsList" :key="item.productId">
         <div class="proItem">
-        <div class="proImg"><img src="../common/img/product.jpg"/></div>
-        <h4>鹿精蛹虫草膏</h4>
-        <h5>￥100.00</h5>
-        <p>月售50<span class="joinCart"><i class="iconfont">&#xe887;</i></span></p>
+        <div class="proImg"><img :src="item.listImg"/></div>
+        <h4>{{item.productName}}</h4>
+        <h5>￥{{item.amount}}</h5>
+        <p>月售{{item.mounthCount}}<span class="joinCart"><i class="iconfont">&#xe887;</i></span></p>
         <a>立即购买</a>
         </div>
       </li>
@@ -88,9 +87,13 @@
         <el-pagination
           background
           layout="prev, pager, next"
-          :total="100">
+          :total="totalPages"
+          @current-change="handleCurrentChange"
+          :current-page.sync="pageNo"
+          :page-size="pageSize"
+        >
         </el-pagination>
-        <span class="lookMore">查看更多>></span>
+        <span class="lookMore" @click="toStore();">查看更多>></span>
       </div>
     </div>
 
@@ -120,11 +123,45 @@ export default {
       ],
       isActive: 0,
       errorBox: false,
-      errMsg: ''
+      errMsg: '',
+      newsBannerList: [{
+        'title': 'JAVA实战基础',
+        'subTitle': '副标题',
+        'imgList': [
+          'http://39.104.50.94:8090/images/1520668515669061.jpg',
+          'http://39.104.50.94:8090/images/1520668515669061.jpg'
+        ],
+        'time': '2018.06.28'
+      }],
+      knowBannerList: [{
+        'title': 'JAVA实战基础',
+        'subTitle': '副标题',
+        'imgList': [
+          'http://39.104.50.94:8090/images/1520668515669061.jpg',
+          'http://39.104.50.94:8090/images/1520668515669061.jpg'
+        ],
+        'time': '2018.06.28'
+      }],
+      pickGoodsList: [ {
+        'productId': '002',
+        'listImg': 'http://39.104.50.94:8090/images/1520668515669061.jpg',
+        'productName': '测试二号',
+        'amount': '101',
+        'oldAmount': '101',
+        'reduceStr': '1折',
+        'saleCount': 0,
+        'mounthCount': 0
+      }],
+      totalPages: 0,
+      pageNo: 1,
+      pageSize: 6
     }
   },
   created () {
     this.getBanner()
+    this.getNewsBanner(1)
+    this.getNewsBanner(2)
+    this.getPickGoods(1)
   },
   mounted () {
     this.setSize()
@@ -152,16 +189,49 @@ export default {
     },
     getBanner: function () {
       this.axios.get(this.url.api.bannerQuery, {params: {bannerPosition: 0, status: 'ENABLED'}}).then(res => {
-        console.log(res)
         let data = res.data
         if (!data.bizSucc) {
           this.errMsg = data.errMsg
           this.errorBox = true
         } else {
           this.bannerList = data.obj
-          console.log(this.bannerList)
         }
       }).catch(error => console.log(error))
+    },
+    getNewsBanner: function (type) {
+      this.axios.get(this.url.api.knowledgeQuery, {params: {type: type, pageNo: 1, pageSize: 5}}).then(res => {
+        let data = res.data
+        if (!data.bizSucc) {
+          this.errMsg = data.errMsg
+          this.errorBox = true
+        } else {
+          if (type === 1) {
+            this.newsBannerList = data.listObject
+          } else {
+            this.knowBannerList = data.listObject
+          }
+        }
+      }).catch(error => console.log(error))
+    },
+    toStore: function () {
+      this.$router.push({ path: '/store' })
+    },
+    getPickGoods: function (pageNo) {
+      this.axios.get(this.url.api.pickGoods, {params: {pageNum: pageNo, pageSize: this.pageSize, type: 2}}).then(res => {
+        let data = res.data
+        if (!data.bizSucc) {
+          this.errMsg = data.errMsg
+          this.errorBox = true
+        } else {
+          console.log(data)
+          this.pickGoodsList = data.listObject
+          this.totalPages = parseInt(data.totalItems)
+        }
+      }).catch(error => console.log(error))
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.getPickGoods(pageNum)
     }
   }
 }
@@ -300,6 +370,10 @@ export default {
     float: left;
     width:50%;
   }
+  .newsItemRg img{
+    max-width:100%;
+    max-height: 200px;
+  }
   .newsItemLf {
     color: #151515;
     h1{
@@ -372,8 +446,8 @@ export default {
       overflow:hidden;
       text-align: center;
       img{
-        width:75%;
-        height: auto;
+        width:100%;
+        height: 100%;
       }
     }
     h4{
