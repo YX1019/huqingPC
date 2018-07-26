@@ -1,10 +1,9 @@
-
-let apiUrl = '/front/front/' // '/api/mockjsdata/'
+let apiUrl = '/api/hqyt/'
 let url = {
   api: {
-    login: apiUrl + 'sys/user/login', // 登录
-    getTravelCountry: '/api/v1/mall/getTravelCountry',
-    getGeo: apiUrl + 'api/v1/city/getGeo' // 定位
+    login: apiUrl + 'userLogin.do', // 登录
+    register: apiUrl + 'forgetPwd.do', // 忘记密码，注册
+    bannerQuery: apiUrl + 'bannerQuery.do' // 首页banner
   }
 }
 

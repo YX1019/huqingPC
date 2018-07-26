@@ -3,10 +3,11 @@ import vuex from 'vuex'
 Vue.use(vuex)
 
 const state = {
-  isLogin: false,
+  isLogin: window.localStorage.getItem('isLogin') || false,
   cs: '1',
-  name: '某某',
-  goodsNum: 0
+  name: window.localStorage.getItem('name') || '某某',
+  goodsNum: 0,
+  userId: window.localStorage.getItem('userId') || ''
 }
 
 const getters = {
@@ -18,6 +19,9 @@ const mutations = {
   },
   changeName (state, status) {
     state.name = status
+  },
+  changeId (state, status) {
+    state.userId = status
   },
   changeGoodsNum (state, num) {
     state.goodsNum = num

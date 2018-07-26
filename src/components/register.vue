@@ -5,11 +5,11 @@
       <div class="loginRg">
         <h1>注册新用户</h1>
         <div class="loginInfo">
-          <p><label>手机号:</label><input type="text"/> </p>
-          <p><label>验证码:</label><input type="text"/><input type="button" value="发送验证码" class="sendPwd"/> </p>
-          <p><label>密码:</label><input type="password"/> </p>
+          <p><label>手机号:</label><input type="text" ng-model="cell"/> </p>
+          <p><label>验证码:</label><input type="text" ng-model="code"/><input type="button" v-model="btnTxt" :disabled="disabled" class="sendPwd" :class="{'btnGray' : disabled }" @click="getCode()"/> </p>
+          <p><label>密码:</label><input type="password" ng-model="pwd"/> </p>
           <div class="loginBtn">
-            <button>注册用户</button><router-link to="login"><span style="display: inline-block;vertical-align: middle;color: #095dbb;">直接登录</span></router-link>
+            <button @click="toRegister()">注册用户</button><span style="display: inline-block;vertical-align: middle;color: #095dbb;" @click="toLogin()">直接登录</span>
           </div>
         </div>
       </div>
@@ -22,7 +22,11 @@ export default {
   data () {
     return {
       cell: '',
-      pwd: ''
+      pwd: '',
+      code: '',
+      time: 0,
+      btnTxt: '发送验证码',
+      disabled: false
     }
   },
   mounted () {
@@ -31,17 +35,39 @@ export default {
 
   },
   methods: {
-    login: function () {
-      this.axios.post(this.url.api.login, {
-        cell: this.cell,
-        loginPwd: this.pwd
+    toRegister: function () {
+      var _this = this;
+      var params = new URLSearchParams();
+      params.append('cell', _this.cell);
+      params.append('newPwd', _this.pwd);
+      params.append('checkCode', '1');
+      this.axios({
+        method: 'post',
+        url: this.url.api.login,
+        data: params
       }).then(function (res) {
         console.log(res)
+        this.$router.push({ path: '/login' })
       })
-      this.$router.push({ path: '/index' })
     },
-    toCodeLogin: function () {
-      this.$router.push({ path: '/codeLogin' })
+    toLogin: function () {
+      this.$router.push({ path: '/login' })
+    },
+    getAuthCode: function () {
+      if (this.time > 0) {
+        this.disabled = true
+        this.time--
+        this.btnTxt = this.time + 's后重新获取'
+        setTimeout(this.getAuthCode, 1000)
+      } else {
+        this.time = 0
+        this.btnTxt = '获取验证码'
+        this.disabled = false
+      }
+    },
+    getCode: function () {
+      this.time = 60
+      this.getAuthCode()
     }
   }
 }
@@ -121,6 +147,10 @@ export default {
     border:1px solid #dd0011;
     margin-left: 10px;
     background: #fff;
+  }
+  .loginInfo p input.sendPwd.btnGray{
+    color: #ccc;
+    border:1px solid #ccc;
   }
   .loginBtn{
     width:100%;

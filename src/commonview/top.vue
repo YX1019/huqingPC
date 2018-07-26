@@ -10,7 +10,8 @@
          <div style="border-top:1px solid #ccc;margin: 0 10px;"><button class="lookCart">查看我的购物车</button></div>
        </div>
      </div><span class="line lf">|</span>
-       <router-link to="collect"><div class="lf">收藏夹<i class="iconfont">&#xe60b;</i></div></router-link><span class="line lf">|</span><router-link to="personal"><div class="lf">用户中心<i class="iconfont">&#xe60b;</i></div></router-link></div>
+       <div class="lf hand" @click="toCollect()">收藏夹<i class="iconfont">&#xe60b;</i></div><span class="line lf">|</span>
+       <div class="lf hand" @click="toPerson();">用户中心<i class="iconfont">&#xe60b;</i></div></div>
   </div>
   <div class="header">
       <div class="headCont">
@@ -70,12 +71,24 @@ export default {
     loginOut: function () {
       this.$store.commit('changeLogin', false)
       window.localStorage.removeItem('isLogin')
+      window.localStorage.removeItem('name')
+      window.localStorage.removeItem('userId')
     },
     toLogin: function () {
       this.$router.push({ path: '/login' })
     },
     toRegister: function () {
       this.$router.push({ path: '/register' })
+    },
+    toPerson: function () {
+      if (this.$store.state.isLogin) {
+        this.$router.push({ path: '/personal' })
+      } else {
+        this.$router.push({ path: '/login' })
+      }
+    },
+    toCollect: function () {
+      this.$router.push({path: '/collect'})
     }
   },
   watch: {

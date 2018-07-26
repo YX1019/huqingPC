@@ -2,9 +2,9 @@
   <div class="personRg">
     <div class="personBanner"><img src="../common/img/personImg1.jpg"/></div>
     <div class="personCont">
-      <p>138****5420 欢迎您回到胡庆余堂商城！</p>
-      <p>您的上一次登录时间：2018-06-21 11:20:10</p>
-      <p>您的会员等级是 <span class="grade">V1</span></p>
+      <p>{{userCell}} 欢迎您回到胡庆余堂商城！</p>
+      <p>您的上一次登录时间：{{loginTime}}</p>
+      <p>您的会员等级是 <span class="grade">{{grade}}</span></p>
       <div class="profile2">
         胡庆余堂商城是中药材一站式网购服务平台，配送各类常用药1000余种，包括各类中药饮片，养生药膳和名贵药材，品种齐全，质量可靠，价格实惠，是您放心的网上中药店。
         因为药材品种的繁多，请使用本站搜索您需要的品种，如果搜索不到你所需要的药材，请直接联系客服详细咨询，本店还提供按方抓药服务！ 本店的网上支付方式为支付宝，提供安全有保障的交易服务。
@@ -30,7 +30,11 @@
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      userCell: '138****5420',
+      loginTime: '2018-06-21 11:20:10',
+      grade: 'V1'
+    }
   },
   methods: {}
 }

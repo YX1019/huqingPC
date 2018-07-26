@@ -6,10 +6,10 @@
         <h1>找回密码</h1>
         <div class="loginInfo">
           <p><label>手机号:</label><input type="text"/> </p>
-          <p><label>验证码:</label><input type="text"/><input type="button" v-model="btnTxt" :disabled="disabled" class="sendPwd" :class="{'btnGray' : disabled }" @click="getAuthCode()"/> </p>
+          <p><label>验证码:</label><input type="text"/><input type="button" v-model="btnTxt" :disabled="disabled" class="sendPwd" :class="{'btnGray' : disabled }" @click="getCode()"/> </p>
           <p><label>密码:</label><input type="password"/> </p>
           <div class="loginBtn">
-            <button>确认</button><router-link to="login"><span style="display: inline-block;vertical-align: middle;color: #095dbb;" @click="tologin();">返回登录</span></router-link>
+            <button @click="forgotPwd()">确认</button><span style="display: inline-block;vertical-align: middle;color: #095dbb;" @click="toLogin();">返回登录</span>
           </div>
         </div>
       </div>
@@ -34,16 +34,17 @@ export default {
 
   },
   methods: {
-    login: function () {
-      this.axios.post(this.url.api.login, {
+    forgotPwd: function () {
+      this.axios.post(this.url.api.register, {
         cell: this.cell,
-        loginPwd: this.pwd
+        newPwd: this.pwd,
+        checkCode: this.code
       }).then(function (res) {
         console.log(res)
+        this.$router.push({ path: '/login' })
       })
-      this.$router.push({path: '/index'})
     },
-    tologin: function () {
+    toLogin: function () {
       this.$router.push({path: '/login'})
     },
     getAuthCode: function () {
@@ -57,6 +58,10 @@ export default {
         this.btnTxt = '获取验证码'
         this.disabled = false
       }
+    },
+    getCode: function () {
+      this.time = 60
+      this.getAuthCode()
     }
   }
 }

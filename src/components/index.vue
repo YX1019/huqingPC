@@ -2,8 +2,8 @@
 <div>
   <div class="banner">
   <el-carousel :height="bannerHeight + 'px'">
-    <el-carousel-item v-for="item in bannerList" :key="item.imageUrl">
-      <img :src="item.imageUrl" style="width:100%;display: block;"/>
+    <el-carousel-item v-for="item in bannerList" :key="item.bannerImg">
+      <img :src="item.bannerImg" style="width:100%;display: block;"/>
     </el-carousel-item>
   </el-carousel>
   </div>
@@ -40,26 +40,6 @@
   <div class="knowledgePart">
     <h1 class="title">养生知识</h1>
     <div class="KnowCont">
-    <!--<div class="swiper-container">-->
-      <!--<div class="swiper-wrapper">-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-        <!--<div class="swiper-slide"><img src="../common/img/knowImg.jpg"/><p>你家有这个么？千万别扔，有大用处</p></div>-->
-      <!--</div>-->
-      <!--&lt;!&ndash; Add Pagination &ndash;&gt;-->
-      <!--<div class="swiper-pagination"></div>-->
-      <!--&lt;!&ndash; 如果需要导航按钮 &ndash;&gt;-->
-      <!--<div class="swiper-button-prev"></div>-->
-      <!--<div class="swiper-button-next"></div>-->
-
-    <!--</div>-->
       <div class="v_out v_out_p">
         <div class="v_show">
           <div class="v_cont">
@@ -115,11 +95,19 @@
     </div>
 
   </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
-import Swiper from 'swiper'
-import 'swiper/dist/css/swiper.min.css'
 import {next, prev, toAnypage} from '../../static/js/silder'
 export default {
   name: 'index',
@@ -127,13 +115,16 @@ export default {
     return {
       bannerHeight: '300',
       bannerList: [
-        {imageUrl: require('../common/img/banner1.jpg')},
-        {imageUrl: require('../common/img/banner2.jpg')}
+        {bannerImg: require('../common/img/banner1.jpg')},
+        {bannerImg: require('../common/img/banner2.jpg')}
       ],
-      isActive: 0
+      isActive: 0,
+      errorBox: false,
+      errMsg: ''
     }
   },
   created () {
+    this.getBanner()
   },
   mounted () {
     this.setSize()
@@ -143,21 +134,6 @@ export default {
       that.setSize()
     }, false)
     this.$nextTick(function () {
-      this.mySwiper = new Swiper('.swiper-container', {
-        slidesPerView: 3,
-        spaceBetween: 30,
-        slidesPerGroup: 3,
-        // loop: true,
-        loopFillGroupWithBlank: true,
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true
-        },
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev'
-        }
-      })
     })
   },
   methods: {
@@ -173,11 +149,27 @@ export default {
     toAnypage: function (index) {
       this.isActive = index
       toAnypage()
+    },
+    getBanner: function () {
+      this.axios.get(this.url.api.bannerQuery, {params: {bannerPosition: 0, status: 'ENABLED'}}).then(res => {
+        console.log(res)
+        let data = res.data
+        if (!data.bizSucc) {
+          this.errMsg = data.errMsg
+          this.errorBox = true
+        } else {
+          this.bannerList = data.obj
+          console.log(this.bannerList)
+        }
+      }).catch(error => console.log(error))
     }
   }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">
+  .el-pagination.is-background .el-pager li:not(.disabled).active{
+    background-color: #e60012;
+  }
   $pageWidth:1150px;
   .banner{
   .el-carousel__button{

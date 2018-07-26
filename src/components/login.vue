@@ -12,10 +12,23 @@
        </div>
      </div>
        <div class="loginBottom">
-         <a @click="toReg()">免费注册</a><a @click="toForgotPwd()">忘记密码?</a>
+         <a @click="toRegister()">免费注册</a><a @click="toForgotPwd()">忘记密码?</a>
        </div>
     </div>
   </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="errorBox"
+      width="30%"
+      center>
+      <span>{{errMsg}}</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+    </el-dialog>
+
+    <!--<div class="errorbox"><p>{{errMsg}}</p><button @click="closeErrorBox();">确定</button></div>-->
+    <!--<div class="bg"></div>-->
   </div>
 </template>
 <script type="text/ecmascript-6">
@@ -25,7 +38,9 @@ export default {
   data () {
     return {
       cell: '',
-      pwd: ''
+      pwd: '',
+      errorBox: false,
+      errMsg: ''
     }
   },
   mounted () {
@@ -35,27 +50,48 @@ export default {
   },
   methods: {
     login: function () {
-      this.axios.post(this.url.api.login, {
-        cell: this.cell,
-        loginPwd: this.pwd
+      var _this = this;
+      var params = new URLSearchParams();
+      params.append('cell', _this.cell);
+      params.append('loginPwd', _this.pwd);
+      params.append('token', '1');
+      this.axios({
+        method: 'post',
+        url: this.url.api.login,
+        data: params
       }).then(function (res) {
         console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          window.localStorage.setItem('isLogin', true)
+          window.localStorage.setItem('name', data.obj.cell)
+          window.localStorage.setItem('userId', data.obj.userId)
+          var name = data.obj.cell
+          var userId = data.obj.userId
+          _this.$store.commit('changeLogin', true)
+          _this.$store.commit('changeName', name)
+          _this.$store.commit('changeId', userId)
+          _this.$router.push({ path: '/index' })
+        }
       })
-      var name = '亲爱的我'
-      this.$store.commit('changeLogin', true)
-      this.$store.commit('changeName', name)
-      window.localStorage.setItem('isLogin', true)
-      this.$router.push({ path: '/index' })
+      // window.localStorage.setItem('isLogin', true)
+      // this.$router.push({ path: '/index' })
       // location.reload()
     },
     toCodeLogin: function () {
       this.$router.push({ path: '/codeLogin' })
     },
-    toReg: function () {
+    toRegister: function () {
       this.$router.push({ path: '/register' })
     },
     toForgotPwd: function () {
       this.$router.push({ path: '/forgotPwd' })
+    },
+    closeErrorBox: function () {
+      this.errorBox = false;
     }
   }
 }
@@ -171,5 +207,27 @@ export default {
       border-radius: 3px;
       margin-right: 30px;
     }
+  }
+  .errorbox{
+    width:500px;
+    position: fixed;
+    top:50%;
+    left: 50%;
+    background: #fff;
+    border-radius: 5px;
+    color: #333;
+    text-align: center;
+    padding: 30px;
+    box-sizing: border-box;
+    z-index:12;
+  }
+  .bg{
+    width:100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    position: fixed;
+    top:0;
+    left: 0;
+    z-index:11;
   }
 </style>

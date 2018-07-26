@@ -51,4 +51,7 @@ export default {
   .rg{
     float: right;
   }
+  .hand{
+    cursor: pointer;
+  }
 </style>

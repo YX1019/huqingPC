@@ -2,7 +2,7 @@
 <div class="person">
   <div class="curPosition">您现在的位置:首页>用户中心{{position}}</div>
   <div class="pLeftNav">
-     <h1 class="pLeftNav_title" @click="toUserCenter();">用户中心</h1>
+     <h1 class="pLeftNav_title hand" @click="toUserCenter();">用户中心</h1>
      <div class="plNavItem" v-for="(item,index) in plNavItemList" :key="item.title">
         <h1>{{item.title}}<i class="iconfont black rg">&#xe602;</i></h1>
         <ul>
