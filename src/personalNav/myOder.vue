@@ -1,16 +1,17 @@
 <template>
   <div class="personRg">
      <ul class="myOrderList">
-       <li v-for="(item,index) in myOrderList" :key="item" @click="changeOrderState(index)" :class="{'cur':index == active}">{{item}}</li>
+       <li v-for="(item,index) in myOrderMenu" :key="item" @click="changeOrderState(index)" :class="{'cur':index == active}">{{item}}</li>
      </ul>
-    <div class="orderTitle">
+    <div class="nocont" v-show="!isList">暂无订单</div>
+    <div class="orderTitle1" v-show="isList">
       <span class="orderItem1">产品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
       <span class="orderItem4">商品操作</span><span class="orderItem5">实付款</span><span class="orderItem6">交易状态</span><span class="orderItem7">交易操作</span>
     </div>
-    <div class="myOderItem ">
+    <div class="myOderItem " v-for="item in myOrderList" :key="item.childOrderId" v-show="isList">
       <div class="myOrderTop">
-        <input type="checkbox"/>2018-06-21<span class="orderNo">订单号:15652154654524</span>
-        <span><img src="../common/img/storeIcon.png" class="storeIcon"/> 胡庆余堂滨江店</span><span class="rg">快递</span>
+        <input type="checkbox"/>{{item.createTime}}<span class="orderNo">订单号:{{item.orderId}}</span>
+        <span><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span><span class="rg">快递</span>
       </div>
       <div class="myOrderItemCont ">
         <div class="orderItem1 orderItemName"><img src="../common/img/productImg1.jpg"/>
@@ -20,19 +21,27 @@
         <div class="orderItem3"><p>1</p></div>
         <div class="orderItem4"></div>
         <div class="orderItem5"><p>￥100.00</p></div>
-        <!--<div class="orderItem6"><p>等待买家付款</p><p>订单详情</p></div>-->
-        <div class="orderItem6"><p>待发货</p><p @click="toOderDteail()">订单详情</p></div>
-        <!--<div class="orderItem6"><p>待收货</p><p>订单详情</p></div>-->
-        <!--<div class="orderItem6"><p>待评价</p><p>订单详情</p></div>-->
-        <!--<div class="orderItem7"><a class="returnGoods">立即付款</a><p>取消订单</p></div>-->
-        <div class="orderItem7"><a class="returnGoods">申请退货</a></div>
-        <!--<div class="orderItem7"><a class="returnGoods">确认收货</a><p>查询物流</p></div>-->
-        <!--<div class="orderItem7"><a class="returnGoods">待评价</a></div>-->
-
+        <div class="orderItem6" v-if="item.statusEnum == 0"><p>等待买家付款</p><p>订单详情</p></div>
+        <div class="orderItem6" v-if="item.statusEnum == 1"><p>待发货</p><p @click="toOderDteail()">订单详情</p></div>
+        <div class="orderItem6" v-if="item.statusEnum == 2"><p>待收货</p><p>订单详情</p></div>
+        <div class="orderItem6" v-if="item.statusEnum == 3"><p>待评价</p><p>订单详情</p></div>
+        <div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods">立即付款</a><p>取消订单</p></div>
+        <div class="orderItem7" v-if="item.statusEnum == 1"><a class="returnGoods">申请退货</a></div>
+        <div class="orderItem7" v-if="item.statusEnum == 2"><a class="returnGoods">确认收货</a><p>查询物流</p></div>
+        <div class="orderItem7" v-if="item.statusEnum == 3"><a class="returnGoods">待评价</a></div>
       </div>
     </div>
-    <div class="orderBottom"><input type="checkbox"/>全选 <span class="orderPayBtn">合并付款</span></div>
-
+    <!--<div class="orderBottom"><input type="checkbox"/>全选 <span class="orderPayBtn">合并付款</span></div>-->
+    <el-dialog
+      title="提示"
+      :visible.sync="errorBox"
+      width="30%"
+      center>
+      <span>{{errMsg}}</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -41,16 +50,60 @@ export default {
   name: 'myOder',
   data () {
     return {
-      myOrderList: ['所有订单', '待付款', '待发货', '待收货', '待评价'],
-      active: 0
+      myOrderMenu: ['所有订单', '待付款', '待发货', '待收货', '待评价'],
+      active: 0,
+      myOrderList: [],
+      errorBox: false,
+      errMsg: '',
+      isList: true
     }
+  },
+  created () {
+    this.queryUserOrderList('', '')
   },
   methods: {
     changeOrderState: function (index) {
       this.active = index
+      if (index === 0) {
+        this.queryUserOrderList()
+      } else if (index === 1) {
+        this.queryUserOrderList('', 0)
+      } else if (index === 2) {
+        this.queryUserOrderList('', 1)
+      } else if (index === 3) {
+        this.queryUserOrderList('', 2)
+      } else if (index === 4) {
+        this.queryUserOrderList('', 3)
+      }
     },
     toOderDteail: function () {
       this.$router.push({ path: '/orderDetail' })
+    },
+    queryUserOrderList: function (payStatus, orderStatus) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('payStatus', payStatus);
+      params.append('orderStatus', orderStatus);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryUserOrderList,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.myOrderList = data.listObject
+          if (_this.myOrderList.length === 0) {
+            _this.isList = false
+          } else {
+            _this.isList = true
+          }
+        }
+      })
     }
   }
 }
@@ -78,7 +131,7 @@ export default {
     }
   }
 }
-.orderTitle{
+.orderTitle1{
   box-sizing: border-box;
   height: 48px;
   line-height: 48px;
@@ -183,5 +236,10 @@ export default {
     border:1px solid #ddd;
     font-size: 14px;
     margin-left: 15px;
+  }
+  .nocont{
+    width:100%;
+    padding: 30px 0;
+    text-align: center;
   }
 </style>

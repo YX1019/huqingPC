@@ -11,11 +11,13 @@ import placeOrder from '@/components/placeOrder'
 import payOrder from '@/components/payOrder'
 import evaluate from '@/components/evaluate'
 import collect from '@/components/collect'
+import collectStore from '@/components/collectStore'
 import personal from '@/components/personal'
 import orderDetail from '@/components/orderDetail'
 import storeOrderDetail from '@/components/storeOrderDetail'
 import returnGoods from '@/components/returnGoods'
 import news from '@/components/news'
+import newsDetail from '@/components/newsDetail'
 import productDetail from '@/components/productDetail'
 import personInfo from '@/personalNav/personInfo'
 import myAcount from '@/personalNav/myAcount'
@@ -73,6 +75,11 @@ export default new Router({
       path: '/collect',
       name: 'collect',
       component: collect
+    },
+    {
+      path: '/collectStore',
+      name: 'collectStore',
+      component: collectStore
     },
     {
       path: '/personal',
@@ -186,6 +193,11 @@ export default new Router({
       path: '/news',
       name: 'news',
       component: news
+    },
+    {
+      path: '/newsDetail',
+      name: 'newsDetail',
+      component: newsDetail
     },
     {
       path: '/productDetail',

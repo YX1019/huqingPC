@@ -9,40 +9,169 @@
     <span>优惠方式</span>
     <span>小计</span>
   </div>
-  <div class="orderItem clearfix">
-    <h4>店铺:胡庆余堂滨江店</h4>
-    <div style="width: 100%;box-sizing: border-box;padding: 15px;">
-      <div class="orderItem1"><img src="../common/img/productImg1.jpg"/><span>胡庆余堂枇杷膏</span> </div>
-      <div class="orderItem2">规格：100ML</div>
-      <div class="orderItem3">199.00</div>
-      <div class="orderItem4">1</div>
-      <div class="orderItem5"><select><option selected>已省10元</option></select></div>
-      <div class="orderItem6">199.00</div>
+  <div class="orderItem clearfix" v-for="item in orderCartList" :key="item.orderId">
+    <h4>店铺:{{item.merchantName}}</h4>
+    <div style="width: 100%;box-sizing: border-box;padding: 15px;float: left;">
+      <div class="orderItem1"><img :src="item.proImg"/><span>{{item.proName}}</span> </div>
+      <div class="orderItem2">{{item.attrNames}}：{{item.valueNames}}</div>
+      <div class="orderItem3">{{item.perPrice}}</div>
+      <div class="orderItem4">{{item.orderCount}}</div>
+      <div class="orderItem5"><select disabled><option selected>{{item.giveMessage}}</option></select></div>
+      <div class="orderItem6">{{item.realAllAmount}}</div>
     </div>
-    <div class="methods">运送方式<select><option selected>快递</option></select></div>
-    <div class="address">收货地址<select>
-      <option selected><span>张三</span><span>浙江省杭州市滨江区伟业路1号</span><span>高新软件园307</span><span>287421</span><span>159****124</span></option>
-      <option><a>新增收货地址</a></option>
-    </select>
-      <p class="total">店铺合计:<span> ￥199.00</span></p>
+    <div class="methods">运送方式<select v-model="item.transfer" disabled><option value="0">快递</option><option value="1">自提</option></select></div>
+    <div class="address" v-show="isExpress"><label class="lf">收货地址</label>
+      <div class="addrOption">
+        <h2 @click="showAddr()" >{{address}}</h2>
+        <div v-show="isShowAddr">
+        <p @click="getAttr(item,itemm)" v-for="itemm in addressList" :key="itemm.addressId"><span>{{itemm.name}}</span><span>{{itemm.province}}{{itemm.city}}{{itemm.area}}</span><span>{{itemm.addr}}</span><span>{{itemm.cell}}</span></p>
+        <a @click="toAddr()">新增收货地址</a>
+        </div>
+      </div>
+      <p class="total">店铺合计:<span> ￥{{item.realAllAmount}}</span></p>
     </div>
-    <div class="address" style="display: none">门店地址 <span style="margin-left: 20px">浙江省杭州市滨江区胡庆余堂滨江店</span>
+    <div class="address" v-show="!isExpress">门店地址 <span style="margin-left: 20px">浙江省杭州市滨江区胡庆余堂滨江店</span>
       <p class="total">店铺合计:<span> ￥199.00</span></p>
     </div>
   </div>
-  <p class="realPayment">实付款:<span>￥199.00</span></p>
-  <p class="clearfix"><button class="putOrder" @click="postOrder()">提交订单</button></p>
+  <p class="realPayment">实付款:<span>￥{{orderObj.orderAllAmount}}</span></p>
+  <p class="clearfix"><button class="putOrder" @click="completeOrder()">提交订单</button></p>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      isExpress: true,
+      isShowAddr: false,
+      address: '请选择收货地址',
+      orderCartList: [],
+      orderObj: {},
+      addressList: [],
+      errorBox: false,
+      errMsg: '',
+      orderNo: ''
+    }
+  },
+  created () {
+    this.queryCartOrderList()
+    this.addressQuery()
   },
   methods: {
     postOrder: function () {
       this.$router.push({path: '/payOrder'})
+    },
+    showAddr: function () {
+      this.isShowAddr = !this.isShowAddr
+    },
+    getAttr: function (item, itemm) {
+      console.log(item, itemm)
+      this.isShowAddr = false
+      this.address = itemm.name + '  ' + itemm.province + itemm.city + itemm.area + itemm.addr + '  ' + itemm.cell
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('addressId', itemm.addressId);
+      params.append('order', item.childOrderId);
+      params.append('type', 1);
+      this.axios({
+        method: 'post',
+        url: this.url.api.completeOrderReturn,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(111)
+          _this.queryCartOrderList()
+        }
+      })
+    },
+    toAddr: function () {
+      this.$router.push({path: '/personal/address'})
+    },
+    queryCartOrderList: function () {
+      let _this = this;
+      let orderNo = sessionStorage.getItem('orderNo')
+      console.log(orderNo)
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', orderNo);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryCartOrderList,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.orderObj = data.obj
+          _this.orderCartList = data.obj.orderCartList
+          _this.orderNo = data.obj.orderNo
+        }
+      })
+    },
+    addressQuery: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.addressQuery,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.addressList = data.listObject
+        }
+      })
+    },
+    completeOrder: function () {
+      let _this = this;
+      let msg = ''
+      this.orderCartList.forEach(function (item) {
+        msg = msg + item.orderId + '_(' + item.reName + ';' + item.reCell + ';' + item.reProvince + ';' + item.reCity + ';' + item.reArea + ';' + item.reAddr + ';' + ')'
+      })
+      console.log(msg)
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', this.orderNo);
+      params.append('msg', msg);
+      this.axios({
+        method: 'post',
+        url: this.url.api.completeOrder,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$router.push({path: '/payOrder'})
+        }
+      })
     }
   }
 }
@@ -107,6 +236,8 @@ export default {
 img{
   float: left;
   margin-right: 10px;
+  width:55px;
+  height: 55px;
 }}
 .orderItem2{ width:18%;}
 .orderItem3{width:11%;}
@@ -141,6 +272,7 @@ img{
     box-sizing: border-box;
     background: #fef2f3;
     padding: 20px;
+    float: left;
     select{
       width:700px;
       height: 30px;
@@ -175,5 +307,36 @@ img{
     height: 50px;
     border-radius: 3px;
     float: right;
+  }
+  .addrOption{
+    float: left;
+    width:65%;
+    border: 1px solid #ccc;
+    background: #fff;
+    margin-left:15px;
+    h2{
+      width:100%;
+      height: 30px;
+      line-height: 35px;
+      border-bottom: 1px solid #ccc;
+      padding: 0 10px;
+      font-weight:100;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    p{
+      font-size: 13px;
+      padding:5px 10px;
+      border-bottom: 1px solid #ddd;
+      span{
+        margin-right: 10px;
+      }
+    }
+    a{
+      padding:5px 10px;
+      color: #dd0011;
+      font-size:13px;
+      display: block;
+    }
   }
 </style>

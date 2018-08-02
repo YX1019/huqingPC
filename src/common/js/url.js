@@ -8,7 +8,39 @@ let url = {
     register: apiUrl + 'register.do', // 注册
     knowledgeQuery: apiUrl + 'knowledgeQuery.do', // 新闻，养生知识点查询 1：新闻 2：养生知识
     pickGoods: apiUrl + 'merchantProQuery.do', // 首页的推荐商品
-    queryProduct: apiUrl + 'queryProduct.do' // 商城商品列表
+    queryProduct: apiUrl + 'queryProduct.do', // 商城商品列表
+    categoryQuery: apiUrl + 'categoryQuery.do', // 商品类别
+    accountLogList: apiUrl + 'accountLogList.do', // 我的账户
+    addToCollect: apiUrl + 'addToCollect.do', // 添加收藏
+    myCollect: apiUrl + 'myCollect.do', // 我的收藏
+    queryProductDetails: apiUrl + 'queryProductDetails.do', // 商品详情
+    newOption: apiUrl + 'newOption.do', // 意见反馈
+    getUserAllInfo: apiUrl + 'getUserAllInfo.do', // 获取用户个人信息
+    getKnowledgeDetails: apiUrl + 'knowledgeDetailsQuery.do', // 新闻详情页
+    addressQuery: apiUrl + 'addressQuery.do', // 地址列表查询
+    updateUserAddress: apiUrl + 'updateUserAddress.do', // type 1修改  0新增  isDefalt  是否默认(1是  0不是)
+    delAddressMsg: apiUrl + 'delAddressMsg.do', // 删除地址
+    knowledgeCommentQuery: apiUrl + 'knowledgeCommentQuery.do', // 新闻评论列表
+    knowledgeZan: apiUrl + 'knowledgeZan.do', // 新闻点赞
+    knowledgeComment: apiUrl + 'knowledgeCommnet.do', // 新闻评论
+    accountLogTeam: apiUrl + 'accountLogTeam.do', // 团队账户
+    withdrawLogList: apiUrl + 'withdrawLogList.do', // 提现记录
+    updatePwd: apiUrl + 'updatePwdForWeb.do', // 修改登录密码
+    addCart: apiUrl + 'addCart.do', // 加入购物车
+    myCart: apiUrl + 'myCart.do', // 查看购物车
+    delCart: apiUrl + 'delCart.do', // 删除购物车商品
+    updateCartSum: apiUrl + 'updateCartSum.do', // 购物车单件数量加减
+    cancelCollect: apiUrl + 'cancleCollect.do', // 取消收藏
+    createOrder: apiUrl + 'createOrder.do', // 创建订单 购物车里的去结算
+    queryCartOrderList: apiUrl + 'queryCartOrderList.do', // 结算页面信息列表
+    updateCartDelivery: apiUrl + 'updateCartDelivery.do', // 修改购物车中的商品的配送方式
+    nearQuery: apiUrl + 'nearQuery.do', // 店铺列表查询
+    queryUserOrderList: apiUrl + 'queryUserOrderList.do', // 查询用户订单列表
+    completeOrder: apiUrl + 'completeOrder.do', // 完善用户信息，提交订单
+    completeOrderReturn: apiUrl + 'completeOrderReturn.do', // 订单地址
+    getCompleteOrderDetails: apiUrl + 'getCompleteOrderDetails.do', // 提交订单后到支付页面的信息
+    mineInfo: apiUrl + 'mineInfo.do', // 我的页面
+    updateUserSomeInfo: apiUrl + 'updateUserSomeInfo.do' // 用户修改信息
   }
 }
 

@@ -13,6 +13,16 @@
         <div class="cashRg">50.00</div></li>
     </ul>
   </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
@@ -20,10 +30,32 @@ export default {
   name: 'putCash',
   data () {
     return {
-      radio: '1'
+      radio: '1',
+      errorBox: false,
+      errMsg: ''
     }
   },
-  methods: {}
+  methods: {
+    withdrawLogList: function (type) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('searchType', type);
+      this.axios({
+        method: 'post',
+        url: this.url.api.knowledgeComment,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+        }
+      })
+    }
+  }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">

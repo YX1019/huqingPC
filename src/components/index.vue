@@ -74,12 +74,14 @@
     <div class="productCont">
     <ul class="productList clearfix">
       <li v-for="item in pickGoodsList" :key="item.productId">
-        <div class="proItem">
-        <div class="proImg"><img :src="item.listImg"/></div>
-        <h4>{{item.productName}}</h4>
-        <h5>￥{{item.amount}}</h5>
-        <p>月售{{item.mounthCount}}<span class="joinCart"><i class="iconfont">&#xe887;</i></span></p>
-        <a>立即购买</a>
+        <div class="proItem" @click="toProDetail(item.productId)">
+          <div>
+            <div class="proImg"><img :src="item.listImg"/></div>
+            <h4>{{item.productName}}</h4>
+            <h5>￥{{item.amount}}</h5>
+          </div>
+        <p>月售{{item.mounthCount}}<span class="joinCart hand"><i class="iconfont">&#xe887;</i></span></p>
+        <a class="hand">立即购买</a>
         </div>
       </li>
     </ul>
@@ -232,6 +234,18 @@ export default {
     handleCurrentChange (val) {
       var pageNum = val
       this.getPickGoods(pageNum)
+    },
+    toProDetail: function (productId) {
+      if (this.$store.state.isLogin) {
+        this.$router.push({path: '/productDetail', query: {productId: productId}})
+      } else {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({ path: '/login' })
+      }
     }
   }
 }
@@ -518,6 +532,7 @@ export default {
     line-height: 32px;
     background: #fff;
     border-radius: 3px;
+    cursor: pointer;
     @media screen and (max-width: 1150px) {
       right: 75px;
     }
@@ -536,7 +551,7 @@ export default {
     .v_show{width: 760px;height: 210px;}
     .v_cont ul li{width:236px;height: 162px;}
   }
-  .v_cont ul li img{width:100%;height: auto;}
+  .v_cont ul li img{width:100%;height: 250px;}
   .v_cont ul li p{line-height: 30px;}
   /*---圆圈---*/
   .v_out_p{position:relative;overflow:visible}

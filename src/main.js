@@ -9,13 +9,15 @@ import $ from 'jquery'
 import store from './store'
 import axios from 'axios'
 import {url} from './common/js/url'
+import VDistpicker from 'v-distpicker'
 require('../static/js/common')
 require('../static/js/silder')
+require('../static/js/pdata')
 Vue.config.productionTip = false
 Vue.use(ElementUI)
 Vue.prototype.axios = axios
 Vue.prototype.url = url
-
+Vue.component('v-distpicker', VDistpicker)
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

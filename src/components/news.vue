@@ -18,7 +18,7 @@
   </div>
   <div class="news_rg">
    <ul>
-     <li v-for="item in 20" :key="item"><a><span class="newsList_lf"><i>●</i>推荐几款秋季解暑养生粥</span><span class="newsList_rg">2018-08-21</span></a></li>
+     <li v-for="item in newsList" :key="item.knowId" @click="toNewsDetail(item.knowId)"><a class="hand"><span class="newsList_lf"><i>●</i>{{item.title}}</span><span class="newsList_rg">{{item.time}}</span></a></li>
    </ul>
   </div>
   <div style="width: 100%;height: 50px;text-align: center;clear: both">
@@ -32,6 +32,16 @@
       >
     </el-pagination>
   </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
@@ -41,10 +51,46 @@ export default {
     return {
       total: 5, // 总条数
       pageNo: 1,
-      pageSize: 10
+      pageSize: 20,
+      newsList: [],
+      errorBox: false,
+      errMsg: ''
     }
   },
-  methods: {}
+  created () {
+    this.getNewsList(1, 1)
+  },
+  methods: {
+    handleCurrentChange (val) {
+      var pageNum = val
+      console.log(pageNum)
+    },
+    getNewsList: function (pageNo, type) {
+      let _this = this;
+      let params = new URLSearchParams();
+      // params.append('userId', this.$store.state.userId);
+      params.append('type', type);
+      params.append('pageNo', pageNo);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.knowledgeQuery,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.newsList = data.listObject
+        }
+      })
+    },
+    toNewsDetail: function (knowId) {
+      this.$router.push({path: '/newsDetail', query: {knowId: knowId}})
+    }
+  }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">

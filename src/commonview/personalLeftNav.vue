@@ -3,12 +3,18 @@
   <div class="curPosition">您现在的位置:首页>用户中心{{position}}</div>
   <div class="pLeftNav">
      <h1 class="pLeftNav_title hand" @click="toUserCenter();">用户中心</h1>
-     <div class="plNavItem" v-for="(item,index) in plNavItemList" :key="item.title">
+     <div class="plNavItem" v-for="(item,index) in plNavItemList" :key="item.title" v-show="hasTeam">
         <h1>{{item.title}}<i class="iconfont black rg">&#xe602;</i></h1>
         <ul>
            <li v-for="(IItem,indexx) in item.content" :key="IItem" @click="selectItem(index,indexx,IItem)" :class="{cur: isActive == index && isActive2 == indexx}">{{IItem}}</li>
         </ul>
      </div>
+    <div class="plNavItem" v-for="(item,index) in plNavItemList2" :key="index" v-show="!hasTeam">
+      <h1>{{item.title}}<i class="iconfont black rg">&#xe602;</i></h1>
+      <ul>
+        <li v-for="(IItem,indexx) in item.content" :key="indexx" @click="selectItem2(index,indexx,IItem)" :class="{cur: isActive == index && isActive2 == indexx}">{{IItem}}</li>
+      </ul>
+    </div>
   </div>
   <router-view></router-view>
 </div>
@@ -24,14 +30,55 @@ export default {
       plNavItemList: [{'title': '账户管理', 'content': ['个人信息', '我的账户', '团队账户']},
         {'title': '商品管理', 'content': ['我的订单', '门店订单', '收货地址']},
         {'title': '会员中心', 'content': ['我的优惠', '我的收藏', '意见反馈']},
-        {'title': '服务管理', 'content': ['投诉维权', '兑换现金']}]
+        {'title': '服务管理', 'content': ['投诉维权', '兑换现金']}],
+      plNavItemList2: [{'title': '账户管理', 'content': ['个人信息', '我的账户']},
+        {'title': '商品管理', 'content': ['我的订单', '收货地址']},
+        {'title': '会员中心', 'content': ['我的优惠', '我的收藏', '意见反馈']},
+        {'title': '服务管理', 'content': ['投诉维权', '兑换现金']}],
+      hasTeam: true
     }
   },
+  created () {
+    this.getMineInfo()
+  },
+  mounted () {
+    this.isActive = sessionStorage.getItem('pIndex') || -1
+    this.isActive2 = sessionStorage.getItem('pIndexx') || 0
+    console.log(this.isActive, this.isActive2)
+  },
   methods: {
+    selectItem2: function (index, indexx, IItem) {
+      this.position = '>' + IItem
+      this.isActive = index
+      this.isActive2 = indexx
+      sessionStorage.setItem('pIndex', this.isActive)
+      sessionStorage.setItem('pIndexx', this.isActive2)
+      if (index === 0 && indexx === 0) {
+        this.$router.push({ path: '/personal/personInfo' })
+      } else if (index === 0 && indexx === 1) {
+        this.$router.push({ path: '/personal/myAcount' })
+      } else if (index === 1 && indexx === 0) {
+        this.$router.push({ path: '/personal/myOder' })
+      } else if (index === 1 && indexx === 1) {
+        this.$router.push({ path: '/personal/address' })
+      } else if (index === 2 && indexx === 0) {
+        this.$router.push({ path: '/personal/myDiscount' })
+      } else if (index === 2 && indexx === 1) {
+        this.$router.push({ path: '/collect' })
+      } else if (index === 2 && indexx === 2) {
+        this.$router.push({ path: '/personal/feedback' })
+      } else if (index === 3 && indexx === 0) {
+        this.$router.push({ path: '/personal/complaint' })
+      } else if (index === 3 && indexx === 1) {
+        this.$router.push({ path: '/personal/cashExchange' })
+      }
+    },
     selectItem: function (index, indexx, IItem) {
       this.position = '>' + IItem
       this.isActive = index
       this.isActive2 = indexx
+      sessionStorage.setItem('pIndex', this.isActive)
+      sessionStorage.setItem('pIndexx', this.isActive2)
       if (index === 0 && indexx === 0) {
         this.$router.push({ path: '/personal/personInfo' })
       } else if (index === 0 && indexx === 1) {
@@ -58,7 +105,44 @@ export default {
     },
     toUserCenter: function () {
       this.position = ''
-      this.$router.push({ path: '/personal/userCenter' })
+      this.$router.push({path: '/personal/userCenter'})
+      sessionStorage.setItem('pIndex', -1)
+      sessionStorage.setItem('pIndexx', 0)
+      this.isActive = -1
+      this.isActive2 = 0
+    },
+    getMineInfo: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.mineInfo,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          if (data.obj.userRole === '2') {
+            _this.hasTeam = false
+          } else {
+            _this.hasTeam = true
+          }
+        }
+      })
+    }
+  },
+  watch: {
+    $route (to, from) {
+      if (to.path === '/personal/userCenter') {
+        sessionStorage.setItem('pIndex', -1)
+        sessionStorage.setItem('pIndexx', 0)
+        this.isActive = -1
+        this.isActive2 = 0
+      }
     }
   }
 }

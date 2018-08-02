@@ -6,28 +6,72 @@
       <span>您的订单已提交成功！付款咯~</span>
       </p>
       <div class="orderInfo">
-       <h6> 订单：54654125546414646</h6>
-        <p>金额：100.00</p>
-        <p>购买时间:2018-06-21 09:10:00</p>
-        <p>配送：张三/13989238902/浙江省，杭州市，滨江区 伟业路</p>
-        <p>商品详情：胡庆余堂琵琶膏&nbsp;&nbsp;&nbsp;&nbsp;单价：100.00；&nbsp;使用胡币：10；&nbsp;使用积分10；&nbsp;数量：1件</p>
+       <h6>订单：{{orderObj.orderNo}}</h6>
+        <p>商品名称：{{orderObj.productName}}</p>
+        <p>金额：{{orderObj.orderPrice}}</p>
+        <p>购买时间:{{orderObj.orderTime}}</p>
+        <!--<p>配送：张三/13989238902/浙江省，杭州市，滨江区 伟业路</p>-->
+        <!--<p>商品详情：胡庆余堂琵琶膏&nbsp;&nbsp;&nbsp;&nbsp;单价：100.00；&nbsp;使用胡币：10；&nbsp;使用积分10；&nbsp;数量：1件</p>-->
       </div>
     </div>
   <h4>选择支付方式</h4>
   <div class="payWay">
-    <span><input type="radio" name="pay"/><img src="../common/img/zfb.png"/> </span>
-    <span><input type="radio" name="pay"/><img src="../common/img/wechat.png"/> </span>
+    <span><input type="radio" name="pay" value="2" v-model="payWay"/><img src="../common/img/zfb.png"/> </span>
+    <span><input type="radio" name="pay" value="1" v-model="payWay"/><img src="../common/img/wechat.png"/> </span>
   </div>
-  <div class="payMoney">应付金额<span>￥100.00</span><a>立即付款</a></div>
+  <div class="payMoney">应付金额<span>￥{{orderObj.orderPrice}}</span><a @click="toPay()" class="hand">立即付款</a></div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      errorBox: false,
+      errMsg: '',
+      orderObj: {},
+      payWay: 2
+    }
   },
-  methods: {}
+  created () {
+    this.getCompleteOrderDetails()
+  },
+  methods: {
+    getCompleteOrderDetails: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', sessionStorage.getItem('orderNo'));
+      params.append('type', 0);
+      this.axios({
+        method: 'post',
+        url: this.url.api.getCompleteOrderDetails,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.orderObj = data.obj
+        }
+      })
+    },
+    toPay: function () {
+      console.log(this.payWay)
+    }
+  }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">

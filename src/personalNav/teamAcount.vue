@@ -35,6 +35,27 @@
        </ul>
     </div>
   </div>
+  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;">
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="total"
+      @current-change="handleCurrentChange"
+      :current-page.sync="pageNo"
+      :page-size="pageSize"
+    >
+    </el-pagination>
+  </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
@@ -46,19 +67,61 @@ export default {
       teamName: 0,
       name: '贡献值',
       myAcountList: ['贡献值', '胡币', '积分'],
-      teamList: ['团队人员', '明细记录']
+      teamList: ['团队人员', '明细记录'],
+      errorBox: false,
+      errMsg: '',
+      pageNo: 1,
+      pageSize: 10,
+      total: 5
     }
+  },
+  created () {
+    this.accountLogTeam(1)
+  },
+  mounted () {
+    this.isCur = sessionStorage.getItem('isCur') || 0
+    this.state = sessionStorage.getItem('state') || 1
+    console.log(this.state)
   },
   methods: {
     choseItem: function (index, item) {
       this.isCur = index
       this.name = item
+      this.state = index + 1
+      sessionStorage.setItem('isCur', this.isCur)
+      sessionStorage.setItem('state', this.state)
+      this.accountLogTeam(1)
     },
     putCash: function () {
       this.$router.push({ path: '/personal/putCash' })
     },
     getTeamInfo: function (index) {
       this.teamName = index
+    },
+    accountLogTeam: function (pageNo) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('logType', this.state);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.accountLogTeam,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+        }
+      })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.accountLogTeam(pageNum)
     }
   }
 }

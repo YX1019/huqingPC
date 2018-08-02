@@ -1,8 +1,8 @@
 <template>
 <div class="rightNav">
-   <div class="rightItem1"><i class="iconfont">&#xe851;</i></div>
-   <div class="rightItem2" @click="toCart();"><i class="iconfont">&#xe887;</i><p>购<br/>物<br/>车<br/>0</p></div>
-   <div class="rightItem2"><i class="iconfont">&#xe618;</i><p>收藏</p></div>
+   <div class="rightItem1" @click="toPerson();"><i class="iconfont">&#xe851;</i></div>
+   <div class="rightItem2" @click="toCart();"><i class="iconfont">&#xe887;</i><p>购<br/>物<br/>车<br/>{{this.$store.state.goodsNum}}</p></div>
+   <div class="rightItem2" @click="toCollect()"><i class="iconfont">&#xe618;</i><p>收藏</p></div>
    <div class="rightItem2"><i class="iconfont">&#xe607;</i><p>客服</p></div>
    <div class="rightItem2"><i class="iconfont">&#xe63b;</i></div>
    <div class="rightItem2"><i class="iconfont">&#xe733;</i><p>TOP</p></div>
@@ -17,7 +17,42 @@ export default {
   },
   methods: {
     toCart: function () {
-      this.$router.push({ path: '/shopcart' })
+      if (this.$store.state.isLogin) {
+        this.$router.push({ path: '/shopcart' })
+      } else {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({ path: '/login' })
+      }
+    },
+    toCollect: function () {
+      if (this.$store.state.isLogin) {
+        this.$router.push({ path: '/collect' })
+      } else {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({path: '/login'})
+      }
+    },
+    toPerson: function () {
+      if (this.$store.state.isLogin) {
+        this.$router.push({ path: '/personal' })
+        sessionStorage.setItem('pIndex', -1)
+        sessionStorage.setItem('pIndexx', 0)
+      } else {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({ path: '/login' })
+      }
     }
   }
 }

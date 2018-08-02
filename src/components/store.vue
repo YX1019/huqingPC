@@ -21,16 +21,16 @@
     <div class="conditions">
       排序:<span class="conditionsItem" @click="getColligate();">综合</span><span class="conditionsItem">价格<i class="iconfont">&#xe630;</i></span><span class="conditionsItem">销量<i class="iconfont">&#xe630;</i></span><span class="conditionsItem">人气<i class="iconfont">&#xe630;</i></span>
       <div class="comprehensive" v-show="isShowColligate">
-        <div>
-        <h2 class="cur">商品分类</h2>
-          <ul><li v-for="(item,index) in 4" :key="item" :class="{'cur':active==index}">产品分类</li></ul>
+        <div v-for="item in cateList" :key="item.cateName">
+        <h2 class="cur">{{item.cateName}}</h2>
+          <ul><li v-for="(itemm,index) in item.childList" :key="itemm.cateId" :class="{'cur':active==index}">{{itemm.cateName}}</li></ul>
           <p><span v-for="(item,index) in 8" :key="item" :class="{'cur':active==index}">中草药1</span></p>
         </div>
-      <div>
-        <h2>功效分类</h2>
-        <ul><li v-for="(item,index) in 4" :key="item" :class="{'cur':active==index}">产品分类</li></ul>
-        <p><span v-for="(item,index) in 8" :key="item" :class="{'cur':active==index}">中草药1</span></p>
-    </div>
+      <!--<div>-->
+        <!--<h2>功效分类</h2>-->
+        <!--<ul><li v-for="(item,index) in 4" :key="item" :class="{'cur':active==index}">产品分类</li></ul>-->
+        <!--<p><span v-for="(item,index) in 8" :key="item" :class="{'cur':active==index}">中草药1</span></p>-->
+    <!--</div>-->
     <div>
         <h2>价格区间</h2>
         <h3><span>不限</span> 自定义 <input type="text"/> -<input type="text"/> </h3>
@@ -39,14 +39,14 @@
       </div>
     </div>
     <ul class="goodsList clearfix">
-      <li v-for =" item in 10" :key="item">
-        <div @click="toProDetail();">
-          <img src="../common/img/storeImg1.jpg"/>
-          <p>桃红四物汤</p>
-          <h5>￥4.5元</h5>
-          <h6><s>￥6.7元</s><span class="rg">月售200件</span></h6>
+      <li v-for =" item in goodsList" :key="item.productId">
+        <div @click="toProDetail(item.productId);">
+          <img :src="item.imgList"/>
+          <p>{{item.productName}}</p>
+          <h5>￥{{item.productPrice}}元</h5>
+          <h6><s>￥{{item.oldPrice}}元</s><span class="rg">月售{{item.mounthSales}}件</span></h6>
         </div>
-        <div><button><i></i>加入收藏</button><button class="rg"><i></i>放入购物车</button></div>
+        <div><button @click="addToCollect(item.productId)" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId)"><i></i>取消收藏</button><button class="rg"><i></i>放入购物车</button></div>
       </li>
     </ul>
     <div style="width: 100%;height: 50px;text-align: center;margin-bottom: 30px;">
@@ -59,11 +59,21 @@
         :page-size="pageSize">
       </el-pagination>
     </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="errorBox"
+      width="30%"
+      center>
+      <span>{{errMsg}}</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
-  name: '',
+  name: 'store',
   data () {
     return {
       active: 0,
@@ -82,12 +92,24 @@ export default {
       priceSort: '',
       leastPrice: '',
       mostPrice: '',
-      proType: '' // 搜索条件结束
+      proType: '', // 搜索条件结束
+      cateList: [],
+      cateSubList: [],
+      errorBox: false,
+      errMsg: ''
     }
   },
+  created () {
+    this.getcategory()
+    this.getProList()
+    console.log(this.cateList)
+  },
+  mounted () {
+
+  },
   methods: {
-    toProDetail: function () {
-      this.$router.push({path: '/productDetail'})
+    toProDetail: function (productId) {
+      this.$router.push({path: '/productDetail', query: {productId: productId}})
     },
     getColligate: function () {
       this.isShowColligate = true
@@ -101,12 +123,11 @@ export default {
     getProList: function () {
       let _this = this;
       let params = new URLSearchParams();
-      params.append('cell', _this.cell);
-      params.append('loginPwd', _this.pwd);
-      params.append('token', '1');
+      params.append('userId', this.$store.state.userId);
+      params.append('priceSort', _this.priceSort);
       this.axios({
         method: 'post',
-        url: this.url.api.login,
+        url: this.url.api.queryProduct,
         data: params
       }).then(function (res) {
         console.log(res)
@@ -115,7 +136,62 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
-
+          // _this.totalNum = data.totalItems
+          _this.goodsList = data.listObject
+        }
+      })
+    },
+    getcategory: function () {
+      let _this = this
+      this.axios.get(this.url.api.categoryQuery).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.cateList = data.obj.cateList
+          _this.cateSubList = data.obj.cateSubList
+        }
+      })
+    },
+    addToCollect: function (id) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('collectId', id);
+      params.append('collectType', '0');
+      this.axios({
+        method: 'post',
+        url: this.url.api.addToCollect,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.getProList()
+        }
+      })
+    },
+    cancelCollect: function (id) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('collectId', id);
+      params.append('collectType', '0');
+      this.axios({
+        method: 'post',
+        url: this.url.api.cancelCollect,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.getProList()
         }
       })
     }
@@ -290,8 +366,12 @@ export default {
     margin: 0 auto;
     li{
       cursor: pointer;
-      width:18.4%;
-      margin-right:2%;
+      width:214px;
+      margin-right:20px;
+      @media screen and (max-width: 1150px){
+        width:144px;
+        margin-right:10px;
+      }
       margin-bottom: 34px;
       float: left;
       &:nth-child(5n+5){
@@ -299,7 +379,10 @@ export default {
       }
       img{
         width:100%;
-        height: auto;
+        height: 214px;
+        @media screen and (max-width: 1150px){
+          height:144px;
+        }
       }
       p{
         font-size: 14px;
@@ -331,6 +414,7 @@ export default {
           border-radius: 2px;
           font-size: 12px;
           color: #171717;
+          cursor: pointer;
         }
       }
     }

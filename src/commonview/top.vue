@@ -2,16 +2,23 @@
   <div class="hqTop">
   <div class="top">
      <div class="top_lf lf">您好，欢迎光临胡庆余堂网上商城<span class="line">|</span><a v-show="!isLogin" @click="toLogin();">登录</a><span class="line" v-show="!isLogin">|</span><a v-show="!isLogin" @click="toRegister();">快速注册</a><span v-show="isLogin">{{name}}</span> <span class="line" v-show="isLogin">|</span><span v-show="isLogin" style="cursor: pointer" @click="loginOut()">退出</span></div>
-     <div class="top_rg rg"><div class="lf" style="position: relative;" :class="{'cartDiv': isShowCart}"><i class="iconfont red">&#xe887;</i>购物车<span class="red">0</span>件<i class="iconfont">&#xe60b;</i>
+    <div class="top_rg rg">
+      <div class="lf hand" :class="{'cartDiv' : isShowCart}">
+      <div @click="showCartList()"><i class="iconfont red">&#xe887;</i>购物车<span class="red">{{this.$store.state.goodsNum}}</span>件<i class="iconfont">&#xe60b;</i></div>
        <div class="smallCart" v-show="isShowCart">
-         <div class="smallCartItem" v-for="item in 2" :key="item">
-           <span class="smallCart_lf">益母草</span><span class="smallCart_Rg">50.00元×1</span>
+         <div class="smallCartItem" v-for="item in cartList" :key="item.cartId">
+           <span class="smallCart_lf">{{item.productName}}</span><span class="smallCart_Rg">{{item.price}}元×{{item.productNum}}</span>
          </div>
-         <div style="border-top:1px solid #ccc;margin: 0 10px;"><button class="lookCart">查看我的购物车</button></div>
+         <div style="border-top:1px solid #ccc;margin: 0 10px;"><button class="lookCart" @click="toCart()">查看我的购物车</button></div>
        </div>
-     </div><span class="line lf">|</span>
-       <div class="lf hand" @click="toCollect()">收藏夹<i class="iconfont">&#xe60b;</i></div><span class="line lf">|</span>
-       <div class="lf hand" @click="toPerson();">用户中心<i class="iconfont">&#xe60b;</i></div></div>
+     </div>
+      <span class="line lf">|</span>
+       <div class="lf hand" @click="toCollect()">收藏夹
+         <!--<i class="iconfont">&#xe60b;</i>-->
+       </div><span class="line lf">|</span>
+       <div class="lf hand" @click="toPerson();">用户中心
+         <!--<i class="iconfont">&#xe60b;</i>-->
+       </div></div>
   </div>
   <div class="header">
       <div class="headCont">
@@ -45,11 +52,25 @@ export default {
       msg: 'Welcome to Your Vue.js App',
       isActive: 0,
       menuList: [{name: '首页'}, {name: '商城'}, {name: '我的优惠'}, {name: '活动信息'}, {name: '新闻公告'}, {name: '养生知识'}],
-      isShowCart: false
+      isShowCart: false,
+      cartList: []
     }
   },
   created () {
-    console.log(this.$store.state.isLogin, this.$store.state.name)
+    console.log(this.$store.state.isLogin, this.$store.state.name, this.$store.state.goodsNum)
+    this.isActive = sessionStorage.getItem('sIndex') || 0
+    this.lookMyCart()
+  },
+  mounted () {
+    let pageName = this.$route.name
+    if (pageName === 'index') {
+      this.isActive = 0
+    } else if (pageName === 'store') {
+      this.isActive = 1
+    } else if (pageName === 'news') {
+      this.isActive = 4
+    }
+    console.log(this.isActive)
   },
   computed: {
     ...mapState(['isLogin', 'name']) // 引入vuex 里的变量
@@ -57,10 +78,20 @@ export default {
   methods: {
     linkPage: function (index) {
       this.isActive = index
+      sessionStorage.setItem('sIndex', this.isActive)
       if (index === 0) {
         this.$router.push({ path: '/index' })
       } else if (index === 1) {
-        this.$router.push({ path: '/store' })
+        if (this.$store.state.isLogin) {
+          this.$router.push({ path: '/store' })
+        } else {
+          this.$message({
+            message: '请先登录！',
+            type: 'warning',
+            duration: 1000
+          });
+          this.$router.push({ path: '/login' })
+        }
       } else if (index === 2) {
         this.$router.push({ path: '/store' })
       } else if (index === 4) {
@@ -73,6 +104,7 @@ export default {
       window.localStorage.removeItem('isLogin')
       window.localStorage.removeItem('name')
       window.localStorage.removeItem('userId')
+      window.localStorage.removeItem('goodsNum')
     },
     toLogin: function () {
       this.$router.push({ path: '/login' })
@@ -83,12 +115,70 @@ export default {
     toPerson: function () {
       if (this.$store.state.isLogin) {
         this.$router.push({ path: '/personal' })
+        sessionStorage.setItem('pIndex', -1)
+        sessionStorage.setItem('pIndexx', 0)
       } else {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
         this.$router.push({ path: '/login' })
       }
     },
     toCollect: function () {
-      this.$router.push({path: '/collect'})
+      if (this.$store.state.isLogin) {
+        this.$router.push({path: '/collect'})
+      } else {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({ path: '/login' })
+      }
+    },
+    lookMyCart: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.myCart,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+          return false
+        } else {
+          console.log(data)
+          _this.cartList = data.obj
+          let goodsNum = 0;
+          for (let i = 0; i < _this.cartList.length; i++) {
+            goodsNum = parseInt(goodsNum) + parseInt(_this.cartList[i].productNum)
+          }
+
+          window.localStorage.setItem('goodsNum', goodsNum)
+          _this.$store.commit('changeGoodsNum', goodsNum)
+        }
+      })
+    },
+    showCartList: function () {
+      this.isShowCart = !this.isShowCart
+    },
+    toCart: function () {
+      if (this.$store.state.isLogin) {
+        this.$router.push({path: '/shopcart'})
+      } else {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({ path: '/login' })
+      }
     }
   },
   watch: {
@@ -229,6 +319,7 @@ export default {
     border-top: 1px solid #ccc;
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
+    position: relative
   }
   .smallCartItem{
     width:100%;

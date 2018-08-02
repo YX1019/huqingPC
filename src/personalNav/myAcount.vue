@@ -6,7 +6,7 @@
   <div class="myInfo">
     <div class="myAcountNum">
       <p>{{name}}</p>
-      <h1>200</h1>
+      <h1>{{amount}}</h1>
       <a class="putCash" v-if="name === '胡币' " @click="putCash();">提现</a>
     </div>
     <div class="myAcountTable">
@@ -16,16 +16,40 @@
           <th>{{name}}变化</th>
           <th>日期</th>
         </tr>
-        <tr>
-          <td><img src="../common/img/productImg1.jpg" class="productImg"/>
-            <div class="myTableRg"><h3>胡庆余堂枇杷膏</h3><p>订单编号：154652451254621</p></div>
+        <tr v-for="(item,index) in tableList" :key="index">
+          <td>
+            <!--<img src="../common/img/productImg1.jpg" class="productImg"/>-->
+            <div class="myTableRg" style="margin-left: 20px;"><h3>{{item.typeMsg}}</h3>
+              <!--<p>订单编号：154652451254621</p>-->
+            </div>
           </td>
-          <td class="proMoney">+10</td>
-          <td class="proTime">2018年6月4日 09:20:30</td>
+          <td class="proMoney">{{item.amountStr}}</td>
+          <td class="proTime">{{item.time}}</td>
         </tr>
       </table>
     </div>
   </div>
+  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;">
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="total"
+      @current-change="handleCurrentChange"
+      :current-page.sync="pageNo"
+      :page-size="pageSize"
+    >
+    </el-pagination>
+  </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
@@ -35,16 +59,70 @@ export default {
     return {
       isCur: 0,
       name: '贡献值',
-      myAcountList: ['贡献值', '胡币', '积分']
+      myAcountList: ['贡献值', '胡币', '积分'],
+      tableList: [],
+      pageNo: 1,
+      pageSize: 10,
+      total: 5,
+      errMsg: '',
+      errorBox: false,
+      state: 1,
+      amount: '200'
     }
+  },
+  created () {
+    this.getMyAcount(1)
+  },
+  mounted () {
+    this.isCur = sessionStorage.getItem('isCur') || 0
+    this.state = sessionStorage.getItem('state') || 1
+    console.log(this.state)
   },
   methods: {
     choseItem: function (index, item) {
       this.isCur = index
+      this.state = index + 1
+      sessionStorage.setItem('isCur', this.isCur)
+      sessionStorage.setItem('state', this.state)
       this.name = item
+      this.getMyAcount(1)
     },
     putCash: function () {
       this.$router.push({ path: '/personal/putCash' })
+    },
+    getMyAcount: function (pageNo) {
+      console.log(this.$store.state.userId, this.state)
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('logType', this.state);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.accountLogList,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data, _this.state)
+          _this.tableList = data.listObject
+          if (_this.state === 1 || _this.state === '1') {
+            _this.amount = data.accountResult.devoteAmount.amount
+          } else if (_this.state === 2 || _this.state === '2') {
+            _this.amount = data.accountResult.huBalance.amount
+          } else {
+            _this.amount = data.accountResult.huPoint.amount
+          }
+        }
+      })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.getMyAcount(pageNum)
     }
   }
 }
@@ -65,6 +143,7 @@ export default {
       height: 33px;
       text-align: center;
       font-size: 16px;
+      cursor: pointer;
       &.cur{
         color: #e3120e;
         border-bottom: 2px solid #e3120e;

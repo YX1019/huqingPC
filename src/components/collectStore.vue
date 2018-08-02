@@ -10,8 +10,8 @@ export default {
   },
   data () {
     return {
-      collectType: 0,
-      name: '产品'
+      collectType: 1,
+      name: '店铺'
     }
   },
   mounted () {
