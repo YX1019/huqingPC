@@ -1,10 +1,10 @@
 <template>
 <div class="personRg">
-  <div class="orderTitle">
+  <div class="orderTitle2">
     <span class="orderItem1">产品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
     <span class="orderItem4">商品操作</span><span class="orderItem5">实付款</span><span class="orderItem6">交易状态</span><span class="orderItem7">交易操作</span>
   </div>
-  <div class="myOderItem ">
+  <div class="myOderItem">
     <div class="myOrderTop">
       <input type="checkbox"/>2018-06-21<span class="orderNo">订单号:15652154654524</span>
       <span><img src="../common/img/storeIcon.png" class="storeIcon"/> 胡庆余堂滨江店</span><span class="rg">快递</span>
@@ -18,7 +18,7 @@
       <div class="orderItem4"></div>
       <div class="orderItem5"><p>￥100.00</p></div>
       <div class="orderItem6"><p>已收货</p><p>订单详情</p></div>
-      <div class="orderItem7"><a class="returnGoods">申请售后</a></div>
+      <div class="orderItem7"><a class="returnGoods" @click="toReturnGoods()">申请售后</a></div>
     </div>
   </div>
 </div>
@@ -29,7 +29,11 @@ export default {
   data () {
     return {}
   },
-  methods: {}
+  methods: {
+    toReturnGoods: function () {
+      this.$router.push({path: '/returnGoods'})
+    }
+  }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">
@@ -38,7 +42,7 @@ export default {
     position: relative;
     color: #000;
   }
-  .orderTitle{
+  .orderTitle2{
     box-sizing: border-box;
     height: 48px;
     line-height: 48px;

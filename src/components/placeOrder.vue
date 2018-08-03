@@ -9,7 +9,7 @@
     <span>优惠方式</span>
     <span>小计</span>
   </div>
-  <div class="orderItem clearfix" v-for="item in orderCartList" :key="item.orderId">
+  <div class="orderItem clearfix" v-for="item in orderCartList" :key="item.childOrderId">
     <h4>店铺:{{item.merchantName}}</h4>
     <div style="width: 100%;box-sizing: border-box;padding: 15px;float: left;">
       <div class="orderItem1"><img :src="item.proImg"/><span>{{item.proName}}</span> </div>
@@ -22,8 +22,8 @@
     <div class="methods">运送方式<select v-model="item.transfer" disabled><option value="0">快递</option><option value="1">自提</option></select></div>
     <div class="address" v-show="isExpress"><label class="lf">收货地址</label>
       <div class="addrOption">
-        <h2 @click="showAddr()" >{{address}}</h2>
-        <div v-show="isShowAddr">
+        <h2 @click="showAddr(item)" >{{item.address}}</h2>
+        <div v-show="item.isShowAddr">
         <p @click="getAttr(item,itemm)" v-for="itemm in addressList" :key="itemm.addressId"><span>{{itemm.name}}</span><span>{{itemm.province}}{{itemm.city}}{{itemm.area}}</span><span>{{itemm.addr}}</span><span>{{itemm.cell}}</span></p>
         <a @click="toAddr()">新增收货地址</a>
         </div>
@@ -54,7 +54,6 @@ export default {
   data () {
     return {
       isExpress: true,
-      isShowAddr: false,
       address: '请选择收货地址',
       orderCartList: [],
       orderObj: {},
@@ -68,17 +67,26 @@ export default {
     this.queryCartOrderList()
     this.addressQuery()
   },
+  mounted () {
+  },
   methods: {
     postOrder: function () {
       this.$router.push({path: '/payOrder'})
     },
-    showAddr: function () {
-      this.isShowAddr = !this.isShowAddr
+    showAddr: function (item) {
+      // this.isShowAddr = !this.isShowAddr
+      // this.orderCartList.forEach(function (item) {
+      if (typeof item.isShowAddr === 'undefined') {
+        this.$set(item, 'isShowAddr', true)
+      } else {
+        item.isShowAddr = !item.isShowAddr
+      }
+      // })
     },
     getAttr: function (item, itemm) {
       console.log(item, itemm)
-      this.isShowAddr = false
-      this.address = itemm.name + '  ' + itemm.province + itemm.city + itemm.area + itemm.addr + '  ' + itemm.cell
+      item.isShowAddr = false
+      // item.address = itemm.name + '  ' + itemm.province + itemm.city + itemm.area + itemm.addr + '  ' + itemm.cell
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
@@ -125,6 +133,13 @@ export default {
           _this.orderObj = data.obj
           _this.orderCartList = data.obj.orderCartList
           _this.orderNo = data.obj.orderNo
+          _this.orderCartList.forEach(function (item) {
+            if (typeof item.isShowAddr === 'undefined') {
+              _this.$set(item, 'address', '请选择收货地址')
+            } else {
+              item.address = item.reName + '  ' + item.reProvince + item.reCity + item.reArea + item.reAddr + '  ' + item.reCell
+            }
+          })
         }
       })
     },
@@ -151,8 +166,9 @@ export default {
       let _this = this;
       let msg = ''
       this.orderCartList.forEach(function (item) {
-        msg = msg + item.orderId + '_(' + item.reName + ';' + item.reCell + ';' + item.reProvince + ';' + item.reCity + ';' + item.reArea + ';' + item.reAddr + ';' + ')'
+        msg = msg + item.orderId + '_(' + item.reName + ';' + item.reCell + ';' + item.reProvince + ';' + item.reCity + ';' + item.reArea + ';' + item.reAddr + ';' + '),'
       })
+      msg = msg.TrimEnd(',')
       console.log(msg)
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
@@ -176,7 +192,7 @@ export default {
   }
 }
 </script>
-<style lang="scss" rel="stylesheet/scss">
+<style lang="scss" rel="stylesheet/scss" scoped>
 .order{
   width:1150px;
   margin: 0 auto 30px auto;

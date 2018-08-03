@@ -12,9 +12,9 @@
       <div class="personInfoItem">
         <h1>您的账户</h1>
         <div class="perItemCont">
-          <p>您的贡献值:<span>{{userAccountInfo.devoteAmount.amount}}</span></p>
-          <p>积分:<span>{{userAccountInfo.huPoint.amount}}</span>优惠积分:<span>{{userAccountInfo.huPointTemp.amount}}</span></p>
-          <p>胡币:<span>{{userAccountInfo.huBalance.amount}}</span>优惠胡币:<span>{{userAccountInfo.huBalanceTemp.amount}}</span></p>
+          <p>您的贡献值:<span>{{devoteAmount}}</span></p>
+          <p>积分:<span>{{huPoint}}</span>优惠积分:<span>{{huPointTemp}}</span></p>
+          <p>胡币:<span>{{huBalance}}</span>优惠胡币:<span>{{huBalanceTemp}}</span></p>
         </div>
       </div>
       <div class="personInfoItem">
@@ -46,7 +46,12 @@ export default {
       grade: '1',
       errorBox: false,
       errMsg: '',
-      userAccountInfo: {}
+      userAccountInfo: {},
+      devoteAmount: '',
+      huPoint: '',
+      huPointTemp: '',
+      huBalance: '',
+      huBalanceTemp: ''
     }
   },
   created () {
@@ -73,6 +78,11 @@ export default {
           _this.userCell = data.obj.userAllInfo.cell
           _this.grade = data.obj.userAllInfo.level
           _this.userAccountInfo = data.obj.userAccountInfo
+          _this.devoteAmount = data.obj.userAccountInfo.devoteAmount.amount
+          _this.huPoint = data.obj.userAccountInfo.huPoint.amount
+          _this.huPointTemp = data.obj.userAccountInfo.huPointTemp.amount
+          _this.huBalance = data.obj.userAccountInfo.huBalance.amount
+          _this.huBalanceTemp = data.obj.userAccountInfo.huBalanceTemp.amount
         }
       })
     }

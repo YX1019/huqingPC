@@ -109,6 +109,7 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data, _this.state)
+          _this.total = data.totalItems
           _this.tableList = data.listObject
           if (_this.state === 1 || _this.state === '1') {
             _this.amount = data.accountResult.devoteAmount.amount

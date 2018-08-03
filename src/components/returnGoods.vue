@@ -4,11 +4,18 @@
   <div class="returnCont clearfix">
     <div class="rCont_lf">
       <p><span class="rItem_lf">退货商品：</span><span class="rItem_rg"><img src="../common/img/productImg1.jpg"/>胡庆余堂鹿精蛹虫草膏</span></p>
-      <p><span class="rItem_lf">退货原因：<span class="red">*</span></span><span class="rItem_rg"><select><option>请选择</option></select></span></p>
+      <p><span class="rItem_lf">退货原因：<span class="red">*</span></span><span class="rItem_rg">
+        <select v-model="reasonId"><option selected value="0">请选择</option><option v-for="item in reasonList" :value="item.id" :key="item.id">{{item.reason}}</option></select>
+      </span>
+      </p>
       <p><span class="rItem_lf">申请售后：</span><span class="rItem_rg"><textarea placeholder="退货说明"></textarea></span></p>
-      <p><span class="rItem_lf">物流公司：<span class="red">*</span></span><span class="rItem_rg"><select><option>请选择</option></select></span></p>
+      <p><span class="rItem_lf">物流公司：<span class="red">*</span></span>
+        <span class="rItem_rg">
+          <select v-model="expressNo"><option value="0">请选择</option><option v-for="item in ExpressList" :value="item.expressNo" :key="item.expressNo">{{item.expressName}}</option></select>
+        </span>
+      </p>
       <p><span class="rItem_lf">物流单号：<span class="red">*</span></span><span class="rItem_rg"><input type="text"></span></p>
-       <p><button class="putReturnInfo">提交</button></p>
+       <p><button class="putReturnInfo" @click="submitReason()">提交</button></p>
     </div>
     <div class="rCont_rg">
       <h3>订单详情</h3>
@@ -20,15 +27,103 @@
       <p><span>商品总价：</span>￥100.00</p>
     </div>
   </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      errorBox: false,
+      errMsg: '',
+      orderId: '',
+      reasonList: [],
+      ExpressList: [],
+      reasonId: '0',
+      expressNo: '0'
+    }
   },
-  methods: {}
+  created () {
+    this.getParams()
+    this.getReturnReason()
+    this.getExpress()
+  },
+  methods: {
+    getParams () {
+      // 取到路由带过来的参数
+      let routerParams = this.$route.query.orderId
+      // 将数据放在当前组件的数据内
+      this.orderId = routerParams
+      console.log(this.orderId)
+    },
+    returnOrder: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.returnOrder,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+
+        }
+      })
+    },
+    getReturnReason: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      this.axios({
+        method: 'post',
+        url: this.url.api.getReturnReason,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.reasonList = data.obj
+        }
+      })
+    },
+    getExpress: function () {
+      let _this = this;
+      this.axios({
+        method: 'post',
+        url: this.url.api.getExpress
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.ExpressList = data.obj
+        }
+      })
+    },
+    submitReason: function () {
+      console.log(this.reasonId, this.expressNo)
+    }
+  }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">

@@ -21,17 +21,31 @@
         <div class="orderItem3"><p>1</p></div>
         <div class="orderItem4"></div>
         <div class="orderItem5"><p>￥100.00</p></div>
-        <div class="orderItem6" v-if="item.statusEnum == 0"><p>等待买家付款</p><p>订单详情</p></div>
-        <div class="orderItem6" v-if="item.statusEnum == 1"><p>待发货</p><p @click="toOderDteail()">订单详情</p></div>
-        <div class="orderItem6" v-if="item.statusEnum == 2"><p>待收货</p><p>订单详情</p></div>
-        <div class="orderItem6" v-if="item.statusEnum == 3"><p>待评价</p><p>订单详情</p></div>
-        <div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods">立即付款</a><p>取消订单</p></div>
-        <div class="orderItem7" v-if="item.statusEnum == 1"><a class="returnGoods">申请退货</a></div>
-        <div class="orderItem7" v-if="item.statusEnum == 2"><a class="returnGoods">确认收货</a><p>查询物流</p></div>
-        <div class="orderItem7" v-if="item.statusEnum == 3"><a class="returnGoods">待评价</a></div>
+        <div class="orderItem6" v-if="item.statusEnum == 0"><p>等待买家付款</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
+        <div class="orderItem6" v-else-if="item.statusEnum == 1"><p>待发货</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
+        <div class="orderItem6" v-else-if="item.statusEnum == 2"><p>待收货</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
+        <div class="orderItem6" v-else-if="item.statusEnum == 3"><p>待评价</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
+        <div class="orderItem6" v-else><p>{{item.statusStr}}</p></div>
+        <div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods">立即付款</a><p @click="cancleOrder(item.childOrderId)" class="hand">取消订单</p></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 1"><a class="returnGoods">申请退货</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 2"><a class="returnGoods">确认收货</a><p>查询物流</p></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 3"><a class="returnGoods">待评价</a></div>
+        <div class="orderItem7" v-else></div>
       </div>
     </div>
     <!--<div class="orderBottom"><input type="checkbox"/>全选 <span class="orderPayBtn">合并付款</span></div>-->
+
+    <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;float: left;">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="total"
+        @current-change="handleCurrentChange"
+        :current-page.sync="pageNo"
+        :page-size="pageSize"
+        v-show="isList">
+      </el-pagination>
+    </div>
     <el-dialog
       title="提示"
       :visible.sync="errorBox"
@@ -55,36 +69,43 @@ export default {
       myOrderList: [],
       errorBox: false,
       errMsg: '',
-      isList: true
+      isList: true,
+      pageSize: 10,
+      total: 5,
+      pageNo: 1,
+      pageStation: ''
     }
   },
   created () {
-    this.queryUserOrderList('', '')
+    this.queryUserOrderList('', '', 1)
   },
   methods: {
     changeOrderState: function (index) {
       this.active = index
+      this.pageNo = 1
       if (index === 0) {
-        this.queryUserOrderList()
+        this.queryUserOrderList('', '', 1)
       } else if (index === 1) {
-        this.queryUserOrderList('', 0)
+        this.queryUserOrderList('', 0, 1)
       } else if (index === 2) {
-        this.queryUserOrderList('', 1)
+        this.queryUserOrderList('', 1, 1)
       } else if (index === 3) {
-        this.queryUserOrderList('', 2)
+        this.queryUserOrderList('', 2, 1)
       } else if (index === 4) {
-        this.queryUserOrderList('', 3)
+        this.queryUserOrderList('', 3, 1)
       }
     },
-    toOderDteail: function () {
-      this.$router.push({ path: '/orderDetail' })
+    toOderDteail: function (orderId) {
+      this.$router.push({ path: '/orderDetail', query: {orderId: orderId} })
     },
-    queryUserOrderList: function (payStatus, orderStatus) {
+    queryUserOrderList: function (payStatus, orderStatus, pageNo) {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       params.append('payStatus', payStatus);
       params.append('orderStatus', orderStatus);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
       this.axios({
         method: 'post',
         url: this.url.api.queryUserOrderList,
@@ -96,11 +117,63 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
+          _this.total = data.totalItems
           _this.myOrderList = data.listObject
           if (_this.myOrderList.length === 0) {
             _this.isList = false
           } else {
             _this.isList = true
+          }
+        }
+      })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.pageStation = pageNum
+      window.scrollTo(0, 0);
+      if (this.active === 0) {
+        this.queryUserOrderList('', '', pageNum)
+      } else if (this.active === 1) {
+        this.queryUserOrderList('', 0, pageNum)
+      } else if (this.active === 2) {
+        this.queryUserOrderList('', 1, pageNum)
+      } else if (this.active === 3) {
+        this.queryUserOrderList('', 2, pageNum)
+      } else if (this.active === 4) {
+        this.queryUserOrderList('', 3, pageNum)
+      }
+    },
+    cancleOrder: function (orderId) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.cancleOrder,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            message: '订单取消成功！',
+            type: 'success'
+          });
+          console.log(_this.pageStation)
+          if (_this.active === 0) {
+            _this.queryUserOrderList('', '', _this.pageStation)
+          } else if (_this.active === 1) {
+            _this.queryUserOrderList('', 0, _this.pageStation)
+          } else if (this.active === 2) {
+            _this.queryUserOrderList('', 1, _this.pageStation)
+          } else if (this.active === 3) {
+            _this.queryUserOrderList('', 2, _this.pageStation)
+          } else if (this.active === 4) {
+            _this.queryUserOrderList('', 3, _this.pageStation)
           }
         }
       })
@@ -125,6 +198,7 @@ export default {
     font-size: 16px;
     text-align: center;
     line-height: 38px;
+    cursor: pointer;
     &.cur{
       color: #e10a08;
       border-bottom: 2px solid #e10a08;
@@ -217,6 +291,7 @@ export default {
     background: #dd0011;
     border-radius: 3px;
     display: inline-block;
+    cursor: pointer;
   }
   .storeIcon{
     display: inline-block;

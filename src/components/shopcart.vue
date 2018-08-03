@@ -17,18 +17,19 @@
     <div class="goodStore">
       <h4>
         <div class="hand lf">
+          <i class="checkIcon" :class="{checked:item.checked}" @click="selectedShop(item)"></i>
           <img src="../common/img/storeIcon.png" class="storeIcon"/><span @click="showStore(item)">{{item.teamName}}<i class="iconfont">&#xe602;</i></span>
           <img src="../common/img/ticket.png" class="ticket"/></div>
         <span style="margin-left:15px;">运送方式<select  @change="chooseMothod(item)" class="kdWay" v-model="item.delivery"><option value="0">快递</option><option value="1">自提</option></select></span>
       </h4>
     </div>
-    <div class="goodsItem">
-      <div class="goodsItem1"><i class="checkIcon" :class="{checked:item.checked}" @click="selectedProduct(item)"></i> <img :src="item.productImg"/><span>{{item.productName}}</span></div>
-      <div class="goodsItem2"><p v-for="itemm in item.attrValue" :key="itemm.attrName">{{itemm.attrName}}：{{itemm.values}}</p></div>
-      <div class="goodsItem3"><p>￥299.00</p><p>￥{{item.price}}</p></div>
-      <div class="goodsItem4"><button @click="updateCartSum(item, 0)">-</button><input type="text" v-model="item.productNum" readonly/><button @click="updateCartSum(item, 1)">+</button> </div>
-      <div class="goodsItem5 red">￥{{item.price * item.productNum}}</div>
-      <div class="goodsItem6"><p class="hand" @click="addToCollect(item.productId)">移入收藏夹</p><p @click="delCart(item.cartId)" class="hand">删除</p></div>
+    <div class="goodsItem" v-for="iitem in item.cartInfo" :key="iitem.cartId">
+      <div class="goodsItem1"><i class="checkIcon" :class="{checked:iitem.checked}" @click="selectedProduct(item, iitem)"></i> <img :src="iitem.productImg"/><span>{{iitem.productName}}</span></div>
+      <div class="goodsItem2"><p v-for="itemm in iitem.attrValue" :key="itemm.attrName">{{itemm.attrName}}：{{itemm.values}}</p></div>
+      <div class="goodsItem3"><p>￥299.00</p><p>￥{{iitem.price}}</p></div>
+      <div class="goodsItem4"><button @click="updateCartSum(iitem, 0)">-</button><input type="text" v-model="iitem.productNum" readonly/><button @click="updateCartSum(iitem, 1)">+</button> </div>
+      <div class="goodsItem5 red">￥{{iitem.price * iitem.productNum}}</div>
+      <div class="goodsItem6"><p class="hand" @click="addToCollect(iitem.productId)">移入收藏夹</p><p @click="delCart(iitem.cartId)" class="hand">删除</p></div>
     </div>
     </div>
     <div class="goodsOpera">
@@ -74,7 +75,8 @@ export default {
       noGoods: false,
       way: '快递',
       dialogVisible: false,
-      storeLists: []
+      storeLists: [],
+      cartAllInfo: []
     }
   },
   filters: {
@@ -104,10 +106,11 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
-          _this.cartList = data.obj
+          _this.cartList = data.obj.cartListInfos
+          _this.cartAllInfo = data.obj.cartAllInfo
           var goodsNum = 0
-          for (var i = 0; i < _this.cartList.length; i++) {
-            goodsNum = parseInt(goodsNum) + parseInt(_this.cartList[i].productNum)
+          for (var i = 0; i < _this.cartAllInfo.length; i++) {
+            goodsNum = parseInt(goodsNum) + parseInt(_this.cartAllInfo[i].productNum)
           }
           window.localStorage.setItem('goodsNum', data.obj.goodsNum)
           _this.$store.commit('changeGoodsNum', goodsNum)
@@ -187,47 +190,108 @@ export default {
         }
       })
     },
-    selectedProduct: function (item) {
-      if (typeof item.checked === 'undefined') {
+    selectedProduct: function (item, iitem) {
+      let _this = this
+      let len = item.cartInfo.length
+      let num = 0
+
+      if (typeof iitem.checked === 'undefined') {
         // Vue.set(item, "checked", true)
-        this.$set(item, 'checked', true)
+        _this.$set(iitem, 'checked', true)
       } else {
-        item.checked = !item.checked
+        iitem.checked = !iitem.checked
       }
-      this.isAllChecked()
+      item.cartInfo.forEach(function (iitem) {
+        if (iitem.checked) {
+          num++
+        }
+      })
+      if (num === len) {
+        if (typeof item.checked === 'undefined') {
+          // Vue.set(item, "checked", true)
+          _this.$set(item, 'checked', true)
+        } else {
+          item.checked = true
+        }
+      } else {
+        item.checked = false
+      }
+      _this.isAllChecked()
       this.calcTotalPrice()
     },
-    checkAll: function (flag) {
-      if (this.checkAllFlag) {
-        this.isBanlance = true
-      } else {
-        this.isBanlance = false
-      }
+    checkAll: function () { // 全部商品全选
       this.checkAllFlag = !this.checkAllFlag
       var _this = this;
+      if (_this.checkAllFlag) {
+        _this.isBanlance = true
+      } else {
+        _this.isBanlance = false
+      }
       this.cartList.forEach(function (item) {
         if (typeof item.checked === 'undefined') {
           _this.$set(item, 'checked', _this.checkAllFlag)
         } else {
           item.checked = _this.checkAllFlag
         }
+        item.cartInfo.forEach(function (iitem) {
+          if (typeof iitem.checked === 'undefined') {
+            _this.$set(iitem, 'checked', _this.checkAllFlag)
+          } else {
+            iitem.checked = _this.checkAllFlag
+          }
+        })
       })
       _this.calcTotalPrice()
     },
-    isAllChecked: function () {
+    selectedShop: function (item) { // 店铺商品全选
+      let _this = this
+      if (typeof item.checked === 'undefined') {
+        // Vue.set(item, "checked", true)
+        _this.$set(item, 'checked', true)
+      } else {
+        item.checked = !item.checked
+      }
+      if (item.checked) {
+        _this.isBanlance = true
+        item.cartInfo.forEach(function (iitem) {
+          if (typeof iitem.checked === 'undefined') {
+            _this.$set(iitem, 'checked', true)
+          } else {
+            iitem.checked = true
+          }
+        })
+      } else {
+        item.cartInfo.forEach(function (iitem) {
+          if (typeof iitem.checked === 'undefined') {
+            _this.$set(iitem, 'checked', false)
+          } else {
+            iitem.checked = false
+          }
+        })
+      }
+      _this.isAllChecked()
+      _this.calcTotalPrice()
+    },
+    isAllChecked: function () { // 商品是否全部选中
       var t = 0
+      var m = 0
       var len = this.cartList.length
       this.cartList.forEach(function (item) {
         if (item.checked) {
           t++
         }
+        item.cartInfo.forEach(function (iitem) {
+          if (iitem.checked) {
+            m++
+          }
+        })
       })
       if (t === len) {
         this.checkAllFlag = true
       } else {
         this.checkAllFlag = false
       }
-      if (t === 0) {
+      if (m === 0) {
         this.isBanlance = false
       } else {
         this.isBanlance = true
@@ -263,10 +327,12 @@ export default {
       _this.totalMoney = 0;
       _this.selectGoodsNum = 0;
       _this.cartList.forEach(function (item) {
-        if (item.checked) {
-          _this.totalMoney += item.price * item.productNum
-          _this.selectGoodsNum += parseInt(item.productNum)
-        }
+        item.cartInfo.forEach(function (iitem) {
+          if (iitem.checked) {
+            _this.totalMoney += iitem.price * iitem.productNum
+            _this.selectGoodsNum += parseInt(iitem.productNum)
+          }
+        })
       });
     },
     createOrder: function () {
@@ -274,9 +340,11 @@ export default {
       let cartIdsArr = []
       let cartIds
       _this.cartList.forEach(function (item) {
-        if (item.checked) {
-          cartIdsArr.push(item.cartId)
-        }
+        item.cartInfo.forEach(function (iitem) {
+          if (iitem.checked) {
+            cartIdsArr.push(iitem.cartId)
+          }
+        })
       });
       cartIds = cartIdsArr.join(',')
       let params = new URLSearchParams();
@@ -519,6 +587,7 @@ export default {
       background: #b0b0b0;
       color: #fff;
       text-align: center;
+      cursor: pointer;
       &.balance{
         background:#dd0011;
       }

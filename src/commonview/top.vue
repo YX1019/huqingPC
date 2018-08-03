@@ -144,7 +144,7 @@ export default {
       params.append('userId', this.$store.state.userId);
       this.axios({
         method: 'post',
-        url: this.url.api.myCart,
+        url: this.url.api.myCarts,
         data: params
       }).then(function (res) {
         let data = res.data
@@ -154,7 +154,7 @@ export default {
           return false
         } else {
           console.log(data)
-          _this.cartList = data.obj
+          _this.cartList = data.obj.cartAllInfo
           let goodsNum = 0;
           for (let i = 0; i < _this.cartList.length; i++) {
             goodsNum = parseInt(goodsNum) + parseInt(_this.cartList[i].productNum)

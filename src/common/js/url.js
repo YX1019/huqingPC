@@ -27,7 +27,7 @@ let url = {
     withdrawLogList: apiUrl + 'withdrawLogList.do', // 提现记录
     updatePwd: apiUrl + 'updatePwdForWeb.do', // 修改登录密码
     addCart: apiUrl + 'addCart.do', // 加入购物车
-    myCart: apiUrl + 'myCart.do', // 查看购物车
+    myCart: apiUrl + 'myCarts.do', // 查看购物车
     delCart: apiUrl + 'delCart.do', // 删除购物车商品
     updateCartSum: apiUrl + 'updateCartSum.do', // 购物车单件数量加减
     cancelCollect: apiUrl + 'cancleCollect.do', // 取消收藏
@@ -40,7 +40,13 @@ let url = {
     completeOrderReturn: apiUrl + 'completeOrderReturn.do', // 订单地址
     getCompleteOrderDetails: apiUrl + 'getCompleteOrderDetails.do', // 提交订单后到支付页面的信息
     mineInfo: apiUrl + 'mineInfo.do', // 我的页面
-    updateUserSomeInfo: apiUrl + 'updateUserSomeInfo.do' // 用户修改信息
+    updateUserSomeInfo: apiUrl + 'updateUserSomeInfo.do', // 用户修改信息
+    queryUserComplaintsOrderList: apiUrl + 'queryUserComplaintsOrderList.do', // 查询用户可投诉维权订单列表
+    queryOrderDetails: apiUrl + 'queryOrderDetails.do', // 查询订单详情
+    cancleOrder: apiUrl + 'cancleOrder.do', // 取消订单
+    returnOrder: apiUrl + 'returnOrder.do', // 申请退货
+    getReturnReason: apiUrl + 'getReturnReason.do', // 退货理由列表查询
+    getExpress: apiUrl + 'getExpress.do' // 物流列表查询
   }
 }
 

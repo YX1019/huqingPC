@@ -12,7 +12,9 @@
        <p><span class="ordCont_lf">电话：</span><span class="ordCont_rg">158458784520</span></p>
      </div>
     <div class="order_rg">
-      <div class="waitToPay" style="display: none;"><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待买家付款</span></div>
+      <div class="waitToPay" style="display: none;">
+        <img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待买家付款</span>
+      </div>
       <div class="waitToDeliver" >
        <p><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待卖家发货</span></p>
         <p>您可以 <span class="rtnGoodsBtn" @click="sendGoods()">点击发货</span></p>

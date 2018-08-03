@@ -388,6 +388,9 @@ export default {
         font-size: 14px;
         color: #020202;
         line-height: 22px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       h5{
         font-size: 18px;
