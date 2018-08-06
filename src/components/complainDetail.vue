@@ -24,11 +24,11 @@
       <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 3">
         <p><img src="../common/img/icon2.png"/><span>订单状态：商家已发货，等待买家确认</span></p>
          <h6>物流：中通快递 运单号：1567465435<br/>2018-06-21 18:20:12  <span class="orange">已签收</span></h6>
-        <p>您可以 <span class="rtnGoodsBtn hand" @click="toEvaluate(orderInfo.orderId)">评价</span></p>
+        <p>您可以 <span class="rtnGoodsBtn hand" @click="toEvaluate()">评价</span></p>
       </div>
       <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 2 && orderInfo.proType == 2">
         <p><img src="../common/img/icon.png"/><span>订单状态：买家已付款，待使用</span></p>
-        <p>您可以 <span class="rtnGoodsBtn hand" @click="lookCode()">点击凭证</span><span class="cancelBtn hand" @click="returnGoods(orderInfo.orderId)">申请退款</span></p>
+        <p>您可以 <span class="rtnGoodsBtn hand" @click="lookCode()">点击凭证</span><span class="cancelBtn">申请退款</span></p>
       </div>
       <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 2 && orderInfo.proType == 1">
         <p><img src="../common/img/icon2.png"/><span>订单状态：商家已发货，等待买家确认</span></p>
@@ -97,7 +97,6 @@ export default {
   created () {
     this.getParams()
     this.queryOrderDetails()
-    // this.queryOrderExpress()
   },
   methods: {
     getParams () {
@@ -134,8 +133,8 @@ export default {
     closeBox: function () {
       this.dialogVisible = false
     },
-    toEvaluate: function (orderId) {
-      this.$router.push({path: '/evaluate', query: {orderId: orderId}})
+    toEvaluate: function () {
+      this.$router.push({path: '/evaluate'})
     },
     returnGoods: function (orderId) {
       this.$router.push({path: '/returnGoods', query: {orderId: orderId}})
@@ -161,26 +160,6 @@ export default {
             type: 'success'
           });
           _this.queryOrderDetails()
-        }
-      })
-    },
-    queryOrderExpress: function () {
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('userId', this.$store.state.userId);
-      params.append('orderId', this.orderId);
-      this.axios({
-        method: 'post',
-        url: this.url.api.queryOrderExpress,
-        data: params
-      }).then(function (res) {
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-          console.log('yicahng')
-        } else {
-          console.log(data)
         }
       })
     }

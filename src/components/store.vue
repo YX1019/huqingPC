@@ -19,7 +19,7 @@
       </ul>
     </div>
     <div class="conditions">
-      排序:<span class="conditionsItem" @click="getColligate();">综合</span><span class="conditionsItem">价格<i class="iconfont">&#xe630;</i></span><span class="conditionsItem">销量<i class="iconfont">&#xe630;</i></span><span class="conditionsItem">人气<i class="iconfont">&#xe630;</i></span>
+      排序:<span class="conditionsItem" @click="getColligate();">综合</span><span class="conditionsItem">价格<i class="iconfont">&#xe630;</i><i class="iconfont">&#xe62f;</i></span><span class="conditionsItem">销量<i class="iconfont">&#xe630;</i><i class="iconfont">&#xe62f;</i></span><span class="conditionsItem">人气<i class="iconfont">&#xe630;</i><i class="iconfont">&#xe62f;</i></span>
       <div class="comprehensive" v-show="isShowColligate">
         <div v-for="item in cateList" :key="item.cateName">
         <h2 class="cur">{{item.cateName}}</h2>

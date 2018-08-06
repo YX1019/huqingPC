@@ -6,7 +6,7 @@
   <div class="myInfo">
     <div class="myAcountNum">
       <p>{{name}}</p>
-      <h1>200</h1>
+      <h1>{{amount}}</h1>
       <a class="putCash" v-if="name === '胡币' " @click="putCash();">提现</a>
     </div>
     <ul class="teamNav">
@@ -31,7 +31,7 @@
     </div>
     <div class="teamCont" v-show="teamName === 0 ">
        <ul class="teamList">
-         <li><img src="../common/img/productImg1.jpg" class="productImg"/>张三</li>
+         <li v-for="item in userTeamList" :key="item"><img src="item.headImg" class="productImg"/>{{item.nickName}}</li>
        </ul>
     </div>
   </div>
@@ -72,7 +72,9 @@ export default {
       errMsg: '',
       pageNo: 1,
       pageSize: 10,
-      total: 5
+      total: 5,
+      userTeamList: [],
+      amount: ''
     }
   },
   created () {
@@ -116,6 +118,14 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.userTeamList = data.userTeamList
+          if (_this.state === 1 || _this.state === '1') {
+            _this.amount = data.accountResult.devoteAmount.amount
+          } else if (_this.state === 2 || _this.state === '2') {
+            _this.amount = data.accountResult.huBalance.amount
+          } else {
+            _this.amount = data.accountResult.huPoint.amount
+          }
         }
       })
     },
@@ -142,6 +152,7 @@ export default {
       height: 33px;
       text-align: center;
       font-size: 16px;
+      cursor: pointer;
       &.cur{
         color: #e3120e;
         border-bottom: 2px solid #e3120e;

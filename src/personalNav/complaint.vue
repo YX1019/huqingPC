@@ -4,34 +4,104 @@
     <span class="orderItem1">产品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
     <span class="orderItem4">商品操作</span><span class="orderItem5">实付款</span><span class="orderItem6">交易状态</span><span class="orderItem7">交易操作</span>
   </div>
-  <div class="myOderItem">
+  <div class="nocont" v-show="!isList">暂无订单</div>
+  <div class="myOderItem" v-for="item in complainList" :key="item.orderId">
     <div class="myOrderTop">
-      <input type="checkbox"/>2018-06-21<span class="orderNo">订单号:15652154654524</span>
-      <span><img src="../common/img/storeIcon.png" class="storeIcon"/> 胡庆余堂滨江店</span><span class="rg">快递</span>
+      <input type="checkbox"/>2018-06-21<span class="orderNo">订单号:{{item.orderId}}</span>
+      <span><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span>
+      <span class="rg" v-if="item.trans === '0'">快递</span>
+      <span class="rg" v-if="item.trans === '1'">自提</span>
     </div>
     <div class="myOrderItemCont ">
-      <div class="orderItem1 orderItemName"><img src="../common/img/productImg1.jpg"/>
-        <div class="oderItem_rg"><h3>胡庆余堂鹿精蛹虫草膏</h3><p>规格：100ml</p></div>
+      <div class="orderItem1 orderItemName"><img :src="item.proImg"/>
+        <div class="oderItem_rg"><h3>{{item.proName}}</h3><p>{{item.attrNames}}：{{item.valueNames}}</p></div>
       </div>
-      <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥100.00</p></div>
-      <div class="orderItem3"><p>1</p></div>
+      <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥{{item.perPrice}}</p></div>
+      <div class="orderItem3"><p>{{item.orderCount}}</p></div>
       <div class="orderItem4"></div>
       <div class="orderItem5"><p>￥100.00</p></div>
-      <div class="orderItem6"><p>已收货</p><p>订单详情</p></div>
-      <div class="orderItem7"><a class="returnGoods" @click="toReturnGoods()">申请售后</a></div>
+      <div class="orderItem6"><p>{{item.statusStr}}</p><p @click="toComplainDetail(item.childOrderId)">订单详情</p></div>
+      <div class="orderItem7" v-if="item.statusEnum === '6'"><a class="returnGoods" @click="toReturnGoods(item.childOrderId)">申请售后</a></div>
     </div>
   </div>
+  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;float: left;">
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="total"
+      @current-change="handleCurrentChange"
+      :current-page.sync="pageNo"
+      :page-size="pageSize"
+      v-show="isList">
+    </el-pagination>
+  </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      isList: true,
+      pageSize: 10,
+      total: 5,
+      pageNo: 1,
+      pageStation: '',
+      errorBox: false,
+      errMsg: '',
+      complainList: []
+    }
+  },
+  created () {
+    this.queryUserComplaintsOrderList()
   },
   methods: {
-    toReturnGoods: function () {
-      this.$router.push({path: '/returnGoods'})
+    toReturnGoods: function (orderId) {
+      this.$router.push({path: '/returnGoods', query: {orderId: orderId}})
+    },
+    toComplainDetail: function (orderId) {
+      this.$router.push({path: '/complainDetail', query: {orderId: orderId}})
+    },
+    queryUserComplaintsOrderList: function (pageNo) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryUserComplaintsOrderList,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.total = data.totalItems
+          _this.complainList = data.listObject
+          if (_this.complainList.length === 0) {
+            _this.isList = false
+          } else {
+            _this.isList = true
+          }
+        }
+      })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.queryUserComplaintsOrderList(pageNum)
     }
   }
 }

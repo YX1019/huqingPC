@@ -2,21 +2,108 @@
 <div class="evaluate">
   <h4>您现在的位置：首页>用户中心>订单详情>评价</h4>
   <div class="evaluateCont">
-    <h2><img src="../common/img/productImg1.jpg"/>胡庆余堂鹿精蛹虫草膏 </h2>
-    <textarea placeholder="请写下您的评价内容"></textarea>
-    <p><span>*</span>描述相符<i class="iconfont">&#xe618;</i><i class="iconfont">&#xe618;</i>
-      <i class="iconfont">&#xe618;</i><i class="iconfont">&#xe618;</i></p>
+    <h2><img :src="orderInfo.proImg" style="width:90px;height: 90px;"/>{{orderInfo.proName}} </h2>
+    <textarea placeholder="请写下您的评价内容" v-model="comment"></textarea>
+    <div>
+      <span>*</span>描述相符
+      <ul class="star">
+        <span v-for="(itemClass,index) in itemClasses" :class="itemClass" class="star-item" track-by="index" :key="index" @click="getIndex(index)"></span>
+        <!--性能优化 track-by 数据不改变时不会重新渲染-->
+      </ul>
+    </div>
   </div>
-  <div style="text-align: center"><button class="putEva">提交评价</button></div>
+  <div style="text-align: center"><button class="putEva" @click="addOrderEvaluate()">提交评价</button></div>
 </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      score: 0,
+      orderId: '',
+      comment: '',
+      orderInfo: {}
+    }
   },
-  methods: {}
+  created () {
+    this.getParams()
+    this.queryOrderDetails()
+  },
+  computed: { // 计算属性
+    itemClasses () {
+      let result = [];
+      for (let i = 0; i < this.score; i++) {
+        result.push('on');
+      }
+      while (result.length < 5) {
+        result.push('off');
+      }
+      return result;
+    }
+  },
+  methods: {
+    getParams () {
+      // 取到路由带过来的参数
+      let routerParams = this.$route.query.orderId
+      // 将数据放在当前组件的数据内
+      this.orderId = routerParams
+      console.log(this.orderId)
+    },
+    getIndex: function (index) {
+      this.score = parseInt(index) + 1
+    },
+    addOrderEvaluate: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      params.append('star', this.score);
+      params.append('comment', this.comment);
+      params.append('imgArr', '');
+      this.axios({
+        method: 'post',
+        url: this.url.api.addOrderEvaluate,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            showClose: true,
+            message: '评价成功',
+            type: 'success',
+            duration: 1000
+          })
+          _this.$router.push({path: '/personal/myOder'})
+        }
+      })
+    },
+    queryOrderDetails: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryOrderDetails,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          window.scrollTo(0, 0);
+          _this.orderInfo = data.obj
+        }
+      })
+    }
+  }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">
@@ -79,4 +166,26 @@ export default {
     color: #fff;
     margin: 0 auto 100px auto;
   }
+ .star{
+   font-size: 0;
+   display: inline-block;
+   margin-left: 10px;
+ }
+.star-item{
+  display: inline-block;
+  background-repeat: no-repeat;
+  width: 20px;
+  height: 20px;
+  margin-right: 22px;
+  background-size: 100%;
+}
+.star-item.on{
+  background-image: url(../common/img/on.png);
+}
+.star-item.half{
+  background-image: url(../common/img/on.png);
+}
+.star-item.off{
+  background-image: url(../common/img/off.png);
+}
 </style>

@@ -62,9 +62,19 @@
           <div class="commentRg"><img src="../common/img/grade.jpg"/> </div>
           </div>
           <ul class="commentList clearfix">
-            <li><div class="comList_lf">怕上火让客服把熟地换成了生地，喝了不上火，不错</div><div class="comList_rg"><h6>白交互</h6><p>2016-02-11 12:00</p></div></li>
+            <li v-for="item in commentList" :key="item.commnetUserId"><div class="comList_lf">{{item.commentWord}}</div><div class="comList_rg"><h6>{{item.nickName}}</h6><p>{{item.dateStr}}</p></div></li>
 
           </ul>
+          <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;">
+            <el-pagination
+              background
+              layout="prev, pager, next"
+              :total="total"
+              @current-change="handleCurrentChange"
+              :current-page.sync="pageNo"
+              :page-size="pageSize">
+            </el-pagination>
+          </div>
         </div>
       </div>
     </div>
@@ -96,6 +106,7 @@ export default {
       idString: '',
       goodsNum: 0,
       priceStocks: [],
+      commentList: [],
       attrAndValuees: [
         {
           'attrId': 1,
@@ -130,7 +141,10 @@ export default {
       options: [],
       num: 1,
       stockId: '',
-      collectionFlg: false
+      collectionFlg: false,
+      pageSize: 10,
+      total: 5,
+      pageNo: 1
     }
   },
   beforeCreated () {
@@ -139,6 +153,7 @@ export default {
     this.goTop()
     this.getParams()
     this.getProDetail()
+    this.queryEvaluate()
     console.log(this.headImgList)
   },
   mounted () {
@@ -309,6 +324,33 @@ export default {
           _this.collectionFlg = false
         }
       })
+    },
+    queryEvaluate: function (pageNum) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('linkId', this.productId);
+      params.append('type', 1);
+      params.append('pageNum', pageNum);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryEvaluate,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.total = data.totalItems
+          _this.commentList = data.listObject
+        }
+      })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.queryEvaluate(pageNum)
     }
   },
   watch: {
@@ -574,7 +616,7 @@ export default {
     height: auto;
     margin: 50px 0 30px 0;
     li{
-      padding-bottom: 10px;
+      padding: 10px 0;
       border-bottom: 1px solid #ddd;
       width:100%;
       float: left;
@@ -583,6 +625,7 @@ export default {
   .comList_lf{
     float: left;
     font-size: 13px;
+    width:80%;
   }
 .comList_rg{
   float: right;

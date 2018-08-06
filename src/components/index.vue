@@ -471,6 +471,10 @@ export default {
       font-weight: 100;
       padding-left: 10px;
       margin-top: 10px;
+      height: 35px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       @media screen and (max-width: 1150px){font-size: 16px;line-height: 25px;}
     }
     h5{

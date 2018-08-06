@@ -46,7 +46,12 @@ let url = {
     cancleOrder: apiUrl + 'cancleOrder.do', // 取消订单
     returnOrder: apiUrl + 'returnOrder.do', // 申请退货
     getReturnReason: apiUrl + 'getReturnReason.do', // 退货理由列表查询
-    getExpress: apiUrl + 'getExpress.do' // 物流列表查询
+    getExpress: apiUrl + 'getExpress.do', // 物流列表查询
+    queryComplaintsOrderDetails: apiUrl + 'queryComplaintsOrderDetails.do', // 查询用户可投诉列表订单详情
+    queryEvaluate: apiUrl + 'queryEvaluate.do', // 评论列表 1商品 2服务 3养生知识/新闻公告ID
+    addOrderEvaluate: apiUrl + 'addOrderEvaluate.do', // 新增订单评价
+    receiveOrder: apiUrl + 'receiveOrder.do', // 确认收货
+    queryOrderExpress: apiUrl + 'queryOrderExpress.do' // 查询物流信息
   }
 }
 

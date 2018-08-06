@@ -3,28 +3,28 @@
   <h4>您现在的位置：首页>用户中心>订单详情>退货</h4>
   <div class="returnCont clearfix">
     <div class="rCont_lf">
-      <p><span class="rItem_lf">退货商品：</span><span class="rItem_rg"><img src="../common/img/productImg1.jpg"/>胡庆余堂鹿精蛹虫草膏</span></p>
+      <p><span class="rItem_lf">退货商品：</span><span class="rItem_rg"><img :src="obj.proImg"/>{{obj.proName}}</span></p>
       <p><span class="rItem_lf">退货原因：<span class="red">*</span></span><span class="rItem_rg">
-        <select v-model="reasonId"><option selected value="0">请选择</option><option v-for="item in reasonList" :value="item.id" :key="item.id">{{item.reason}}</option></select>
+        <select v-model="reason"><option selected value="0">请选择</option><option v-for="item in reasonList" :value="item.reason" :key="item.reason">{{item.reason}}</option></select>
       </span>
       </p>
-      <p><span class="rItem_lf">申请售后：</span><span class="rItem_rg"><textarea placeholder="退货说明"></textarea></span></p>
+      <p><span class="rItem_lf">申请售后：</span><span class="rItem_rg"><textarea placeholder="退货说明" v-model="reasonOther"></textarea></span></p>
       <p><span class="rItem_lf">物流公司：<span class="red">*</span></span>
         <span class="rItem_rg">
-          <select v-model="expressNo"><option value="0">请选择</option><option v-for="item in ExpressList" :value="item.expressNo" :key="item.expressNo">{{item.expressName}}</option></select>
+          <select v-model="expressCom"><option value="0">请选择</option><option v-for="item in ExpressList" :value="item.expressNo" :key="item.expressNo">{{item.expressName}}</option></select>
         </span>
       </p>
-      <p><span class="rItem_lf">物流单号：<span class="red">*</span></span><span class="rItem_rg"><input type="text"></span></p>
-       <p><button class="putReturnInfo" @click="submitReason()">提交</button></p>
+      <p><span class="rItem_lf">物流单号：<span class="red">*</span></span><span class="rItem_rg"><input type="text" v-model="expressNo"></span></p>
+       <p><button class="putReturnInfo" @click="returnOrder()">提交</button></p>
     </div>
     <div class="rCont_rg">
       <h3>订单详情</h3>
-      <h5 class="clearfix"><img src="../common/img/productImg1.jpg"/>胡庆余堂鹿精蛹虫草膏</h5>
+      <h5 class="clearfix"><img :src="obj.proImg" width="90px"/>{{obj.proName}}</h5>
       <p><span>卖家：</span><i class="bule">胡庆余堂滨江店</i></p>
-      <p><span>订单编号：</span><i class="bule">12654879542131254</i></p>
-      <p><span>单价：</span>￥100.00*1</p>
+      <p><span>订单编号：</span><i class="bule">{{obj.orderId}}</i></p>
+      <p><span>单价：</span>￥{{obj.perPrice}}*{{obj.orderCount}}</p>
       <p><span>邮费：</span>￥0.00</p>
-      <p><span>商品总价：</span>￥100.00</p>
+      <p><span>商品总价：</span>￥{{obj.allAmount}}</p>
     </div>
   </div>
   <el-dialog
@@ -49,14 +49,18 @@ export default {
       orderId: '',
       reasonList: [],
       ExpressList: [],
-      reasonId: '0',
-      expressNo: '0'
+      reason: '0',
+      expressCom: '0',
+      obj: {},
+      reasonOther: '',
+      expressNo: ''
     }
   },
   created () {
     this.getParams()
     this.getReturnReason()
     this.getExpress()
+    this.queryOrderDetails()
   },
   methods: {
     getParams () {
@@ -71,6 +75,11 @@ export default {
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       params.append('orderId', this.orderId);
+      params.append('reason', this.reason);
+      params.append('reasonOther', this.reasonOther);
+      params.append('expressCom', this.expressCom);
+      params.append('expressNo', this.expressNo);
+      console.log(params)
       this.axios({
         method: 'post',
         url: this.url.api.returnOrder,
@@ -82,7 +91,31 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
-
+          _this.$message({
+            message: '提交成功',
+            type: 'success'
+          })
+          _this.$router.push({path: '/personal/myOder'})
+        }
+      })
+    },
+    queryOrderDetails: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryOrderDetails,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.obj = data.obj
         }
       })
     },
@@ -119,9 +152,6 @@ export default {
           _this.ExpressList = data.obj
         }
       })
-    },
-    submitReason: function () {
-      console.log(this.reasonId, this.expressNo)
     }
   }
 }

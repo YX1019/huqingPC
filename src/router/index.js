@@ -14,6 +14,7 @@ import collect from '@/components/collect'
 import collectStore from '@/components/collectStore'
 import personal from '@/components/personal'
 import orderDetail from '@/components/orderDetail'
+import complainDetail from '@/components/complainDetail'
 import storeOrderDetail from '@/components/storeOrderDetail'
 import returnGoods from '@/components/returnGoods'
 import news from '@/components/news'
@@ -158,6 +159,11 @@ export default new Router({
       path: '/orderDetail',
       name: 'orderDetail',
       component: orderDetail
+    },
+    {
+      path: '/complainDetail',
+      name: 'complainDetail',
+      component: complainDetail
     },
     {
       path: '/storeOrderDetail',

@@ -10,24 +10,26 @@
     </div>
     <div class="myOderItem " v-for="item in myOrderList" :key="item.childOrderId" v-show="isList">
       <div class="myOrderTop">
-        <input type="checkbox"/>{{item.createTime}}<span class="orderNo">订单号:{{item.orderId}}</span>
-        <span><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span><span class="rg">快递</span>
+        <input type="checkbox"/>{{item.createTime}}<span class="orderNo">订单号:{{item.childOrderId}}</span>
+        <span><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span>
+        <span class="rg" v-if="item.trans === '0'">快递</span>
+        <span class="rg" v-if="item.trans === '1'">自提</span>
       </div>
       <div class="myOrderItemCont ">
-        <div class="orderItem1 orderItemName"><img src="../common/img/productImg1.jpg"/>
-          <div class="oderItem_rg"><h3>胡庆余堂鹿精蛹虫草膏</h3><p>规格：100ml</p></div>
+        <div class="orderItem1 orderItemName"><img :src="item.proImg"/>
+          <div class="oderItem_rg"><h3>{{item.proName}}</h3><p v-show="item.attrNames">{{item.attrNames}}：{{item.valueNames}}</p></div>
         </div>
-        <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥100.00</p></div>
-        <div class="orderItem3"><p>1</p></div>
+        <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥{{item.perPrice}}</p></div>
+        <div class="orderItem3"><p>{{item.orderCount}}</p></div>
         <div class="orderItem4"></div>
-        <div class="orderItem5"><p>￥100.00</p></div>
+        <div class="orderItem5"><p>￥{{item.allAmount}}</p></div>
         <div class="orderItem6" v-if="item.statusEnum == 0"><p>等待买家付款</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else-if="item.statusEnum == 1"><p>待发货</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else-if="item.statusEnum == 2"><p>待收货</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else-if="item.statusEnum == 3"><p>待评价</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
-        <div class="orderItem6" v-else><p>{{item.statusStr}}</p></div>
+        <div class="orderItem6" v-else><p>{{item.statusStr}}</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods">立即付款</a><p @click="cancleOrder(item.childOrderId)" class="hand">取消订单</p></div>
-        <div class="orderItem7" v-else-if="item.statusEnum == 1"><a class="returnGoods">申请退货</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 1"><a class="returnGoods" @click="returnGoods(item.childOrderId)">申请退货</a></div>
         <div class="orderItem7" v-else-if="item.statusEnum == 2"><a class="returnGoods">确认收货</a><p>查询物流</p></div>
         <div class="orderItem7" v-else-if="item.statusEnum == 3"><a class="returnGoods">待评价</a></div>
         <div class="orderItem7" v-else></div>
@@ -177,6 +179,9 @@ export default {
           }
         }
       })
+    },
+    returnGoods: function (orderId) {
+      this.$router.push({ path: '/returnGoods', query: {orderId: orderId} })
     }
   }
 }
@@ -269,6 +274,7 @@ export default {
       font-weight: 100;
       font-size: 14px;
       margin-bottom: 30px;
+      text-align: left;
     }
     p{
       color: #8e8e8e;
