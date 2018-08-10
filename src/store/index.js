@@ -6,7 +6,7 @@ const state = {
   isLogin: window.localStorage.getItem('isLogin') || false,
   cs: '1',
   name: window.localStorage.getItem('name') || '某某',
-  goodsNum: 0,
+  goodsNum: window.localStorage.getItem('goodsNum') || 0,
   userId: window.localStorage.getItem('userId') || ''
 }
 

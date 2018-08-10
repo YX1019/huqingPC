@@ -1,6 +1,15 @@
 <template>
 <div class="order">
  <h3>确认订单信息</h3>
+  <div class="address" style="background: #fff;"><label class="lf">收货地址</label>
+    <div class="addrOption">
+      <h2 @click="showAddr()" >{{address}}</h2>
+      <div v-show="isShowAddr">
+        <p @click="getAttr(item)" v-for="item in addressList" :key="item.addressId"><span>{{item.name}}</span><span>{{item.province}}{{item.city}}{{item.area}}</span><span>{{item.addr}}</span><span>{{item.cell}}</span></p>
+        <a @click="toAddr()">新增收货地址</a>
+      </div>
+    </div>
+  </div>
   <div class="orderTitle">
     <span>店铺宝贝</span>
     <span>商品属性</span>
@@ -9,30 +18,33 @@
     <span>优惠方式</span>
     <span>小计</span>
   </div>
-  <div class="orderItem clearfix" v-for="item in orderCartList" :key="item.childOrderId">
+  <div class="orderItem clearfix" v-for="item in orderCartList" :key="item.merchantName">
     <h4>店铺:{{item.merchantName}}</h4>
-    <div style="width: 100%;box-sizing: border-box;padding: 15px;float: left;">
-      <div class="orderItem1"><img :src="item.proImg"/><span>{{item.proName}}</span> </div>
-      <div class="orderItem2">{{item.attrNames}}：{{item.valueNames}}</div>
-      <div class="orderItem3">{{item.perPrice}}</div>
-      <div class="orderItem4">{{item.orderCount}}</div>
-      <div class="orderItem5"><select disabled><option selected>{{item.giveMessage}}</option></select></div>
-      <div class="orderItem6">{{item.realAllAmount}}</div>
+    <div style="width: 100%;box-sizing: border-box;padding: 15px;float: left;" v-for="(itemm,index) in item.proMerchant" :key="index">
+      <div class="orderItem1"><img :src="itemm.proImg"/><span>{{itemm.proName}}</span> </div>
+      <div class="orderItem2" v-show="itemm.attrNames">{{itemm.attrNames}}:{{itemm.valueNames}}</div>
+      <div class="orderItem2" v-show="itemm.attrNames == null ">无</div>
+      <div class="orderItem3">{{itemm.perPrice}}</div>
+      <div class="orderItem4">{{itemm.perCount}}</div>
+      <div class="orderItem5"><select disabled><option selected></option></select></div>
+      <div class="orderItem6">{{itemm.perPrice * itemm.perCount}}</div>
     </div>
-    <div class="methods">运送方式<select v-model="item.transfer" disabled><option value="0">快递</option><option value="1">自提</option></select></div>
-    <div class="address" v-show="isExpress"><label class="lf">收货地址</label>
-      <div class="addrOption">
-        <h2 @click="showAddr(item)" >{{item.address}}</h2>
-        <div v-show="item.isShowAddr">
-        <p @click="getAttr(item,itemm)" v-for="itemm in addressList" :key="itemm.addressId"><span>{{itemm.name}}</span><span>{{itemm.province}}{{itemm.city}}{{itemm.area}}</span><span>{{itemm.addr}}</span><span>{{itemm.cell}}</span></p>
-        <a @click="toAddr()">新增收货地址</a>
-        </div>
-      </div>
-      <p class="total">店铺合计:<span> ￥{{item.realAllAmount}}</span></p>
+    <div class="methods">运送方式<select v-model="item.trans" disabled><option value="0">快递</option><option value="1">自提</option></select>
+      <select disabled class="rg" style="margin-right:12%"><option selected>{{item.giveMessage}}</option></select>
     </div>
+    <!--<div class="address" v-show="isExpress"><label class="lf">收货地址</label>-->
+      <!--<div class="addrOption">-->
+        <!--<h2 @click="showAddr(item)" >{{item.address}}</h2>-->
+        <!--<div v-show="item.isShowAddr">-->
+        <!--<p @click="getAttr(item,itemm)" v-for="itemm in addressList" :key="itemm.addressId"><span>{{itemm.name}}</span><span>{{itemm.province}}{{itemm.city}}{{itemm.area}}</span><span>{{itemm.addr}}</span><span>{{itemm.cell}}</span></p>-->
+        <!--<a @click="toAddr()">新增收货地址</a>-->
+        <!--</div>-->
+      <!--</div>-->
+      <!--<p class="total">店铺合计:<span> ￥{{item.realAllAmount}}</span></p>-->
+    <!--</div>-->
     <div class="address" v-show="!isExpress">门店地址 <span style="margin-left: 20px">浙江省杭州市滨江区胡庆余堂滨江店</span>
-      <p class="total">店铺合计:<span> ￥199.00</span></p>
     </div>
+    <div class="address"><p class="total">店铺合计:<span> ￥{{item.orderMerchantPrice}}</span></p></div>
   </div>
   <p class="realPayment">实付款:<span>￥{{orderObj.orderAllAmount}}</span></p>
   <p class="clearfix"><button class="putOrder" @click="completeOrder()">提交订单</button></p>
@@ -46,11 +58,24 @@
     <el-button type="primary" @click="errorBox = false">确 定</el-button>
   </span>
   </el-dialog>
+
+  <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+    <addAddress v-on:refreshbizlines="tochildrenAdrr"></addAddress>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialogFormVisible = false">取 消</el-button>
+      <!--<el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>-->
+    </div>
+  </el-dialog>
+
 </div>
 </template>
 <script type="text/ecmascript-6">
+import addAddress from './address/addAddress.vue'
 export default {
-  name: '',
+  name: 'placeOrder',
+  components: {
+    addAddress
+  },
   data () {
     return {
       isExpress: true,
@@ -60,7 +85,15 @@ export default {
       addressList: [],
       errorBox: false,
       errMsg: '',
-      orderNo: ''
+      orderNo: '',
+      isShowAddr: false,
+      dialogFormVisible: false,
+      name: '',
+      province: '',
+      city: '',
+      area: '',
+      addr: '',
+      cell: ''
     }
   },
   created () {
@@ -70,47 +103,30 @@ export default {
   mounted () {
   },
   methods: {
+    tochildrenAdrr: function () {
+      this.dialogFormVisible = false
+      this.addressQuery()
+    },
     postOrder: function () {
       this.$router.push({path: '/payOrder'})
     },
-    showAddr: function (item) {
-      // this.isShowAddr = !this.isShowAddr
-      // this.orderCartList.forEach(function (item) {
-      if (typeof item.isShowAddr === 'undefined') {
-        this.$set(item, 'isShowAddr', true)
-      } else {
-        item.isShowAddr = !item.isShowAddr
-      }
-      // })
+    showAddr: function () {
+      this.isShowAddr = !this.isShowAddr
     },
-    getAttr: function (item, itemm) {
-      console.log(item, itemm)
-      item.isShowAddr = false
-      // item.address = itemm.name + '  ' + itemm.province + itemm.city + itemm.area + itemm.addr + '  ' + itemm.cell
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('userId', this.$store.state.userId);
-      params.append('addressId', itemm.addressId);
-      params.append('order', item.childOrderId);
-      params.append('type', 1);
-      this.axios({
-        method: 'post',
-        url: this.url.api.completeOrderReturn,
-        data: params
-      }).then(function (res) {
-        console.log(res)
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-        } else {
-          console.log(111)
-          _this.queryCartOrderList()
-        }
-      })
+    getAttr: function (item) {
+      console.log(item)
+      this.isShowAddr = false
+      this.address = item.name + '  ' + item.province + item.city + item.area + item.addr + '  ' + item.cell
+      this.name = item.name
+      this.province = item.province
+      this.city = item.city
+      this.area = item.area
+      this.addr = item.addr
+      this.cell = item.cell
     },
     toAddr: function () {
-      this.$router.push({path: '/personal/address'})
+      // this.$router.push({path: '/personal/address'})
+      this.dialogFormVisible = true
     },
     queryCartOrderList: function () {
       let _this = this;
@@ -124,22 +140,15 @@ export default {
         url: this.url.api.queryCartOrderList,
         data: params
       }).then(function (res) {
-        console.log(res)
         let data = res.data
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
+          console.log(data)
           _this.orderObj = data.obj
-          _this.orderCartList = data.obj.orderCartList
+          _this.orderCartList = data.obj.orderMerchantList
           _this.orderNo = data.obj.orderNo
-          _this.orderCartList.forEach(function (item) {
-            if (typeof item.isShowAddr === 'undefined') {
-              _this.$set(item, 'address', '请选择收货地址')
-            } else {
-              item.address = item.reName + '  ' + item.reProvince + item.reCity + item.reArea + item.reAddr + '  ' + item.reCell
-            }
-          })
         }
       })
     },
@@ -165,10 +174,7 @@ export default {
     completeOrder: function () {
       let _this = this;
       let msg = ''
-      this.orderCartList.forEach(function (item) {
-        msg = msg + item.orderId + '_(' + item.reName + ';' + item.reCell + ';' + item.reProvince + ';' + item.reCity + ';' + item.reArea + ';' + item.reAddr + ';' + '),'
-      })
-      msg = msg.TrimEnd(',')
+      msg = this.name + ';' + this.cell + ';' + this.province + ';' + this.city + ';' + this.area + ';' + this.addr
       console.log(msg)
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);

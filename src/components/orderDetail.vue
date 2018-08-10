@@ -17,11 +17,11 @@
         <!--<p>您可以 <span class="rtnGoodsBtn">申请退货</span><span class="cancelBtn">取消订单</span></p>-->
         <p>您可以 <span class="rtnGoodsBtn hand">付款</span><span class="cancelBtn hand" @click="cancleOrder()">取消订单</span></p>
       </div>
-      <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 1">
+      <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 1 && orderInfo.proType != 2">
        <p><img src="../common/img/icon.png"/><span>订单状态：卖家已付款等待发货</span></p>
         <p>您可以 <span class="rtnGoodsBtn hand" @click="returnGoods(orderInfo.orderId)">申请退货</span></p>
       </div>
-      <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 3">
+      <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 3 && orderInfo.proType != 2">
         <p><img src="../common/img/icon2.png"/><span>订单状态：商家已发货，等待买家确认</span></p>
          <h6>物流：中通快递 运单号：1567465435<br/>2018-06-21 18:20:12  <span class="orange">已签收</span></h6>
         <p>您可以 <span class="rtnGoodsBtn hand" @click="toEvaluate(orderInfo.orderId)">评价</span></p>
@@ -30,10 +30,10 @@
         <p><img src="../common/img/icon.png"/><span>订单状态：买家已付款，待使用</span></p>
         <p>您可以 <span class="rtnGoodsBtn hand" @click="lookCode()">点击凭证</span><span class="cancelBtn hand" @click="returnGoods(orderInfo.orderId)">申请退款</span></p>
       </div>
-      <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 2 && orderInfo.proType == 1">
+      <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 2 && orderInfo.proType != 2">
         <p><img src="../common/img/icon2.png"/><span>订单状态：商家已发货，等待买家确认</span></p>
-        <h6>物流：中通快递 运单号：1567465435<br/>2018-06-21 18:20:12  <span class="orange">到达杭州市</span></h6>
-        <p>您可以 <span class="rtnGoodsBtn">确认收货</span><span class="cancelBtn hand">申请退款</span></p>
+        <h6 v-show="orderInfo.trans == 0">最新物流消息：{{orderInfo.transTime}}  <br/><span class="orange">{{orderInfo.transMsg}}</span></h6>
+        <p>您可以 <span class="rtnGoodsBtn" @click="receiveOrder()">确认收货</span><span class="cancelBtn hand" @click="returnGoods(orderInfo.orderId)">申请退款</span></p>
       </div>
       <div class="waitToDeliver" v-else>
         <p><img src="../common/img/icon.png"/><span>订单状态：{{orderInfo.statusStr}}</span></p>
@@ -47,11 +47,11 @@
       <div class="ordInfoCont">
         <div class="myOrderItemCont ">
           <div class="orderItem1 orderItemName"><img :src="orderInfo.proImg"/>
-            <div class="oderItem_rg"><h3>{{orderInfo.proName}}</h3><p>{{orderInfo.attrNames}}：{{orderInfo.valueNames}}</p></div>
+            <div class="oderItem_rg"><h3>{{orderInfo.proName}}</h3><p v-show="orderInfo.attrNames">{{orderInfo.attrNames}}：{{orderInfo.valueNames}}</p></div>
           </div>
           <div class="orderItem2"><p>￥{{orderInfo.perPrice}}</p></div>
           <div class="orderItem3"><p>{{orderInfo.orderCount}}</p></div>
-          <div class="orderItem4"><p>快递</p></div>
+          <div class="orderItem4"><p v-if="orderInfo.trans === '0'">快递</p><p v-if="orderInfo.trans === '1'">自提</p></div>
           <div class="orderItem5"><p style="height: 40px;"></p></div>
           <div class="orderItem6"><p>{{orderInfo.statusStr}}</p></div>
         </div>
@@ -98,6 +98,8 @@ export default {
     this.getParams()
     this.queryOrderDetails()
     // this.queryOrderExpress()
+  },
+  mounted () {
   },
   methods: {
     getParams () {
@@ -158,6 +160,30 @@ export default {
           console.log(data)
           _this.$message({
             message: '订单取消成功！',
+            type: 'success'
+          });
+          _this.queryOrderDetails()
+        }
+      })
+    },
+    receiveOrder: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.receiveOrder,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            message: '交易完成！',
             type: 'success'
           });
           _this.queryOrderDetails()
@@ -337,6 +363,8 @@ export default {
 }
 .oderItem_rg{
   float: left;
+  width: 65%;
+  text-align: left;
   h3{
     font-weight: 100;
     font-size: 14px;

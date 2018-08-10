@@ -27,9 +27,10 @@
           <td class="proTime">{{item.time}}</td>
         </tr>
       </table>
+      <div style="width:100%;text-align: center;line-height: 80px;" v-show="!list">暂无记录</div>
     </div>
   </div>
-  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;">
+  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;" v-show="list">
     <el-pagination
       background
       layout="prev, pager, next"
@@ -67,16 +68,18 @@ export default {
       errMsg: '',
       errorBox: false,
       state: 1,
-      amount: '200'
+      amount: '200',
+      list: true
     }
   },
   created () {
-    this.getMyAcount(1)
+
   },
   mounted () {
     this.isCur = sessionStorage.getItem('isCur') || 0
     this.state = sessionStorage.getItem('state') || 1
     console.log(this.state)
+    this.getMyAcount(1)
   },
   methods: {
     choseItem: function (index, item) {
@@ -111,6 +114,11 @@ export default {
           console.log(data, _this.state)
           _this.total = data.totalItems
           _this.tableList = data.listObject
+          if (_this.tableList.length === 0) {
+            _this.list = false
+          } else {
+            _this.list = true
+          }
           if (_this.state === 1 || _this.state === '1') {
             _this.amount = data.accountResult.devoteAmount.amount
           } else if (_this.state === 2 || _this.state === '2') {

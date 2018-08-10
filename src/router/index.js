@@ -19,7 +19,13 @@ import storeOrderDetail from '@/components/storeOrderDetail'
 import returnGoods from '@/components/returnGoods'
 import news from '@/components/news'
 import newsDetail from '@/components/newsDetail'
+import knowledge from '@/components/knowledge'
+import message from '@/components/message'
+import msgDetail from '@/components/msgDetail'
+import productList from '@/components/productList'
 import productDetail from '@/components/productDetail'
+import shop from '@/components/shop'
+import coupon from '@/components/coupon'
 import personInfo from '@/personalNav/personInfo'
 import myAcount from '@/personalNav/myAcount'
 import teamAcount from '@/personalNav/teamAcount'
@@ -206,10 +212,39 @@ export default new Router({
       component: newsDetail
     },
     {
+      path: '/knowledge',
+      name: 'knowledge',
+      component: knowledge
+    },
+    {
+      path: '/message',
+      name: 'message',
+      component: message
+    },
+    {
+      path: '/msgDetail',
+      name: 'msgDetail',
+      component: msgDetail
+    },
+    {
       path: '/productDetail',
       name: 'productDetail',
       component: productDetail
+    },
+    {
+      path: '/productList',
+      name: 'productList',
+      component: productList
+    },
+    {
+      path: '/shop',
+      name: 'shop',
+      component: shop
+    },
+    {
+      path: '/coupon',
+      name: 'coupon',
+      component: coupon
     }
-
   ]
 })

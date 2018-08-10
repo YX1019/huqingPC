@@ -7,31 +7,70 @@
       <span class="orderItem1">产品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
       <span class="orderItem4">商品操作</span><span class="orderItem5">实付款</span><span class="orderItem6">交易状态</span><span class="orderItem7">交易操作</span>
     </div>
-    <div class="myOderItem ">
+    <div class="myOderItem " v-for="item in teamList" :key="item.childOrderId">
       <div class="myOrderTop">
-        <input type="checkbox"/>张三<span class="orderNo">订单号:15652154654524</span>
-        <span><img src="../common/img/storeIcon.png" class="storeIcon"/> 胡庆余堂滨江店</span><span class="rg">快递</span>
+        <input type="checkbox"/>
+        <!--张三-->
+        <span class="orderNo">订单号:{{item.childOrderId}}</span>
+        <span @click="toShop(item.teamId)"><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span><span class="rg"><span v-if="item.trans === '0'">快递</span><span v-if="item.trans === '1'">自提</span></span>
       </div>
       <div class="myOrderItemCont ">
-        <div class="orderItem1 orderItemName"><img src="../common/img/productImg1.jpg"/>
-          <div class="oderItem_rg"><h3>胡庆余堂鹿精蛹虫草膏</h3><p>规格：100ml</p></div>
+        <div class="orderItem1 orderItemName"><img :src="item.proImg"/>
+          <div class="oderItem_rg"><h3>{{item.proName}}</h3><p v-show="item.attrNames">{{item.attrNames}}：{{item.valueNames}}</p></div>
         </div>
-        <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥100.00</p></div>
-        <div class="orderItem3"><p>1</p></div>
+        <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥{{item.perPrice}}</p></div>
+        <div class="orderItem3"><p>{{item.orderCount}}</p></div>
         <div class="orderItem4"></div>
-        <div class="orderItem5"><p>￥100.00</p></div>
-        <!--<div class="orderItem6"><p>等待买家付款</p><p>订单详情</p></div>-->
-        <div class="orderItem6"><p>待发货</p><p @click="toOrderDetail()">订单详情</p></div>
-        <!--<div class="orderItem6"><p>退货代收</p><p>订单详情</p></div>-->
-        <!--<div class="orderItem6"><p>待评价</p><p>订单详情</p></div>-->
-        <!--<div class="orderItem7"><a class="returnGoods">立即付款</a><p>取消订单</p></div>-->
-        <div class="orderItem7"><a class="returnGoods">申请退货</a></div>
-        <!--<div class="orderItem7"><a class="returnGoods">确认收货</a><p>查询物流</p></div>-->
-        <!--<div class="orderItem7"><a class="returnGoods">待评价</a></div>-->
-
+        <div class="orderItem5"><p>￥{{item.allAmount}}</p></div>
+        <div class="orderItem6"><p>{{item.statusStr}}</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>
+        <!--<div class="orderItem6" v-if="item.statusEnum === '1'"><p>等待买家付款</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
+        <!--<div class="orderItem6" v-else-if="item.statusEnum === '3'"><p>待发货</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
+        <!--<div class="orderItem6" v-else-if="item.statusEnum === '4'"><p>退货代收</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
+        <!--<div class="orderItem6" v-else-if="item.statusEnum === '5'"><p>待评价</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
+        <!--<div class="orderItem6" v-else><p>{{item.statusStr}}</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
+        <div class="orderItem7" v-if="item.statusEnum === '1' && item.proType != 2  && item.trans == 0 "><a class="returnGoods">发货</a></div>
+        <div class="orderItem7" v-if="item.statusEnum == 1 && (item.proType == 2  || item.trans == 1) "><a class="returnGoods" @click="receiveServiceOrder(item.childOrderId)">接单</a><p class="hand">取消订单</p></div>
+        <div class="orderItem7" v-if="item.statusEnum == 2 && item.proType != 2  && item.trans == 0 ">
+          <!--<a class="returnGoods">查看物流</a>-->
+          <el-popover
+            placement="bottom"
+            width="200"
+            trigger="click">
+            <div class="wli">
+              <h1>{{wli.companyName}}<br/>{{wli.nu}}</h1>
+              <ul>
+                <li v-for="(item,index) in wli.data" :key="index"><span>●</span><span>{{item.context}}<br/>{{item.date}}</span></li>
+                <li><span>●</span><span>快件已到达杭州市滨江区，马上进行派请保持手机畅通。</span></li>
+                <li><span>●</span><span>快件已到达杭州市滨江区，马上进行派请保持手机畅通。</span></li>
+              </ul>
+            </div>
+            <el-button slot="reference" class="returnGoods" @click="queryTeamOrderExpress(item.childOrderId)">查询物流</el-button>
+          </el-popover>
+        </div>
+        <div class="orderItem7" v-if="item.statusEnum == 6 "><a class="returnGoods">查看评价</a></div>
       </div>
     </div>
-    <div class="orderBottom"><input type="checkbox"/>全选 <span class="orderPayBtn">合并付款</span></div>
+    <!--<div class="orderBottom"><input type="checkbox"/>全选 <span class="orderPayBtn">合并付款</span></div>-->
+    <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;float: left;" v-show="isList">
+      <el-pagination
+        background
+        layout="prev, pager, next"
+        :total="total"
+        @current-change="handleCurrentChange"
+        :current-page.sync="pageNo"
+        :page-size="pageSize">
+      </el-pagination>
+    </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="errorBox"
+      width="30%"
+      center>
+      <span>{{errMsg}}</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -40,21 +79,146 @@ export default {
   name: 'myOder',
   data () {
     return {
-      myOrderList: ['所有订单', '待付款', '待发货', '待收货', '待评价'],
-      active: 0
+      myOrderList: ['所有订单', '待付款', '待接单', '待发货', '待收货', '评价'],
+      active: 0,
+      errorBox: false,
+      errMsg: '',
+      isList: true,
+      pageSize: 10,
+      total: 5,
+      pageNo: 1,
+      pageStation: '',
+      teamList: [],
+      wli: {}
     }
+  },
+  created () {
+    this.queryTeamOrderList(0, 1)
   },
   methods: {
     changeOrderState: function (index) {
       this.active = index
+      this.pageNo = 1
+      if (index === 0) {
+        this.queryTeamOrderList(0, 1)
+      } else if (index === 1) {
+        this.queryTeamOrderList(1, 1)
+      } else if (index === 2) {
+        this.queryTeamOrderList(2, 1)
+      } else if (index === 3) {
+        this.queryTeamOrderList(3, 1)
+      } else if (index === 4) {
+        this.queryTeamOrderList(4, 1)
+      } else if (index === 5) {
+        this.queryTeamOrderList(5, 1)
+      }
     },
-    toOrderDetail: function () {
-      this.$router.push({ path: '/storeOrderDetail' })
+    toOrderDetail: function (orderId) {
+      this.$router.push({path: '/storeOrderDetail', query: {orderId: orderId}})
+    },
+    toShop: function (teamId) {
+      this.$router.push({path: '/shop', query: {teamId: teamId}})
+    },
+    queryTeamOrderList: function (orderStatus, pageNo) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderStatus', orderStatus);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryTeamOrderList,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.total = data.totalItems
+          _this.teamList = data.listObject
+          if (_this.teamList.length === 0) {
+            _this.isList = false
+          } else {
+            _this.isList = true
+          }
+        }
+      })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.pageStation = pageNum
+      window.scrollTo(0, 0);
+      if (this.active === 0) {
+        this.queryTeamOrderList(0, pageNum)
+      } else if (this.active === 1) {
+        this.queryTeamOrderList(1, pageNum)
+      } else if (this.active === 2) {
+        this.queryTeamOrderList(2, pageNum)
+      } else if (this.active === 3) {
+        this.queryTeamOrderList(3, pageNum)
+      } else if (this.active === 4) {
+        this.queryTeamOrderList(4, pageNum)
+      } else if (this.active === 5) {
+        this.queryTeamOrderList(5, pageNum)
+      }
+    },
+    queryTeamOrderExpress: function (orderId) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryTeamOrderExpress,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+          console.log('yicahng')
+        } else {
+          console.log(data)
+          _this.wli = data.obj
+        }
+      })
+    },
+    receiveServiceOrder: function (orderId) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.receiveServiceOrder,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            message: '接单成功！',
+            type: 'success'
+          });
+          console.log(_this.pageStation)
+          if (_this.active === 0) {
+            _this.queryTeamOrderList(0, _this.pageStation)
+          } else {
+            _this.queryTeamOrderList(2, _this.pageStation)
+          }
+        }
+      })
     }
   }
 }
 </script>
-<style lang="scss" rel="stylesheet/scss">
+<style lang="scss" rel="stylesheet/scss" scoped>
   .personRg{
     margin-left: 250px;
     position: relative;
@@ -65,7 +229,7 @@ export default {
   height:40px;
   border-bottom: 1px solid #ddd;
   li{
-    width:170px;
+    width:150px;
     height: 38px;
     float: left;
     font-size: 16px;
@@ -162,6 +326,7 @@ export default {
     background: #dd0011;
     border-radius: 3px;
     display: inline-block;
+    cursor: pointer;
   }
   .storeIcon{
     display: inline-block;
@@ -181,5 +346,33 @@ export default {
     border:1px solid #ddd;
     font-size: 14px;
     margin-left: 15px;
+  }
+  .wli{
+    h1{
+      font-size: 14px;
+      line-height: 30px;
+      border-bottom: 1px solid #ccc;
+      font-weight: 100;
+    }
+    ul{
+      height: 250px;
+      float: left;
+      overflow: auto;padding: 10px;
+      li{
+        &:first-child{
+          color: #dd0011;
+        }
+        margin-bottom: 10px;
+        float: left;
+        span{
+          display: block;
+          float: left;
+          &:last-child{
+            width: 86%;
+            margin-left: 10px;
+          }
+        }
+      }
+    }
   }
 </style>

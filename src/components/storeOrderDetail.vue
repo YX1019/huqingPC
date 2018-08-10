@@ -1,32 +1,36 @@
 <template>
 <div class="orderDetail clearfix">
-  <div class="curPosition">您现在的位置:首页>用户中心</div>
+  <div class="curPosition">您现在的位置:首页>用户中心>门店订单>订单详情</div>
   <p class="orderTime">2018-06-21 12:20:10</p>
   <div class="orderContent">
      <div class="order_lf">
        <h2>订单信息</h2>
-       <p><span class="ordCont_lf">收货地址：</span><span class="ordCont_rg">张三，15939287890，浙江省杭州市 滨江区 高新软件园222，274700</span></p>
-       <p><span class="ordCont_lf">订单编号：</span><span class="ordCont_rg">1564523154212355</span></p>
+       <p><span class="ordCont_lf">收货地址：</span><span class="ordCont_rg">
+         {{teamOrderInfo.receiveName}}，{{teamOrderInfo.receiveCell}}，{{teamOrderInfo.receiveProvince}} {{teamOrderInfo.receiveCity}} {{teamOrderInfo.receiveArea}} {{teamOrderInfo.receiveAddress}}</span></p>
+       <p><span class="ordCont_lf">订单编号：</span><span class="ordCont_rg">{{teamOrderInfo.orderId}}</span></p>
        <p><span class="ordCont_lf">商家：</span><span class="ordCont_rg">胡庆余堂滨江店</span></p>
        <p><span class="ordCont_lf">地址：</span><span class="ordCont_rg">杭州市滨江区</span></p>
        <p><span class="ordCont_lf">电话：</span><span class="ordCont_rg">158458784520</span></p>
      </div>
     <div class="order_rg">
-      <div class="waitToPay" style="display: none;">
+      <div class="waitToPay" v-if="teamOrderInfo.statusEnum === '0'">
         <img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待买家付款</span>
       </div>
-      <div class="waitToDeliver" >
+      <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '1'">
        <p><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待卖家发货</span></p>
         <p>您可以 <span class="rtnGoodsBtn" @click="sendGoods()">点击发货</span></p>
       </div>
-      <div class="waitToDeliver" style="display: none;">
+      <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '3'">
         <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：已确认收货等待买家评价</span></p>
         <h6>物流：中通快递 运单号：1567465435<br/>2018-06-21 18:20:12  <span class="orange">已签收</span></h6>
       </div>
-      <div class="waitToDeliver" style="display: none;">
+      <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '6'">
         <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：买家已评价</span></p>
         <h6><i class="iconfont orange1">&#xe694;</i><i class="iconfont orange1">&#xe694;</i><i class="iconfont orange1">&#xe694;</i><i class="iconfont orange1">&#xe694;</i>
           <i class="iconfont orange1">&#xe694;</i>东西非常好，很有效</h6>
+      </div>
+      <div class="waitToPay" v-else>
+        <img src="../common/img/icon.png"/><span>订单状态：{{teamOrderInfo.statusStr}}</span>
       </div>
     </div>
   </div>
@@ -36,23 +40,23 @@
     </div>
       <div class="ordInfoCont">
         <div class="myOrderItemCont ">
-          <div class="orderItem1 orderItemName"><img src="../common/img/productImg1.jpg"/>
-            <div class="oderItem_rg"><h3>胡庆余堂鹿精蛹虫草膏</h3><p>规格：100ml</p></div>
+          <div class="orderItem1 orderItemName"><img :src="teamOrderInfo.proImg"/>
+            <div class="oderItem_rg"><h3>{{teamOrderInfo.proName}}</h3><p v-show="teamOrderInfo.attrNames">{{teamOrderInfo.attrNames}}：{{teamOrderInfo.valueNames}}</p></div>
           </div>
-          <div class="orderItem2"><p>￥100.00</p></div>
-          <div class="orderItem3"><p>1</p></div>
-          <div class="orderItem4"><p>快递</p></div>
+          <div class="orderItem2"><p>￥{{teamOrderInfo.perPrice}}</p></div>
+          <div class="orderItem3"><p>{{teamOrderInfo.orderCount}}</p></div>
+          <div class="orderItem4"><p v-if="teamOrderInfo.trans === '0'">快递</p><p v-if="teamOrderInfo.trans === '1'">自提</p></div>
           <div class="orderItem5"><p style="height: 40px;"></p></div>
-          <div class="orderItem6"><p>待付款</p></div>
+          <div class="orderItem6"><p>{{teamOrderInfo.statusStr}}</p></div>
         </div>
       </div>
   <div class="orderCalc">
     <span>返胡币10</span>
     <div class="orderCalcRg">
-      <p><label>商品总价：</label><span>￥100.00</span></p>
+      <p><label>商品总价：</label><span>￥{{teamOrderInfo.allAmount}}</span></p>
       <p><label>运费(快递)：</label><span>￥0.00</span></p>
-      <p><label>订单总价：</label><span class="font18">￥100.00</span></p>
-      <p><label>需付款：</label><span class="red font18">￥100.00</span></p>
+      <p><label>订单总价：</label><span class="font18">￥{{teamOrderInfo.allAmount}}</span></p>
+      <p><label>需付款：</label><span class="red font18">￥{{teamOrderInfo.allAmount}}</span></p>
     </div>
   </div>
   <div class="bg" v-if="isShowBox"></div>
@@ -69,10 +73,44 @@ export default {
   name: '',
   data () {
     return {
-      isShowBox: false
+      isShowBox: false,
+      orderId: '',
+      teamOrderInfo: {}
     }
   },
+  created () {
+    this.getParams()
+    this.queryTeamOrderDetails()
+  },
   methods: {
+    getParams () {
+      // 取到路由带过来的参数
+      let routerParams = this.$route.query.orderId
+      // 将数据放在当前组件的数据内
+      this.orderId = routerParams
+      console.log(this.orderId)
+    },
+    queryTeamOrderDetails: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryTeamOrderDetails,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          window.scrollTo(0, 0);
+          _this.teamOrderInfo = data.obj
+        }
+      })
+    },
     sendGoods: function () {
       this.isShowBox = true
     },
@@ -201,6 +239,7 @@ export default {
       padding: 0 10px;
       margin-top:20px;
       float: left;
+      line-height: 22px;
       span{
         float: left;
         &.ordCont_lf{
@@ -264,6 +303,8 @@ export default {
 }
 .oderItem_rg{
   float: left;
+  width: 68%;
+  text-align: left;
   h3{
     font-weight: 100;
     font-size: 14px;

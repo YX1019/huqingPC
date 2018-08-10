@@ -1,26 +1,14 @@
 <template>
 <div class="newsDetail">
-  <h4>您现在的位置：{{title}}>{{newsInfo.title}}</h4>
+  <h4>您现在的位置：活动消息>{{msgInfo.activityTitle}}</h4>
   <div class="newsDCont">
-    <h1>{{newsInfo.title}}</h1>
-    <h3>发布时间：{{newsInfo.time}}</h3>
-    <div class="newsDcontInfo" v-html="newsInfo.content">
+    <h1>{{msgInfo.activityTitle}}</h1>
+    <h3>发布时间：{{msgInfo.time}}</h3>
+    <div class="newsDcontInfo" v-html="msgInfo.activityUrl">
       我国大部门地区习惯自冬至起“数九”，每九天为一个小节，共分为九九八十一天。
       民间流传着一首歌谣：一九、二九不出手，三九、四九冰上走，五九、六九沿河看柳，七九河开，八九燕来，九九加一九耕牛遍地走。
       冬至后，阳气缓缓回升，白天慢慢变长，是阴阳转化的关键节气，也是夏病冬防、冬病冬治的最好时机。所有古时冬至也喻意为新生命的开始。
       冬至养生食谱
-    </div>
-    <div class="zan">
-      <span class="hand" v-if="!isZan" @click="knowledgeZan(0)"><i class="iconfont">&#xe60c;</i>赞一个</span>
-      <span v-if="isZan" @click="knowledgeZan(1)" class="hand"><i class="iconfont cur">&#xe60c;</i>取消点赞</span><b>{{praiseCount}}</b>赞</div>
-    <textarea class="newsComment" v-model="knowComment"></textarea>
-    <button class="putComment" @click="addKnowledgeComment()">发表评论</button>
-    <div class="allComment">
-      <h1><span>全部评论({{commnetCount}})</span></h1>
-      <ul>
-        <li><img src="../common/img/logo.png"/><div class="n_rg"><h2>张芳<span>9-14</span></h2><p>非常实用，谢谢分享</p></div> </li>
-      </ul>
-      <p class="anotherNews"><span>上一篇：</span><span>下一篇：</span></p>
     </div>
   </div>
   <el-dialog
@@ -40,45 +28,32 @@ export default {
   name: '',
   data () {
     return {
-      knowId: '',
+      activityId: '',
       errorBox: false,
       errMsg: '',
-      newsInfo: {},
-      isZan: false,
-      praiseCount: '',
-      commnetCount: '',
-      knowComment: '',
-      newsType: 1,
+      msgInfo: {},
       title: ''
     }
   },
   created () {
     this.getParams()
-    this.getKnowledgeDetails()
-    // this.knowledgeCommentQuery()
+    this.activityDetailQuery()
   },
   methods: {
     getParams () {
       // 取到路由带过来的参数
-      let routerParams = this.$route.query.knowId
+      let routerParams = this.$route.query.activityId
       // 将数据放在当前组件的数据内
-      this.knowId = routerParams
-      this.newsType = this.$route.query.type
-      if (this.newsType === 1) {
-        this.title = '新闻公告'
-      } else {
-        this.title = '养生知识'
-      }
-      console.log(this.knowId)
+      this.activityId = routerParams
     },
-    getKnowledgeDetails: function () {
+    activityDetailQuery: function () {
       let _this = this;
       let params = new URLSearchParams();
-      params.append('userId', this.$store.state.userId);
-      params.append('knowId', this.knowId);
+      // params.append('userId', this.$store.state.userId);
+      params.append('id', this.activityId);
       this.axios({
         method: 'post',
-        url: this.url.api.getKnowledgeDetails,
+        url: this.url.api.activityDetailQuery,
         data: params
       }).then(function (res) {
         let data = res.data
@@ -87,73 +62,7 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
-          _this.newsInfo = data.obj
-          _this.isZan = data.obj.zanOrNot
-          _this.praiseCount = data.obj.praiseCount
-          _this.commnetCount = data.obj.commnetCount
-        }
-      })
-    },
-    knowledgeCommentQuery: function () { // 评论列表
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('knowId', this.knowId);
-      this.axios({
-        method: 'post',
-        url: this.url.api.knowledgeCommentQuery,
-        data: params
-      }).then(function (res) {
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-        } else {
-          console.log(data)
-        }
-      })
-    },
-    knowledgeZan: function (type) { // 点赞
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('knowId', this.knowId);
-      params.append('userId', this.$store.state.userId);
-      params.append('type', type); // 0 点赞 1 取消点赞
-      this.axios({
-        method: 'post',
-        url: this.url.api.knowledgeZan,
-        data: params
-      }).then(function (res) {
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-        } else {
-          console.log(data)
-          _this.getKnowledgeDetails()
-        }
-      })
-    },
-    addKnowledgeComment: function () {
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('knowId', this.knowId);
-      params.append('userId', this.$store.state.userId);
-      params.append('commentWord', this.knowComment);
-      this.axios({
-        method: 'post',
-        url: this.url.api.knowledgeComment,
-        data: params
-      }).then(function (res) {
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-        } else {
-          console.log(data)
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-          _this.knowComment = ''
-          _this.knowledgeCommentQuery()
+          _this.msgInfo = data.obj
         }
       })
     }

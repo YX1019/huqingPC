@@ -11,7 +11,7 @@
     <div class="myOderItem " v-for="item in myOrderList" :key="item.childOrderId" v-show="isList">
       <div class="myOrderTop">
         <input type="checkbox"/>{{item.createTime}}<span class="orderNo">订单号:{{item.childOrderId}}</span>
-        <span><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span>
+        <span @click="toShop(item.teamId)" class="hand"><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span>
         <span class="rg" v-if="item.trans === '0'">快递</span>
         <span class="rg" v-if="item.trans === '1'">自提</span>
       </div>
@@ -29,9 +29,27 @@
         <div class="orderItem6" v-else-if="item.statusEnum == 3"><p>待评价</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else><p>{{item.statusStr}}</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods">立即付款</a><p @click="cancleOrder(item.childOrderId)" class="hand">取消订单</p></div>
-        <div class="orderItem7" v-else-if="item.statusEnum == 1"><a class="returnGoods" @click="returnGoods(item.childOrderId)">申请退货</a></div>
-        <div class="orderItem7" v-else-if="item.statusEnum == 2"><a class="returnGoods">确认收货</a><p>查询物流</p></div>
-        <div class="orderItem7" v-else-if="item.statusEnum == 3"><a class="returnGoods">待评价</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 1 && item.proType != 2"><a class="returnGoods" @click="returnGoods(item.childOrderId)">申请退货</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 2 && item.proType == 2"><a class="returnGoods">凭证</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 2 && item.proType != 2 && item.trans == 0"><a class="returnGoods" @click="receiveOrder(item.childOrderId)">确认收货</a>
+          <el-popover
+            placement="bottom"
+            width="200"
+            trigger="click">
+            <div class="wli">
+              <h1>{{wli.companyName}}<br/>{{wli.nu}}</h1>
+              <ul>
+                <li v-for="(item,index) in wli.data" :key="index"><span>●</span><span>{{item.context}}<br/>{{item.date}}</span></li>
+                <li><span>●</span><span>快件已到达杭州市滨江区，马上进行派请保持手机畅通。</span></li>
+                <li><span>●</span><span>快件已到达杭州市滨江区，马上进行派请保持手机畅通。</span></li>
+              </ul>
+            </div>
+            <el-button slot="reference" style="background: none;color: #333;border:none;font-size:14px;" @click="queryOrderExpress(item.childOrderId)">查询物流</el-button>
+          </el-popover>
+          <!--<p>查询物流</p>-->
+        </div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 2 && item.proType != 2 && item.trans == 1"><a class="returnGoods">确认收货</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 3 && item.proType != 2"><a class="returnGoods">待评价</a></div>
         <div class="orderItem7" v-else></div>
       </div>
     </div>
@@ -75,7 +93,8 @@ export default {
       pageSize: 10,
       total: 5,
       pageNo: 1,
-      pageStation: ''
+      pageStation: '',
+      wli: {}
     }
   },
   created () {
@@ -99,6 +118,9 @@ export default {
     },
     toOderDteail: function (orderId) {
       this.$router.push({ path: '/orderDetail', query: {orderId: orderId} })
+    },
+    toShop: function (teamId) {
+      this.$router.push({path: '/shop', query: {teamId: teamId}})
     },
     queryUserOrderList: function (payStatus, orderStatus, pageNo) {
       let _this = this;
@@ -176,12 +198,71 @@ export default {
             _this.queryUserOrderList('', 2, _this.pageStation)
           } else if (this.active === 4) {
             _this.queryUserOrderList('', 3, _this.pageStation)
+          } else {
+            _this.queryUserOrderList('', '', 1)
+          }
+        }
+      })
+    },
+    receiveOrder: function (orderId) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.receiveOrder,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            message: '交易完成！',
+            type: 'success'
+          });
+          if (_this.active === 0) {
+            _this.queryUserOrderList('', '', _this.pageStation)
+          } else if (_this.active === 1) {
+            _this.queryUserOrderList('', 0, _this.pageStation)
+          } else if (this.active === 2) {
+            _this.queryUserOrderList('', 1, _this.pageStation)
+          } else if (this.active === 3) {
+            _this.queryUserOrderList('', 2, _this.pageStation)
+          } else if (this.active === 4) {
+            _this.queryUserOrderList('', 3, _this.pageStation)
+          } else {
+            _this.queryUserOrderList('', '', 1)
           }
         }
       })
     },
     returnGoods: function (orderId) {
       this.$router.push({ path: '/returnGoods', query: {orderId: orderId} })
+    },
+    queryOrderExpress: function (orderId) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryOrderExpress,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+          console.log('yicahng')
+        } else {
+          console.log(data)
+          _this.wli = data.obj
+        }
+      })
     }
   }
 }
@@ -322,5 +403,33 @@ export default {
     width:100%;
     padding: 30px 0;
     text-align: center;
+  }
+  .wli{
+    h1{
+      font-size: 14px;
+      line-height: 30px;
+      border-bottom: 1px solid #ccc;
+      font-weight: 100;
+    }
+    ul{
+      height: 250px;
+      float: left;
+      overflow: auto;padding: 10px;
+      li{
+        &:first-child{
+          color: #dd0011;
+        }
+        margin-bottom: 10px;
+        float: left;
+        span{
+          display: block;
+          float: left;
+          &:last-child{
+            width: 86%;
+            margin-left: 10px;
+          }
+        }
+      }
+    }
   }
 </style>

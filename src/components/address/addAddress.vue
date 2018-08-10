@@ -1,10 +1,10 @@
 <template>
-<div class="personRg">
+<div>
   <div class="addr">
-    <h1>收货地址</h1>
-    <p v-show="isNew"><span class="red" style="margin-right: 30px;">新增收货地址</span>电话号码、手机号选填一项，其余均为必填项</p>
-    <p v-show="!isNew"><span class="red" style="margin-right: 30px;">修改收货地址</span>电话号码、手机号选填一项，其余均为必填项</p>
-    <div class="addrCont">
+    <!--<h1>收货地址</h1>-->
+    <!--<p v-show="isNew"><span class="red" style="margin-right: 30px;">新增收货地址</span>电话号码、手机号选填一项，其余均为必填项</p>-->
+    <!--<p v-show="!isNew"><span class="red" style="margin-right: 30px;">修改收货地址</span>电话号码、手机号选填一项，其余均为必填项</p>-->
+    <div class="addrCont1">
       <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="120px" class="demo-ruleForm">
       <el-form-item label="所在地区" prop="region">
         <div>
@@ -38,32 +38,11 @@
               <!--<el-input v-model="ruleForm.tel"></el-input>-->
             <!--</el-form-item>-->
       <el-form-item>
-        <button type="primary" @click="submitForm('ruleForm',0)" class="saveBtn" v-if="isNew">保存</button>
-        <button type="primary" @click="submitForm('ruleForm',1)" class="saveBtn" v-if="!isNew">保存</button>
+        <button type="primary" @click="submitForm('ruleForm')" class="saveBtn" >保存</button>
       </el-form-item>
     </el-form>
     </div>
   </div>
-  <table class="myAddrTable" border="1" cellspacing="0">
-    <tr>
-      <th>收货人</th>
-      <th>所在地区</th>
-      <th>详细地址</th>
-      <!--<th>邮编</th>-->
-      <th>电话/手机</th>
-      <th>操作</th>
-    </tr>
-    <tr v-for="item in addressList" :key="item.addressId">
-      <td>{{item.name}}</td>
-      <td style="width:27%;text-align: left;">{{item.province}} {{item.city}} {{item.area}}
-        </td>
-      <td>{{item.addr}}</td>
-      <!--<td>274100</td>-->
-      <td>{{item.cell}}</td>
-      <td><a @click="updateAddr(item)" class="hand">修改</a>|<a @click="delAddressMsg(item)" class="hand">删除</a></td>
-    </tr>
-
-  </table>
   <el-dialog
     title="提示"
     :visible.sync="errorBox"
@@ -114,7 +93,6 @@ export default {
     }
   },
   created () {
-    this.addressQuery()
   },
   methods: {
     onChangeProvince (data) {
@@ -126,56 +104,30 @@ export default {
     onChangeArea (data) {
       this.getListData.district = data.value
     },
-    submitForm (formName, type, addressId) {
+    submitForm (formName) {
       let _this = this
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          _this.updateUserAddress(type)
-          _this.isNew = true
+          _this.updateUserAddress()
+          _this.$emit('refreshbizlines')
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    addressQuery: function () {
+    updateUserAddress: function () {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      this.axios({
-        method: 'post',
-        url: this.url.api.addressQuery,
-        data: params
-      }).then(function (res) {
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-        } else {
-          console.log(data)
-          _this.addressList = data.listObject
-        }
-      })
-    },
-    updateUserAddress: function (type) {
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('userId', this.$store.state.userId);
-      if (type === 1) {
-        params.append('addressId', this.addressId);
-      } else {
-        params.append('addressId', '');
-      }
       params.append('isDefalt', 0);
       params.append('reUserName', this.ruleForm.name);
       params.append('cell', this.ruleForm.cell);
       params.append('province', this.getListData.province);
       params.append('city', this.getListData.city);
       params.append('area', this.getListData.district);
-      // var pca = this.getListData.province + ',' + this.getListData.city + ',' + this.getListData.district
       params.append('reAddr', this.ruleForm.desc);
-      params.append('type', type);
-      console.log()
+      params.append('type', 0);
       this.axios({
         method: 'post',
         url: this.url.api.updateUserAddress,
@@ -187,8 +139,10 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
+          _this.$message({
+            message: '地址新建成功！',
+            type: 'success'
+          });
           _this.ruleForm.name = ''
           _this.ruleForm.cell = ''
           _this.getListData.province = ''
@@ -197,64 +151,13 @@ export default {
           _this.ruleForm.desc = ''
           _this.ruleForm.postalCode = ''
           _this.ruleForm.tel = ''
-          _this.addressQuery()
         }
       })
-    },
-    updateAddr: function (item) {
-      this.isNew = false
-      this.ruleForm.name = item.name
-      this.ruleForm.cell = item.cell
-      this.getListData.province = item.province
-      this.getListData.city = item.city
-      this.getListData.district = item.area
-      this.ruleForm.desc = item.addr
-      this.addressId = item.addressId
-    },
-    delAddressMsg: function (item) {
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('userId', this.$store.state.userId);
-      params.append('addressId', item.addressId);
-      this.$confirm('此操作将删除该地址, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-        this.axios({
-          method: 'post',
-          url: this.url.api.delAddressMsg,
-          data: params
-        }).then(function (res) {
-          let data = res.data
-          if (!res.data.bizSucc) {
-            _this.errMsg = data.errMsg
-            _this.errorBox = true
-          } else {
-            console.log(data)
-            _this.$message({
-              type: 'success',
-              message: '删除成功'
-            });
-            _this.addressQuery()
-          }
-        })
-      }).catch(() => {
-        _this.$message({
-          type: 'info',
-          message: '已取消删除'
-        });
-      });
     }
   }
 }
 </script>
-<style lang="scss" rel="stylesheet/scss">
-  .personRg{
-    margin-left: 250px;
-    position: relative;
-    color: #000;
-  }
+<style lang="scss" rel="stylesheet/scss" >
   .addr{
     h1{
       padding-left: 8px;
@@ -268,8 +171,8 @@ export default {
       margin: 20px 0;
     }
   }
-  .addrCont{
-    width:70%;
+  .addrCont1{
+    width:100%;
     float: left;
   }
   .red{

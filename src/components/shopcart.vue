@@ -13,7 +13,7 @@
       <span>金额</span>
       <span>操作</span>
     </h5>
-    <div class="goodsPart" v-for="item in cartList" :key="item.cartId">
+    <div class="goodsPart" v-for="item in cartList" :key="item.cartIds">
     <div class="goodStore">
       <h4>
         <div class="hand lf">
@@ -25,7 +25,7 @@
     </div>
     <div class="goodsItem" v-for="iitem in item.cartInfo" :key="iitem.cartId">
       <div class="goodsItem1"><i class="checkIcon" :class="{checked:iitem.checked}" @click="selectedProduct(item, iitem)"></i> <img :src="iitem.productImg"/><span>{{iitem.productName}}</span></div>
-      <div class="goodsItem2"><p v-for="itemm in iitem.attrValue" :key="itemm.attrName">{{itemm.attrName}}：{{itemm.values}}</p></div>
+      <div class="goodsItem2"><p v-for="itemm in iitem.attrValue" :key="itemm.attrName" v-show="itemm.attrName">{{itemm.attrName}}：{{itemm.values}}</p></div>
       <div class="goodsItem3"><p>￥299.00</p><p>￥{{iitem.price}}</p></div>
       <div class="goodsItem4"><button @click="updateCartSum(iitem, 0)">-</button><input type="text" v-model="iitem.productNum" readonly/><button @click="updateCartSum(iitem, 1)">+</button> </div>
       <div class="goodsItem5 red">￥{{iitem.price * iitem.productNum}}</div>
@@ -76,7 +76,8 @@ export default {
       way: '快递',
       dialogVisible: false,
       storeLists: [],
-      cartAllInfo: []
+      cartAllInfo: [],
+      curCartIds: ''
     }
   },
   filters: {
@@ -112,7 +113,7 @@ export default {
           for (var i = 0; i < _this.cartAllInfo.length; i++) {
             goodsNum = parseInt(goodsNum) + parseInt(_this.cartAllInfo[i].productNum)
           }
-          window.localStorage.setItem('goodsNum', data.obj.goodsNum)
+          window.localStorage.setItem('goodsNum', goodsNum)
           _this.$store.commit('changeGoodsNum', goodsNum)
           if (goodsNum === 0) {
             _this.noGoods = true
@@ -374,7 +375,7 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       console.log(item.delivery)
-      params.append('cartId', item.cartId);
+      params.append('cartIds', item.cartIds);
       params.append('delivery', item.delivery);
       this.axios({
         method: 'post',
@@ -391,10 +392,10 @@ export default {
       })
     },
     showStore: function (item) {
-      this.dialogVisible = true
       let _this = this;
       let params = new URLSearchParams();
-      params.append('cartId', item.cartId);
+      params.append('cartIds', item.cartIds);
+      this.curCartIds = item.cartIds
       this.axios({
         method: 'post',
         url: this.url.api.nearQuery,
@@ -406,14 +407,33 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.dialogVisible = true
           _this.storeLists = data.listObject
         }
       })
     },
     chooseStore: function (item) {
       this.dialogVisible = false
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('cartIds', this.curCartIds);
+      params.append('teamId', item.teamId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.updateCartTeamS,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.dialogVisible = false
+          _this.lookMyCart()
+        }
+      })
     }
-
   }
 }
 </script>
@@ -525,6 +545,8 @@ export default {
     span{
       float: left;
       font-size: 14px;
+      display: inline-block;
+      width: 55%;
     }
   }
   .goodsItem2{width:12%;float: left;
@@ -538,7 +560,7 @@ export default {
     }
   }
   .goodsItem4{
-    width:12%;
+    width:14%;
     float: left;
     button{
       float: left;
@@ -570,7 +592,7 @@ export default {
       background:url(../common/img/selected.png);
     }
   }
-  .goodsItem5{width:12%;float: left;}
+  .goodsItem5{width:10%;float: left;}
   .goodsItem6{width:12%;float: left;}
   .goodsOpera{
     box-sizing: border-box;
@@ -627,6 +649,7 @@ export default {
       height: 60px;
       padding: 5px 0;
       border-bottom: 1px solid #ccc;
+      cursor: pointer;
       img{
         float: left;
         width: 100px;

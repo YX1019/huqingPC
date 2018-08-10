@@ -251,6 +251,9 @@ export default {
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">
+  .el-carousel{
+    width: 100%;
+  }
   .el-pagination.is-background .el-pager li:not(.disabled).active{
     background-color: #e60012;
   }
@@ -546,17 +549,19 @@ export default {
   }
   /**{margin:0px;padding:0px;list-style-type:none;}*/
   .v_out{width:1150px;margin:20px auto;overflow:hidden;}
-  .v_show{width:1150px;overflow:hidden;position:relative;height:310px;float:left;}
+  .v_show{width:1100px;overflow:hidden;position:relative;height:310px;float:left;}
   .v_cont{ width:6650px;position:absolute;left:0px;top:0px;}
   .v_cont ul{float:left;text-align:center;line-height:50px;}
-  .v_cont ul li{width:358px;height:245px;background:#f8f8f8;float:left;margin-right: 38px;}
+  .v_cont ul li{width:350px;height:240px;background:#f8f8f8;float:left;margin-right: 25px;}
+  .v_cont ul li img{width:100%;height: 240px;}
   @media screen and (max-width: 1150px){
+    .KnowCont{width:760px;}
     .v_out{width: 760px;}
     .v_show{width: 760px;height: 210px;}
     .v_cont ul li{width:236px;height: 162px;}
+    .v_cont ul li img{height: 162px;}
   }
-  .v_cont ul li img{width:100%;height: 250px;}
-  .v_cont ul li p{line-height: 30px;}
+  .v_cont ul li p{line-height: 30px;height: 30px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
   /*---圆圈---*/
   .v_out_p{position:relative;overflow:visible}
   .circle li{width:15px;height:15px;float:left;margin-right:10px;background:#ccc;border-radius: 50%;}

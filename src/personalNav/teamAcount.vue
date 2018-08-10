@@ -1,7 +1,7 @@
 <template>
 <div class="personRg">
 <ul class="myAcountList">
-  <li v-for="(item,index) in myAcountList" :key="item" @click="choseItem(index,item)" :class="{'cur':index == isCur}">{{item}}</li>
+  <li v-for="(item,index) in myAcountList" :key="index" @click="choseItem(index,item)" :class="{'cur':index == isCur}">{{item}}</li>
 </ul>
   <div class="myInfo">
     <div class="myAcountNum">
@@ -10,7 +10,7 @@
       <a class="putCash" v-if="name === '胡币' " @click="putCash();">提现</a>
     </div>
     <ul class="teamNav">
-      <li v-for="(item,index) in teamList" :key="item" @click="getTeamInfo(index)" :class="{'cur':index == teamName}">{{item}}</li>
+      <li v-for="(item,index) in teamList" :key="index" @click="getTeamInfo(index)" :class="{'cur':index == teamName}">{{item}}</li>
     </ul>
     <div class="teamCont" v-show="teamName === 1 ">
     <div class="myAcountTable">
@@ -31,7 +31,7 @@
     </div>
     <div class="teamCont" v-show="teamName === 0 ">
        <ul class="teamList">
-         <li v-for="item in userTeamList" :key="item"><img src="item.headImg" class="productImg"/>{{item.nickName}}</li>
+         <li v-for="(item,index) in userTeamList" :key="index"><img src="item.headImg" class="productImg"/>{{item.nickName}}</li>
        </ul>
     </div>
   </div>

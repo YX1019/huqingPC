@@ -25,7 +25,7 @@
         <div style="width: 100%;float: left;">
         <img src="../common/img/logo.png"/>
         <div class="searchLine rg">
-          <div class="search"><i class="iconfont searchIcon">&#xe627;</i><input type="text" placeholder="请输入搜索关键词" class="keyword"><input type="button" value="搜索" class="searchBtn"></div>
+          <div class="search"><i class="iconfont searchIcon">&#xe627;</i><input type="text" placeholder="请输入搜索关键词" class="keyword" v-model="searchCont"><input type="button" value="搜索" class="searchBtn" @click="toStore()"></div>
           <div class="hotWord"><span>鹿精蛹虫草膏</span><span>黄芪</span><span>甘草</span><span>艾叶</span><span>白术</span></div>
         </div>
         </div>
@@ -39,6 +39,16 @@
       <!--<li><a>养生知识</a></li>-->
     </ul>
   </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="errorBox"
+      width="30%"
+      center>
+      <span>{{errMsg}}</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -51,15 +61,20 @@ export default {
     return {
       msg: 'Welcome to Your Vue.js App',
       isActive: 0,
-      menuList: [{name: '首页'}, {name: '商城'}, {name: '我的优惠'}, {name: '活动信息'}, {name: '新闻公告'}, {name: '养生知识'}],
+      menuList: [{name: '首页'}, {name: '商城'}, {name: '活动信息'}, {name: '新闻公告'}, {name: '养生知识'}],
       isShowCart: false,
-      cartList: []
+      cartList: [],
+      searchCont: '',
+      errorBox: false,
+      errMsg: ''
     }
   },
   created () {
+    this.lookMyCart()
+    this.getHotSearch()
     console.log(this.$store.state.isLogin, this.$store.state.name, this.$store.state.goodsNum)
     this.isActive = sessionStorage.getItem('sIndex') || 0
-    this.lookMyCart()
+    console.log(this.$store.state.isLogin, this.$store.state.name, this.$store.state.goodsNum)
   },
   mounted () {
     let pageName = this.$route.name
@@ -68,7 +83,11 @@ export default {
     } else if (pageName === 'store') {
       this.isActive = 1
     } else if (pageName === 'news') {
+      this.isActive = 3
+    } else if (pageName === 'knowledge') {
       this.isActive = 4
+    } else if (pageName === 'message') {
+      this.isActive = 2
     }
     console.log(this.isActive)
   },
@@ -93,9 +112,11 @@ export default {
           this.$router.push({ path: '/login' })
         }
       } else if (index === 2) {
-        this.$router.push({ path: '/store' })
-      } else if (index === 4) {
+        this.$router.push({ path: '/message' })
+      } else if (index === 3) {
         this.$router.push({ path: '/news' })
+      } else if (index === 4) {
+        this.$router.push({ path: '/knowledge' })
       }
       console.log(index)
     },
@@ -142,9 +163,9 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      this.axios({
+      _this.axios({
         method: 'post',
-        url: this.url.api.myCarts,
+        url: _this.url.api.myCart,
         data: params
       }).then(function (res) {
         let data = res.data
@@ -156,12 +177,16 @@ export default {
           console.log(data)
           _this.cartList = data.obj.cartAllInfo
           let goodsNum = 0;
-          for (let i = 0; i < _this.cartList.length; i++) {
-            goodsNum = parseInt(goodsNum) + parseInt(_this.cartList[i].productNum)
+          if (_this.cartList.length > 0) {
+            for (let i = 0; i < _this.cartList.length; i++) {
+              goodsNum = parseInt(goodsNum) + parseInt(_this.cartList[i].productNum)
+            }
+          } else {
+            goodsNum = 0
           }
-
           window.localStorage.setItem('goodsNum', goodsNum)
           _this.$store.commit('changeGoodsNum', goodsNum)
+          console.log(goodsNum, window.localStorage.getItem('goodsNum'))
         }
       })
     },
@@ -179,10 +204,32 @@ export default {
         });
         this.$router.push({ path: '/login' })
       }
+    },
+    toStore: function () {
+      this.$router.push({path: '/productList', query: {searchCont: this.searchCont}})
+    },
+    getHotSearch: function () {
+      let _this = this;
+      this.axios({
+        method: 'get',
+        url: this.url.api.getHotSearch
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+        }
+      })
     }
   },
   watch: {
-
+    $route (to, from) {
+      if (from.path === '/shopcart') {
+        this.isActive = 1
+      }
+    }
   }
 }
 </script>

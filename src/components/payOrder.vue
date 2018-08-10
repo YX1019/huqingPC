@@ -15,9 +15,27 @@
       </div>
     </div>
   <h4>选择支付方式</h4>
-  <div class="payWay">
-    <span><input type="radio" name="pay" value="2" v-model="payWay"/><img src="../common/img/zfb.png"/> </span>
-    <span><input type="radio" name="pay" value="1" v-model="payWay"/><img src="../common/img/wechat.png"/> </span>
+  <!--<div class="payWay">-->
+    <!--<span><input type="radio" name="pay" value="2" v-model="payWay"/><img src="../common/img/zfb.png"/> </span>-->
+    <!--<span><input type="radio" name="pay" value="1" v-model="payWay"/><img src="../common/img/wechat.png"/> </span>-->
+  <!--</div>-->
+  <div class="payMethod clearfix">
+     <ul class="payMenu">
+       <li :class="{'cur' : menuIndex === 0}" @click="payWechat()">微信支付<img src="../common/img/wepayIcon.png" class="wepayIcon"/></li>
+       <li @click="payZfb()" :class="{'cur' : menuIndex === 1}">支付宝支付</li>
+     </ul>
+     <div class="payCont">
+       <div v-show="menuIndex === 0">
+          <div class="payCont_lf"><img src="../common/img/WePayLogo.png"/></div>
+          <div class="payCont_rg">
+            <p><img src="../common/img/code1.png"/></p>
+            <p><img src="../common/img/wepayTxt.png"/></p>
+           </div>
+       </div>
+       <div v-show="menuIndex === 1">
+         支付宝支付
+       </div>
+     </div>
   </div>
   <div class="payMoney">应付金额<span>￥{{orderObj.orderPrice}}</span><a @click="toPay()" class="hand">立即付款</a></div>
   <el-dialog
@@ -40,7 +58,8 @@ export default {
       errorBox: false,
       errMsg: '',
       orderObj: {},
-      payWay: 2
+      payWay: 2,
+      menuIndex: 0
     }
   },
   created () {
@@ -70,6 +89,12 @@ export default {
     },
     toPay: function () {
       console.log(this.payWay)
+    },
+    payZfb: function () {
+      this.menuIndex = 1;
+    },
+    payWechat: function () {
+      this.menuIndex = 0;
     }
   }
 }
@@ -151,6 +176,63 @@ export default {
       font-size: 18px;
       text-align: center;
     }
+  }
+  .payMethod{
+    width: 90%;
+    margin: 0 auto;
+  }
+  .payMenu{
+    width:100%;
+    height: 40px;
+    li{
+      width:180px;
+      text-align: center;
+      line-height: 40px;
+      background: #e4e4e4;
+      float: left;
+      color: #333;
+      border-radius: 3px 3px 0 0;
+      border-top:1px solid #a1a1a1;
+      border-left:1px solid #a1a1a1;
+      border-right:1px solid #a1a1a1;
+      position: relative;
+      &:first-child{
+        border-right: 0;
+      }
+      &.cur{
+        color: #000;
+        background: #fff;
+        border-bottom: 1px solid #fff;
+        font-weight: bold;
+        z-index:2;
+      }
+    }
+  }
+  .payCont{
+    width: 100%;
+    height:auto;
+    float: left;
+    padding: 40px 0;
+    border:1px solid #a1a1a1;
+    position: relative;
+    margin-top: -1px;
+    min-height:200px;
+  }
+  .payCont_lf{
+    float: left;
+    img{
+      width:150px;
+      margin-left: 20px;
+      margin-right: 80px;
+    }
+  }
+  .payCont_rg{
+    float: left;
+  }
+  .wepayIcon{
+    position: absolute;
+    top:-18px;
+    left:40%;
   }
 
 </style>

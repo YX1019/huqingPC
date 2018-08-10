@@ -1,61 +1,24 @@
 <template>
-  <div class="store">
-<div class="banner">
-  <img src="../common/img/storeBanner.jpg"/>
-</div>
+  <div class="store" style="border-top:1px solid #e70012;">
   <div class="curPosition">您现在的位置:商城</div>
-    <div class="myOffer">
-      <div class="storeTitle">我的优惠 <i>MY OFFER</i>
-        <!--<span class="rg">查看更多</span>-->
-      </div>
-      <div class="offerCont clearfix">
-        <div class="offerLf"><img src="../common/img/storeImg1.jpg"/><div class="offerLfCont"><h1>会员福利</h1><p>注册送好礼</p></div></div>
-        <div class="offerMid" @click="toCoupon()"><img src="../common/img/storeImg2.jpg"/><div class="offerMidCont"><h1>代金券</h1><p>20元代50元</p></div></div>
-        <div class="offerRg"><img src="../common/img/storeImg3.jpg"/><div class="offerRgCont"><h1>活动名称</h1><p>活动详情简介</p></div></div>
-      </div>
-    </div>
-    <div class="myOffer" style="margin-bottom: 60px;">
-      <div class="storeTitle">活动信息 <i>ACTIVITY</i>
-        <!--<span class="rg">查看更多</span>-->
-        </div>
-      <ul class="activityList clearfix">
-        <li v-for =" item in filteredItems" :key="item.activityId" @click="toMsgDetail(item.activityId)"><img :src="item.activityImg"/><div><h1>{{item.activityTitle}}</h1><p>{{item.time}}</p></div> </li>
+    <div class="clearfix pList">
+    <div class="pList_lf">
+      <ul class="firstUl">
+        <li v-for="(item,index) in sortList" :key="index" class="firstLi">
+          <p @click="showToggle(item)">{{item.name}}<i class="iconfont rg" v-show="!item.isSubShow">&#xe62a;</i><i class="iconfont rg" v-show="item.isSubShow" style="font-size:28px;">&#xe602;</i></p>
+          <ul class="secondUl" v-show="item.isSubShow">
+            <li class="secondLi"  v-for="subItem in item.subItems" :key="subItem.name">{{subItem.name}}</li>
+          </ul>
+        </li>
       </ul>
     </div>
-    <div class="conditions">
+    <div class="pList_rg">
+    <div class="conditions1">
       排序:<span class="conditionsItem" @click="getColligate();">综合</span>
       <span class="conditionsItem"><span @click="priceDesc()">价格</span><i class="iconfont" @click="priceDesc(1)" :class="{'cur': priceState === 1}">&#xe630;</i><i class="iconfont" @click="priceDesc(2)" :class="{'cur': priceState === 2}">&#xe62f;</i></span>
       <span class="conditionsItem"><span @click="saleSort()">销量</span><i class="iconfont" @click="saleSort(1)" :class="{'cur': saleState === 1}">&#xe630;</i><i class="iconfont" @click="saleSort(2)" :class="{'cur': saleState === 2}">&#xe62f;</i></span>
-      <!--<span class="conditionsItem">人气<i class="iconfont">&#xe630;</i><i class="iconfont">&#xe62f;</i></span>-->
-      <div class="comprehensive" v-show="isShowColligate">
-        <!--<div v-for="(item,index) in cateList" :key="item.cateName">-->
-        <!--<h2 class="cur">{{item.cateName}}</h2>-->
-          <!--<ul><li v-for="(itemm,indexx) in item.childList" :key="itemm.cateId" :class="{'cur': sel[index] == indexx}" @click="getSubList(itemm.cateId,index,indexx)">{{itemm.cateName}}</li></ul>-->
-          <!--<p><span v-for="(item,ind) in subCateArr" :key="item" :class="{'cur':active==ind}" @click="getSubTxt(item,ind)">{{item}}</span></p>-->
-        <!--</div>-->
-      <div>
-        <h2 class="cur">{{cateList1.cateName}}</h2>
-        <ul><li v-for="(item,index) in cateList1.childList" :key="item.cateId" :class="{'cur':active1===index}" @click="getSubList(item, index)">{{item.cateName}}</li></ul>
-        <p><span v-for="(item,index) in subCateArr1" :key="index" :class="{'cur':subActive1==index}" @click="getSubTxt1(item, index)">{{item}}</span></p>
-      </div>
-        <div>
-          <h2 class="cur">{{cateList2.cateName}}</h2>
-          <ul><li v-for="(item,index) in cateList2.childList" :key="item.cateId" :class="{'cur':active2===index}" @click="getSubList2(item, index)">{{item.cateName}}</li></ul>
-          <p><span v-for="(item,index) in subCateArr2" :key="item" :class="{'cur':subActive2==index}" @click="getSubTxt2(item,index)">{{item}}</span></p>
-        </div>
-        <!--<div>-->
-          <!--<h2>功效分类</h2>-->
-          <!--<ul><li v-for="(item,index) in 4" :key="item" :class="{'cur':active==index}">产品分类</li></ul>-->
-          <!--<p><span v-for="(item,index) in 8" :key="item" :class="{'cur':active==index}">中草药1</span></p>-->
-        <!--</div>-->
-    <div>
-        <h2 class="cur">价格区间</h2>
-        <h3><span>不限</span> 自定义 <input type="text" v-model="leastPrice"/> -<input type="text" v-model="mostPrice"/> </h3>
     </div>
-        <h4><button @click="reset()">重置</button><button @click="closeColligate()">确定</button></h4>
-      </div>
-    </div>
-    <ul class="goodsList clearfix" v-show="list">
+    <ul class="goodsList1 clearfix" v-show="list">
       <li v-for =" item in goodsList" :key="item.productId">
         <div @click="toProDetail(item.productId);">
           <img :src="item.imgList"/>
@@ -63,7 +26,7 @@
           <h5>￥{{item.productPrice}}元</h5>
           <h6><s>￥{{item.oldPrice}}元</s><span class="rg">月售{{item.mounthSales}}件</span></h6>
         </div>
-        <div><button @click="addToCollect(item.productId)" v-if="!item.collectionFlg"><i class="iconfont" style="margin-right:5px;">&#xe648;</i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId)"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i class="iconfont" style="margin-right: 5px;">&#xe625;</i>放入购物车</button></div>
+        <div><button @click="addToCollect(item.productId)" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId)"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
       </li>
     </ul>
     <div v-show="!list" style="text-align: center;line-height: 80px;">暂无商品</div>
@@ -76,6 +39,8 @@
         :current-page.sync="pageNo"
         :page-size="pageSize">
       </el-pagination>
+    </div>
+    </div>
     </div>
     <el-dialog
       title="提示"
@@ -91,7 +56,7 @@
 </template>
 <script type="text/ecmascript-6">
 export default {
-  name: 'store',
+  name: 'productList',
   data () {
     return {
       active: 0,
@@ -124,31 +89,51 @@ export default {
       priceState: 0,
       saleState: 0,
       list: true,
-      cateList1: {},
-      cateList2: {},
-      msgList: []
+      sortList: [
+        {
+          name: '药食同源',
+          isSubShow: false,
+          subItems: [
+            {
+              name: '五味子'
+            },
+            {
+              name: '大黄'
+            },
+            {
+              name: '枸杞'
+            }
+          ]
+        },
+        {
+          name: '养生汤料',
+          isSubShow: false,
+          subItems: [
+            {
+              name: '汤料1'
+            },
+            {
+              name: '汤料2'
+            },
+            {
+              name: '汤料3'
+            }
+          ]
+        }
+      ]
     }
   },
   created () {
     this.getcategory()
     this.getProList()
-    this.getMsgList()
     console.log(this.cateList)
   },
   mounted () {
 
   },
-  computed: {
-    filteredItems: function () {
-      return this.msgList.slice(0, 2)
-    }
-  },
   methods: {
     toProDetail: function (productId) {
       this.$router.push({path: '/productDetail', query: {productId: productId}})
-    },
-    toCoupon: function () {
-      this.$router.push({path: '/coupon'})
     },
     getColligate: function () {
       this.isShowColligate = true
@@ -210,8 +195,6 @@ export default {
         } else {
           console.log(res)
           _this.cateList = data.obj.cateList
-          _this.cateList1 = _this.cateList[0]
-          _this.cateList2 = _this.cateList[1]
           _this.cateSubList = data.obj.cateSubList
         }
       })
@@ -256,48 +239,6 @@ export default {
         }
       })
     },
-    getSubList: function (item, index) {
-      this.active1 = index
-      let cateId = item.cateId
-      this.fatherCate = item.cateName
-      let len = this.cateSubList.length
-      for (var i = 0; i < len; i++) {
-        if (cateId === this.cateSubList[i].cateId) {
-          this.subCateArr1 = this.cateSubList[i].cateName
-        }
-      }
-    },
-    getSubList2: function (item, index) {
-      this.active2 = index
-      this.fatherEfectCate = item.cateName
-      let cateId = item.cateId
-      let len = this.cateSubList.length
-      for (var i = 0; i < len; i++) {
-        if (cateId === this.cateSubList[i].cateId) {
-          this.subCateArr2 = this.cateSubList[i].cateName
-        }
-      }
-    },
-    getSubTxt1: function (item, index) {
-      this.subActive1 = index
-      this.childCate = item
-    },
-    getSubTxt2: function (item, index) {
-      this.subActive2 = index
-      this.childEfectCate = item
-    },
-    reset: function () {
-      this.subActive1 = -1
-      this.subActive2 = -1
-      this.active2 = -1
-      this.active1 = -1
-      this.fatherCate = ''
-      this.fatherEfectCate = ''
-      this.childCate = ''
-      this.childEfectCate = ''
-      this.leastPrice = ''
-      this.mostPrice = ''
-    },
     priceDesc: function (index) {
       this.saleState = ''
       this.salesSort = ''
@@ -338,28 +279,8 @@ export default {
       console.log(this.saleState, this.priceState)
       this.getProList(1)
     },
-    getMsgList: function () {
-      let _this = this;
-      let params = new URLSearchParams();
-      // params.append('userId', this.$store.state.userId);
-      params.append('type', 1);
-      this.axios({
-        method: 'post',
-        url: this.url.api.activityQuery,
-        data: params
-      }).then(function (res) {
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-        } else {
-          console.log(data)
-          _this.msgList = data.listObject
-        }
-      })
-    },
-    toMsgDetail: function (activityId) {
-      this.$router.push({path: '/msgDetail', query: {activityId: activityId}})
+    showToggle: function (item) {
+      item.isSubShow = !item.isSubShow
     }
   }
 }
@@ -504,7 +425,7 @@ export default {
       }
       img{
         width:210px;
-        height: 130px;
+        height: auto;
         float: left;
       }
       div{
@@ -513,10 +434,8 @@ export default {
           color: #030303;
           font-size: 22px;
           line-height: 40px;
-          margin-bottom: 30px;
+          margin-bottom: 60px;
           font-weight: 100;
-          height: 80px;
-          overflow: hidden;
         }
         p{
           font-size: 16px;
@@ -525,24 +444,24 @@ export default {
       }
     }
   }
-  .goodsList{
-    width:1150px;
+  .goodsList1{
+    width:100%;
     @media screen and (max-width: 1150px){
-      width:760px;
+      width:520px;
     }
     height: auto;
     margin: 0 auto;
     li{
       cursor: pointer;
       width:214px;
-      margin-right:20px;
+      margin-right:15px;
       @media screen and (max-width: 1150px){
         width:144px;
         margin-right:10px;
       }
       margin-bottom: 34px;
       float: left;
-      &:nth-child(5n+5){
+      &:nth-child(4n+4){
         margin-right: 0;
       }
       img{
@@ -590,11 +509,7 @@ export default {
       }
     }
   }
-  .conditions{
-    width:1150px;
-    @media screen and (max-width: 1150px){
-      width:760px;
-    }
+  .conditions1{
     margin: 30px auto;
     border:1px solid #ddd;
     padding: 5px 30px;
@@ -705,6 +620,50 @@ export default {
           margin-left: 30px;
         }
       }
+    }
+  }
+  .pList{
+    width:1150px;
+    margin: 0 auto;
+    @media screen and (max-width: 1150px){
+      width:760px;
+    }
+  }
+  .pList_lf{
+    width:220px;
+    float: left;
+    margin-right: 15px;
+    box-sizing: border-box;
+    border:1px solid #ccc;
+    margin-top: 30px;
+  }
+  .pList_rg{
+    width:70%;
+    width:calc(100% - 240px);
+    float: left;
+  }
+  .firstUl{
+    width:100%
+  }
+  .firstLi{
+    width:100%;
+    height:auto;
+    line-height: 50px;
+    cursor: pointer;
+    box-sizing: border-box;
+    p{
+      padding: 0 15px;
+    }
+    &:nth-child(2n+2){
+     background: #f5f5f5;
+    }
+  }
+  .secondLi{
+    padding: 0 15px;
+    border-top:1px dashed #ccc;
+    background: #fff;
+    &:first-child{
+      border-top:none
     }
   }
 </style>

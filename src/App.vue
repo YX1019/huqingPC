@@ -54,4 +54,7 @@ export default {
   .hand{
     cursor: pointer;
   }
+  .el-pagination.is-background .el-pager li:not(.disabled).active{
+    background-color: #e60012;
+  }
 </style>

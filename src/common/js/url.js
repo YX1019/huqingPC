@@ -18,7 +18,7 @@ let url = {
     getUserAllInfo: apiUrl + 'getUserAllInfo.do', // 获取用户个人信息
     getKnowledgeDetails: apiUrl + 'knowledgeDetailsQuery.do', // 新闻详情页
     addressQuery: apiUrl + 'addressQuery.do', // 地址列表查询
-    updateUserAddress: apiUrl + 'updateUserAddress.do', // type 1修改  0新增  isDefalt  是否默认(1是  0不是)
+    updateUserAddress: apiUrl + 'updateUserAddressWeb.do', // type 1修改  0新增  isDefalt  是否默认(1是  0不是)
     delAddressMsg: apiUrl + 'delAddressMsg.do', // 删除地址
     knowledgeCommentQuery: apiUrl + 'knowledgeCommentQuery.do', // 新闻评论列表
     knowledgeZan: apiUrl + 'knowledgeZan.do', // 新闻点赞
@@ -32,11 +32,11 @@ let url = {
     updateCartSum: apiUrl + 'updateCartSum.do', // 购物车单件数量加减
     cancelCollect: apiUrl + 'cancleCollect.do', // 取消收藏
     createOrder: apiUrl + 'createOrder.do', // 创建订单 购物车里的去结算
-    queryCartOrderList: apiUrl + 'queryCartOrderList.do', // 结算页面信息列表
-    updateCartDelivery: apiUrl + 'updateCartDelivery.do', // 修改购物车中的商品的配送方式
-    nearQuery: apiUrl + 'nearQuery.do', // 店铺列表查询
+    queryCartOrderList: apiUrl + 'queryCartOrderListS.do', // 结算页面信息列表
+    updateCartDelivery: apiUrl + 'updateCartDeliveryS.do', // 修改购物车中的商品的配送方式
+    nearQuery: apiUrl + 'nearQueryS.do', // 店铺列表查询
     queryUserOrderList: apiUrl + 'queryUserOrderList.do', // 查询用户订单列表
-    completeOrder: apiUrl + 'completeOrder.do', // 完善用户信息，提交订单
+    completeOrder: apiUrl + 'completeOrderS.do', // 完善用户信息，提交订单
     completeOrderReturn: apiUrl + 'completeOrderReturn.do', // 订单地址
     getCompleteOrderDetails: apiUrl + 'getCompleteOrderDetails.do', // 提交订单后到支付页面的信息
     mineInfo: apiUrl + 'mineInfo.do', // 我的页面
@@ -51,7 +51,16 @@ let url = {
     queryEvaluate: apiUrl + 'queryEvaluate.do', // 评论列表 1商品 2服务 3养生知识/新闻公告ID
     addOrderEvaluate: apiUrl + 'addOrderEvaluate.do', // 新增订单评价
     receiveOrder: apiUrl + 'receiveOrder.do', // 确认收货
-    queryOrderExpress: apiUrl + 'queryOrderExpress.do' // 查询物流信息
+    queryOrderExpress: apiUrl + 'queryOrderExpress.do', // 查询物流信息
+    activityQuery: apiUrl + 'activityQuery.do', // 活动列表
+    activityDetailQuery: apiUrl + 'activityDetailQuery.do', // 活动详情
+    queryTeamOrderList: apiUrl + 'queryTeamOrderList.do', // 门店订单
+    queryTeamOrderDetails: apiUrl + 'queryTeamOrderDetails.do', // 团队订单列表查看详情
+    queryTeamOrderExpress: apiUrl + 'queryTeamOrderExpress.do', // 团队查看物流
+    queryMerchantDetails: apiUrl + 'queryMerchantDetails.do', // 店铺详情
+    getHotSearch: apiUrl + 'getHotSearch.do', // 搜索热词
+    receiveServiceOrder: apiUrl + 'receiveServiceOrder.do', // 接单
+    updateCartTeamS: apiUrl + 'updateCartTeamS.do' // 修改店铺
   }
 }
 

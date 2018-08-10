@@ -1,16 +1,16 @@
 <template>
-  <newsList :newsType="newsType"></newsList>
+<newsList :newsType="newsType"></newsList>
 </template>
 <script type="text/ecmascript-6">
 import newsList from './newsList/newsList'
 export default {
-  name: 'news',
+  name: 'knowledge',
   components: {
     newsList
   },
   data () {
     return {
-      newsType: 1
+      newsType: 2
     }
   },
   methods: {}

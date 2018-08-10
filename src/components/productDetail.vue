@@ -248,6 +248,9 @@ export default {
       }
     },
     addCart: function (type) {
+      if (this.attrAndValuees.length === 0) {
+        this.stockId = this.priceStocks[0].stockId
+      }
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);

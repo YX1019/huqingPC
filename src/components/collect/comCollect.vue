@@ -5,14 +5,15 @@
       <a :class="{'cur' : collectType == 1}" @click="toCollectStore()">店铺收藏</a>
       <div class="collectSearch"><input type="text"/><button>搜索</button> </div>
     </div>
-    <div class="collectTitle"><span>全部<b>{{name}}</b>5</span></div>
-    <ul class="collectList">
+    <div class="collectTitle"><span>全部<b>{{name}}</b>{{collectNum}}</span></div>
+    <ul class="collectList" v-show="list">
       <li v-for="item in collectList" :key="item.collectId"><img :src="item.image"/>
         <p v-if="collectType == 0">{{item.productName}}</p>
         <p v-if="collectType == 1">{{item.teamName}}</p>
         <h5 v-show="collectType == 0">￥{{item.productPrice}}</h5>
       </li>
     </ul>
+    <div style="text-align: center;line-height: 80px;" v-show="!list">暂无收藏</div>
     <el-dialog
       title="提示"
       :visible.sync="errorBox"
@@ -40,7 +41,9 @@ export default {
     return {
       errMsg: '',
       errorBox: false,
-      collectList: []
+      collectList: [],
+      collectNum: 0,
+      list: true
     }
   },
   created () {
@@ -70,6 +73,12 @@ export default {
         } else {
           console.log(data)
           _this.collectList = data.listObject
+          _this.collectNum = data.listObject.length
+          if (_this.collectNum === 0) {
+            _this.list = false
+          } else {
+            _this.list = true
+          }
         }
       })
     }
@@ -80,6 +89,7 @@ export default {
   .collect{
     width:1150px;
     height: auto;
+    min-height: 500px;
     margin: 25px auto;
     padding-bottom: 100px;
   }
