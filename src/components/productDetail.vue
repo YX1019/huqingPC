@@ -6,7 +6,7 @@
     <div class="goods_img">
       <div class="gimg" id="1">
         <!--<img :src="item" width="300" height="300" v-for="item in headImgList" :key="item"/>-->
-        <img :src="item" width="300" height="300" v-for="item in headImgList" :key="item"/>
+        <img :src="item" width="300" height="300" v-for="(item,index) in headImgList" :key="index"/>
         <!--<img src="" width="300" height="300" />-->
       </div>
       <div id="showsum" class="showsum" ></div>
@@ -47,14 +47,14 @@
       <h3>商品名称：桃红四物汤<span>重量：0.25kg</span>体积：0.00m³</h3>
       <h5>桃红四物汤为调经要方之一，是《玉机微义》转引的《医垒元戎》中的一个方子，也称加味四物汤，桃红四物汤这一方名始于见《医宗金鉴》。该方由四物汤加味桃仁、红花而成，功效为养血活血。现代研究表明，桃红四物汤具有扩张血管、抗炎、抗疲劳、抗休克、调节免疫功能、降脂、补充微量元素、抗过敏等作用。</h5>
     <ul class="proBtmListName">
-      <li class="cur">商品详情</li>
-      <li>售后服务</li>
-      <li>用户评价</li>
+      <li :class="{'cur': station === 0}" @click="getSomeInfo(0)"><a href="#detail" :class="{'cur': station === 0}">商品详情</a></li>
+      <li @click="getSomeInfo(1)" :class="{'cur': station === 1}"><a :class="{'cur': station === 1}">售后服务</a></li>
+      <li @click="getSomeInfo(2)" :class="{'cur': station === 2}"><a href="#comment" :class="{'cur': station === 2}">用户评价</a></li>
     </ul>
-      <div class="proBtmCont" v-html="obj.imgDetails">
+      <div class="proBtmCont" v-html="obj.imgDetails" id="detail">
         桃红四物汤为调经要方之一，是《玉机微义》转引的《医垒元戎》中的一个方子，也称加味四物汤，桃红四物汤这一方名始于见《医宗金鉴》。该方由四物汤加味桃仁、红花而成，功效为养血活血。现代研究表明，桃红四物汤具有扩张血管、抗炎、抗疲劳、抗休克、调节免疫功能、降脂、补充微量元素、抗过敏等作用。
       </div>
-      <div class="proComment">
+      <div class="proComment" id="comment">
         <h1>商品评价</h1>
         <div class="commentCont">
           <div class="clearfix">
@@ -62,7 +62,7 @@
           <div class="commentRg"><img src="../common/img/grade.jpg"/> </div>
           </div>
           <ul class="commentList clearfix">
-            <li v-for="item in commentList" :key="item.commnetUserId"><div class="comList_lf">{{item.commentWord}}</div><div class="comList_rg"><h6>{{item.nickName}}</h6><p>{{item.dateStr}}</p></div></li>
+            <li v-for="(item,index) in commentList" :key="index"><div class="comList_lf">{{item.commentWord}}</div><div class="comList_rg"><h6>{{item.nickName}}</h6><p>{{item.dateStr}}</p></div></li>
 
           </ul>
           <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;">
@@ -144,7 +144,8 @@ export default {
       collectionFlg: false,
       pageSize: 10,
       total: 5,
-      pageNo: 1
+      pageNo: 1,
+      station: 0
     }
   },
   beforeCreated () {
@@ -354,6 +355,9 @@ export default {
     handleCurrentChange (val) {
       var pageNum = val
       this.queryEvaluate(pageNum)
+    },
+    getSomeInfo: function (index) {
+      this.station = index
     }
   },
   watch: {
@@ -368,6 +372,9 @@ export default {
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">
+.el-carousel__arrow--right{
+   right:50px;
+}
 .proDetail{
   width:1150px;
   @media screen and (max-width: 1150px){
@@ -572,6 +579,12 @@ export default {
         color: #fff;
         background: #e60c0c;
         border:none;
+      }
+      a{
+        color: #333;
+        &.cur{
+          color: #fff;
+        }
       }
     }
   }

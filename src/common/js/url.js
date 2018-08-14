@@ -1,4 +1,4 @@
-let apiUrl = '/api/hqyt/'
+let apiUrl = '/api/fyapp/'
 let url = {
   api: {
     login: apiUrl + 'userLogin.do', // 登录
@@ -24,7 +24,6 @@ let url = {
     knowledgeZan: apiUrl + 'knowledgeZan.do', // 新闻点赞
     knowledgeComment: apiUrl + 'knowledgeCommnet.do', // 新闻评论
     accountLogTeam: apiUrl + 'accountLogTeam.do', // 团队账户
-    withdrawLogList: apiUrl + 'withdrawLogList.do', // 提现记录
     updatePwd: apiUrl + 'updatePwdForWeb.do', // 修改登录密码
     addCart: apiUrl + 'addCart.do', // 加入购物车
     myCart: apiUrl + 'myCarts.do', // 查看购物车
@@ -60,7 +59,13 @@ let url = {
     queryMerchantDetails: apiUrl + 'queryMerchantDetails.do', // 店铺详情
     getHotSearch: apiUrl + 'getHotSearch.do', // 搜索热词
     receiveServiceOrder: apiUrl + 'receiveServiceOrder.do', // 接单
-    updateCartTeamS: apiUrl + 'updateCartTeamS.do' // 修改店铺
+    updateCartTeamS: apiUrl + 'updateCartTeamS.do', // 修改店铺
+    getOrderPayStatus: apiUrl + 'getOrderPayStatus.do', // 获取订单支付信息
+    queryCartPlanList: apiUrl + 'queryCartPlanList.do', // 购物车优惠列表
+    withdrawRate: apiUrl + 'withdrawRate.do', // 提现费率查询个人
+    withdrawRateTeam: apiUrl + 'withdrawRateTeam.do', // 提现费率查询团队
+    applyWithdraw: apiUrl + 'applyWithdraw.do', // 提现申请
+    withdrawLogList: apiUrl + 'withdrawLogList.do' // 提现记录
   }
 }
 

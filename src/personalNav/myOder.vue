@@ -28,9 +28,18 @@
         <div class="orderItem6" v-else-if="item.statusEnum == 2"><p>待收货</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else-if="item.statusEnum == 3"><p>待评价</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else><p>{{item.statusStr}}</p><p @click="toOderDteail(item.childOrderId)">订单详情</p></div>
-        <div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods">立即付款</a><p @click="cancleOrder(item.childOrderId)" class="hand">取消订单</p></div>
+        <div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods" @click="toPayPage(item.childOrderId)">立即付款</a><p @click="cancleOrder(item.childOrderId)" class="hand">取消订单</p></div>
         <div class="orderItem7" v-else-if="item.statusEnum == 1 && item.proType != 2"><a class="returnGoods" @click="returnGoods(item.childOrderId)">申请退货</a></div>
-        <div class="orderItem7" v-else-if="item.statusEnum == 2 && item.proType == 2"><a class="returnGoods">凭证</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 2 && item.proType == 2">
+          <el-popover
+            placement="bottom"
+            title="凭证"
+            width="150"
+            trigger="click">
+            <div style="text-align: center;"><img :src="item.voucherCode" style="width:100px;"/></div>
+            <el-button slot="reference" style="border:none;padding: 8px 15px;color: #fff;background: #dd0011;border-radius: 3px;display: inline-block;cursor: pointer;">凭证</el-button>
+          </el-popover>
+        </div>
         <div class="orderItem7" v-else-if="item.statusEnum == 2 && item.proType != 2 && item.trans == 0"><a class="returnGoods" @click="receiveOrder(item.childOrderId)">确认收货</a>
           <el-popover
             placement="bottom"
@@ -49,7 +58,7 @@
           <!--<p>查询物流</p>-->
         </div>
         <div class="orderItem7" v-else-if="item.statusEnum == 2 && item.proType != 2 && item.trans == 1"><a class="returnGoods">确认收货</a></div>
-        <div class="orderItem7" v-else-if="item.statusEnum == 3 && item.proType != 2"><a class="returnGoods">待评价</a></div>
+        <div class="orderItem7" v-else-if="item.statusEnum == 3 && item.proType != 2"><a class="returnGoods" @click="toEvaluate(item.childOrderId)">待评价</a></div>
         <div class="orderItem7" v-else></div>
       </div>
     </div>
@@ -121,6 +130,9 @@ export default {
     },
     toShop: function (teamId) {
       this.$router.push({path: '/shop', query: {teamId: teamId}})
+    },
+    toEvaluate: function (orderId) {
+      this.$router.push({path: '/evaluate', query: {orderId: orderId}})
     },
     queryUserOrderList: function (payStatus, orderStatus, pageNo) {
       let _this = this;
@@ -263,6 +275,9 @@ export default {
           _this.wli = data.obj
         }
       })
+    },
+    toPayPage: function (orderId) {
+      this.$router.push({path: '/payOrder', query: {orderNo: orderId, type: '1'}})
     }
   }
 }

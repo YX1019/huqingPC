@@ -19,8 +19,42 @@
         <div class="hand lf">
           <i class="checkIcon" :class="{checked:item.checked}" @click="selectedShop(item)"></i>
           <img src="../common/img/storeIcon.png" class="storeIcon"/><span @click="showStore(item)">{{item.teamName}}<i class="iconfont">&#xe602;</i></span>
-          <img src="../common/img/ticket.png" class="ticket"/></div>
+          <!--<el-popover-->
+            <!--placement="right"-->
+            <!--width="375"-->
+            <!--trigger="click">-->
+            <!--<div class="couponList clearfix">-->
+              <!--<h3><i class="iconfont">&#xe616;</i>已领取1张优惠券，有新优惠券可领取</h3>-->
+              <!--<ul>-->
+                <!--<li v-for="item in 4" :key="item">-->
+                   <!--<div class="coupon_lf">￥5</div>-->
+                   <!--<div class="coupon_mid"><h6>100-5 满100减5</h6><p>2018.08.06-2018.09.06</p></div>-->
+                   <!--<div class="coupon_rg"><h6 v-show="isGet">领取成功</h6><p v-show="!isGet">领取</p></div>-->
+                 <!--</li>-->
+              <!--</ul>-->
+            <!--</div>-->
+            <!--<el-button slot="reference" style="background: none;border:none;padding: 0;"> <img src="../common/img/ticket.png" class="ticket"/></el-button>-->
+          <!--</el-popover>-->
+        </div>
         <span style="margin-left:15px;">运送方式<select  @change="chooseMothod(item)" class="kdWay" v-model="item.delivery"><option value="0">快递</option><option value="1">自提</option></select></span>
+        <span class="rg" >
+        <el-popover
+          placement="left"
+          title="优惠信息"
+          width="200"
+          trigger="click">
+          <div class="couponList2 clearfix">
+              <ul>
+                <li v-for="(item,index) in coupList" :key="index">
+                  <h5>{{item.planTitle}}</h5>
+                   <h6>{{item.planDesc}}</h6>
+                   <p>{{item.timeStr}}</p>
+                 </li>
+              </ul>
+            </div>
+          <el-button slot="reference" style="background: none;border:none;padding: 0;margin-right:10px;font-size: 14px;font-weight:100;color: #dd0011;" @click="queryCartPlanList(item)">优惠信息</el-button>
+        </el-popover>
+          </span>
       </h4>
     </div>
     <div class="goodsItem" v-for="iitem in item.cartInfo" :key="iitem.cartId">
@@ -77,7 +111,9 @@ export default {
       dialogVisible: false,
       storeLists: [],
       cartAllInfo: [],
-      curCartIds: ''
+      curCartIds: '',
+      isGet: false,
+      coupList: []
     }
   },
   filters: {
@@ -433,6 +469,26 @@ export default {
           _this.lookMyCart()
         }
       })
+    },
+    queryCartPlanList: function (item) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('cartIds', item.cartIds);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryCartPlanList,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.coupList = data.obj
+        }
+      })
     }
   }
 }
@@ -549,8 +605,11 @@ export default {
       width: 55%;
     }
   }
-  .goodsItem2{width:12%;float: left;
-    color: #818181;}
+  .goodsItem2{
+    width:12%;
+    float: left;
+    color: #818181;
+    min-height: 20px;}
   .goodsItem3{
     width:12%;float: left;
     p{
@@ -679,5 +738,93 @@ export default {
       line-height: 40px;
       border-bottom: 1px solid #ccc;
     }
+  }
+  .couponList,.couponList2{
+    width:100%;
+    box-sizing: border-box;
+    padding: 0 15px;
+    li{
+      width:100%;
+      float: left;
+      margin-top: 15px;
+    }
+    h3{
+      font-size: 14px;
+      color: #343434;
+      line-height: 40px;
+      border-bottom: 1px solid #ddd;
+      i{
+        color: #ccc;
+        margin-right: 5px;
+      }
+    }
+  }
+  .couponList2{
+    li{
+      border-bottom: 1px solid #ccc;
+      margin: 5px 0;
+      padding-bottom: 5px;
+    }
+    h5{
+      font-size: 14px;
+    }
+    h6{
+      font-size: 15px;
+      color: #e60012;
+      margin: 5px 0;
+    }
+    p{
+      font-size: 12px;
+    }
+  }
+  .coupon_lf {
+    width: 79px;
+    height: 38px;
+    background: url(../common/img/couponBg.png);
+    background-size: 79px 38px;
+    text-align: center;
+    line-height: 38px;
+    color: #fff;
+    font-size: 18px;
+    float: left;
+  }
+  .coupon_mid{
+    width:50%;
+    margin-left: 10px;
+    float: left;
+    h6{
+      font-size: 14px;
+      color: #646464;
+    }
+    p{
+      font-size: 12px;
+      color: #bababa;
+    }
+  }
+  .coupon_rg{
+    float: right;
+    h6{
+      font-size: 14px;
+      color: #bababa;
+    }
+    p{
+      width:60px;
+      height: 25px;
+      line-height: 25px;
+      margin-top: 6px;
+      text-align: center;
+      border:1px solid #bababa;
+      font-size:14px;
+      color: #323232;
+    }
+  }
+  .el-popover{
+    border:1px solid #de0012;
+  }
+  .el-popper[x-placement^=right] .popper__arrow{
+    border-right-color:#de0012;
+  }
+  .el-popper[x-placement^=left] .popper__arrow{
+    border-left-color:#de0012;
   }
 </style>

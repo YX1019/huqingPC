@@ -107,9 +107,6 @@ export default {
       this.dialogFormVisible = false
       this.addressQuery()
     },
-    postOrder: function () {
-      this.$router.push({path: '/payOrder'})
-    },
     showAddr: function () {
       this.isShowAddr = !this.isShowAddr
     },
@@ -191,7 +188,7 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
-          _this.$router.push({path: '/payOrder'})
+          _this.$router.push({path: '/payOrder', query: {orderNo: _this.orderNo, type: '0'}})
         }
       })
     }

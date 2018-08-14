@@ -125,7 +125,7 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
-          console.log(data)
+          console.log(data, data.obj.userRole, 'userRole')
           if (data.obj.userRole === '2') {
             _this.hasTeam = false
           } else {

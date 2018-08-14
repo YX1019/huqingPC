@@ -15,7 +15,7 @@
       <div class="waitToDeliver" v-if="orderInfo.statusEnum == 0">
         <p><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待买家付款</span></p>
         <!--<p>您可以 <span class="rtnGoodsBtn">申请退货</span><span class="cancelBtn">取消订单</span></p>-->
-        <p>您可以 <span class="rtnGoodsBtn hand">付款</span><span class="cancelBtn hand" @click="cancleOrder()">取消订单</span></p>
+        <p>您可以 <span class="rtnGoodsBtn hand" @click="toPayPage()">付款</span><span class="cancelBtn hand" @click="cancleOrder()">取消订单</span></p>
       </div>
       <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 1 && orderInfo.proType != 2">
        <p><img src="../common/img/icon.png"/><span>订单状态：卖家已付款等待发货</span></p>
@@ -68,7 +68,7 @@
   <div class="bg" v-if="dialogVisible"></div>
   <div class="codeBox" v-if="dialogVisible">
     <p>我的凭证<img src="../common/img/closed.png" @click="closeBox()"/> </p>
-    <img src="../common/img/code.jpg" class="code"/>
+    <img :src="orderInfo.voucherCode" class="code"/>
   </div>
   <el-dialog
     title="提示"
@@ -209,6 +209,9 @@ export default {
           console.log(data)
         }
       })
+    },
+    toPayPage: function () {
+      this.$router.push({path: '/payOrder', query: {orderNo: this.orderId, type: '1'}})
     }
   }
 }

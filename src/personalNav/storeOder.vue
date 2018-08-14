@@ -7,6 +7,7 @@
       <span class="orderItem1">产品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
       <span class="orderItem4">商品操作</span><span class="orderItem5">实付款</span><span class="orderItem6">交易状态</span><span class="orderItem7">交易操作</span>
     </div>
+    <div v-show="!isList" style="width:100%;line-height: 80px;text-align: center;float: left;">暂无订单</div>
     <div class="myOderItem " v-for="item in teamList" :key="item.childOrderId">
       <div class="myOrderTop">
         <input type="checkbox"/>
@@ -33,8 +34,8 @@
         <div class="orderItem7" v-if="item.statusEnum == 2 && item.proType != 2  && item.trans == 0 ">
           <!--<a class="returnGoods">查看物流</a>-->
           <el-popover
-            placement="bottom"
-            width="200"
+            placement="left"
+            width="300"
             trigger="click">
             <div class="wli">
               <h1>{{wli.companyName}}<br/>{{wli.nu}}</h1>
@@ -207,7 +208,7 @@ export default {
             type: 'success'
           });
           console.log(_this.pageStation)
-          if (_this.active === 0) {
+          if (_this.active === '0' || _this.active === 0) {
             _this.queryTeamOrderList(0, _this.pageStation)
           } else {
             _this.queryTeamOrderList(2, _this.pageStation)
@@ -235,6 +236,7 @@ export default {
     font-size: 16px;
     text-align: center;
     line-height: 38px;
+    cursor: pointer;
     &.cur{
       color: #e10a08;
       border-bottom: 2px solid #e10a08;

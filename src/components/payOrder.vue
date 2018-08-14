@@ -10,6 +10,7 @@
         <p>商品名称：{{orderObj.productName}}</p>
         <p>金额：{{orderObj.orderPrice}}</p>
         <p>购买时间:{{orderObj.orderTime}}</p>
+        <p>应付金额<span>￥{{orderObj.orderPrice}}</span></p>
         <!--<p>配送：张三/13989238902/浙江省，杭州市，滨江区 伟业路</p>-->
         <!--<p>商品详情：胡庆余堂琵琶膏&nbsp;&nbsp;&nbsp;&nbsp;单价：100.00；&nbsp;使用胡币：10；&nbsp;使用积分10；&nbsp;数量：1件</p>-->
       </div>
@@ -28,7 +29,7 @@
        <div v-show="menuIndex === 0">
           <div class="payCont_lf"><img src="../common/img/WePayLogo.png"/></div>
           <div class="payCont_rg">
-            <p><img src="../common/img/code1.png"/></p>
+            <p><img :src="weCode" style="width:260px;"/></p>
             <p><img src="../common/img/wepayTxt.png"/></p>
            </div>
        </div>
@@ -37,7 +38,7 @@
        </div>
      </div>
   </div>
-  <div class="payMoney">应付金额<span>￥{{orderObj.orderPrice}}</span><a @click="toPay()" class="hand">立即付款</a></div>
+  <div class="payMoney"><font class="lf" style="margin-left: 20px;">若已支付，请按确定按钮到订单页面查看订单信息</font><a @click="getOrderPayStatus()" class="hand">确定</a></div>
   <el-dialog
     title="提示"
     :visible.sync="errorBox"
@@ -59,19 +60,32 @@ export default {
       errMsg: '',
       orderObj: {},
       payWay: 2,
-      menuIndex: 0
+      menuIndex: 0,
+      orderNo: '',
+      weCode: '',
+      type: '0'
     }
   },
   created () {
+    this.getParams()
     this.getCompleteOrderDetails()
+    this.payByWeixinPage()
   },
   methods: {
+    getParams () {
+      // 取到路由带过来的参数
+      let routerParams = this.$route.query.orderNo
+      // 将数据放在当前组件的数据内
+      this.orderNo = routerParams
+      this.type = this.$route.query.type
+      console.log(this.orderNo)
+    },
     getCompleteOrderDetails: function () {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('orderNo', sessionStorage.getItem('orderNo'));
-      params.append('type', 0);
+      params.append('orderNo', this.orderNo);
+      params.append('type', this.type);
       this.axios({
         method: 'post',
         url: this.url.api.getCompleteOrderDetails,
@@ -88,13 +102,59 @@ export default {
       })
     },
     toPay: function () {
-      console.log(this.payWay)
+      this.$router.push({path: '/personal/myOder'})
     },
     payZfb: function () {
       this.menuIndex = 1;
     },
     payWechat: function () {
       this.menuIndex = 0;
+    },
+    payByWeixinPage: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', this.orderNo);
+      params.append('orderType', this.type);
+      this.axios({
+        method: 'post',
+        url: 'https://m.hqyt.cc/fyapp/payByWeixinPage.do',
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.weCode = data.obj
+        }
+      })
+    },
+    getOrderPayStatus: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', this.orderNo);
+      params.append('type', this.type);
+      this.axios({
+        method: 'post',
+        url: this.url.api.getOrderPayStatus,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          if (data.obj.status === '1') {
+            _this.$router.push({path: '/personal/myOder'})
+          } else {
+            _this.$message.error('支付失败，请重新支付！');
+          }
+        }
+      })
     }
   }
 }

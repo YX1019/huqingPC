@@ -19,7 +19,7 @@
     </div>
     <div class="rCont_rg">
       <h3>订单详情</h3>
-      <h5 class="clearfix"><img :src="obj.proImg" width="90px"/>{{obj.proName}}</h5>
+      <h5 class="clearfix"><img :src="obj.proImg" width="90px"/><span>{{obj.proName}}</span></h5>
       <p><span>卖家：</span><i class="bule">胡庆余堂滨江店</i></p>
       <p><span>订单编号：</span><i class="bule">{{obj.orderId}}</i></p>
       <p><span>单价：</span>￥{{obj.perPrice}}*{{obj.orderCount}}</p>
@@ -245,7 +245,12 @@ export default {
   vertical-align: middle;
   margin-right: 15px;
   width:90px;
+  display: block;
+  float: left;
 }
+  .rItem_rg span{
+    width:60%;
+  }
   .putReturnInfo{
     width: 205px;
     height: 45px;

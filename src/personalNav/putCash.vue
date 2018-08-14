@@ -32,8 +32,15 @@ export default {
     return {
       radio: '1',
       errorBox: false,
-      errMsg: ''
+      errMsg: '',
+      withdrawFrom: '',
+      withUserType: '',
+      withdrawType: '',
+      amount: ''
     }
+  },
+  created () {
+    this.withdrawRate()
   },
   methods: {
     withdrawLogList: function (type) {
@@ -43,7 +50,44 @@ export default {
       params.append('searchType', type);
       this.axios({
         method: 'post',
-        url: this.url.api.knowledgeComment,
+        url: this.url.api.withdrawLogList,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+        }
+      })
+    },
+    withdrawRate: function () {
+      let _this = this;
+      this.axios({
+        method: 'post',
+        url: this.url.api.withdrawRate
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+        }
+      })
+    },
+    applyWithdraw: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('withdrawType', this.withdrawType);
+      params.append('amount', this.amount);
+      params.append('withUserType', this.withUserType);
+      params.append('withdrawFrom', this.withdrawFrom);
+      this.axios({
+        method: 'post',
+        url: this.url.api.withdrawLogList,
         data: params
       }).then(function (res) {
         let data = res.data
