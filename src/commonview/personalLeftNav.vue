@@ -56,6 +56,8 @@ export default {
       if (index === 0 && indexx === 0) {
         this.$router.push({ path: '/personal/personInfo' })
       } else if (index === 0 && indexx === 1) {
+        sessionStorage.setItem('isCur', 0)
+        sessionStorage.setItem('state', 1)
         this.$router.push({ path: '/personal/myAcount' })
       } else if (index === 1 && indexx === 0) {
         this.$router.push({ path: '/personal/myOder' })
@@ -82,8 +84,12 @@ export default {
       if (index === 0 && indexx === 0) {
         this.$router.push({ path: '/personal/personInfo' })
       } else if (index === 0 && indexx === 1) {
+        sessionStorage.setItem('isCur', 0)
+        sessionStorage.setItem('state', 1)
         this.$router.push({ path: '/personal/myAcount' })
       } else if (index === 0 && indexx === 2) {
+        sessionStorage.setItem('isCur', 0)
+        sessionStorage.setItem('state', 1)
         this.$router.push({ path: '/personal/teamAcount' })
       } else if (index === 1 && indexx === 0) {
         this.$router.push({ path: '/personal/myOder' })

@@ -2,16 +2,28 @@
 <div class="personRg">
   <div class="putCashCont">
     <h1>提现</h1>
-    <p><label>提现金额:</label><input type="text"/> 当前胡币:<span class="red">50</span> <span class="red marginLeft20">5胡币=1元</span></p>
-    <p><label>提现至:</label><span class="payWay"><el-radio v-model="radio" label="1"><img src="../common/img/zfb.png"/> </el-radio></span><span><el-radio v-model="radio" label="2"><img src="../common/img/wechat.png"/> 微信</el-radio></span></p>
-    <button>提现</button>
+    <p><label>提现金额:</label><input type="text" v-model="amount"/><span class="red">{{amountStr}}</span> <span class="red marginLeft20">{{rateStr}}</span></p>
+    <p><label>提现至:</label><span class="payWay2"><el-radio v-model="radio" label="1"><img src="../common/img/zfb.png"/> </el-radio></span><span><el-radio v-model="radio" label="2"><img src="../common/img/wechat.png"/> 微信</el-radio></span></p>
+    <button @click="applyWithdraw()">提现</button>
   </div>
   <div class="putCashCont">
     <h1>提现记录</h1>
-    <ul class="puCashList">
-      <li v-for="item in 3" :key="item"><div class="cashLf"><h2>提现成功</h2><h5>2018-06-10 09:00:00</h5></div>
-        <div class="cashRg">50.00</div></li>
+    <ul class="puCashList" v-show="list">
+      <li v-for="(item,index) in recordList" :key="index"><div class="cashLf"><h2>{{item.status}}</h2><h5>{{item.timeStr}}</h5></div>
+        <div class="cashRg">{{item.amountStr}}</div></li>
     </ul>
+    <div style="width:100%;text-align: center;line-height: 80px;" v-show="!list">暂无记录</div>
+  </div>
+  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;" v-show="list">
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="total"
+      @current-change="handleCurrentChange"
+      :current-page.sync="pageNo"
+      :page-size="pageSize"
+    >
+    </el-pagination>
   </div>
   <el-dialog
     title="提示"
@@ -36,18 +48,41 @@ export default {
       withdrawFrom: '',
       withUserType: '',
       withdrawType: '',
-      amount: ''
+      amount: '',
+      type: '', // 区分用户还是团队
+      amountStr: '',
+      rateStr: '',
+      recordList: [],
+      list: true,
+      pageNo: 1,
+      pageSize: 10,
+      total: 5
     }
   },
   created () {
-    this.withdrawRate()
+    this.getParams()
+    if (this.type === '2') {
+      this.withdrawRateTeam()
+    } else {
+      this.withdrawRate()
+    }
+    this.withdrawLogList(1)
   },
   methods: {
-    withdrawLogList: function (type) {
+    getParams () {
+      // 取到路由带过来的参数
+      let routerParams = this.$route.query.type
+      // 将数据放在当前组件的数据内
+      this.type = routerParams
+      console.log(this.type)
+    },
+    withdrawLogList: function (pageNo) {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('searchType', type);
+      params.append('searchType', this.type);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
       this.axios({
         method: 'post',
         url: this.url.api.withdrawLogList,
@@ -59,14 +94,28 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.recordList = data.listObject
+          _this.total = data.totalItems
+          if (_this.recordList.length === 0) {
+            _this.list = false
+          } else {
+            _this.list = true
+          }
         }
       })
     },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.withdrawLogList(pageNum)
+    },
     withdrawRate: function () {
       let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
       this.axios({
         method: 'post',
-        url: this.url.api.withdrawRate
+        url: this.url.api.withdrawRate,
+        data: params
       }).then(function (res) {
         let data = res.data
         if (!res.data.bizSucc) {
@@ -74,6 +123,28 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.amountStr = data.amountStr
+          _this.rateStr = data.rateStr
+        }
+      })
+    },
+    withdrawRateTeam: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.withdrawRateTeam,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.amountStr = data.amountStr
+          _this.rateStr = data.rateStr
         }
       })
     },
@@ -81,13 +152,14 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('withdrawType', this.withdrawType);
+      params.append('withdrawType', this.radio);
       params.append('amount', this.amount);
-      params.append('withUserType', this.withUserType);
-      params.append('withdrawFrom', this.withdrawFrom);
+      params.append('withUserType', this.type);
+      params.append('withdrawFrom', 'WEB');
+      console.log(this.radio, this.amount, this.type)
       this.axios({
         method: 'post',
-        url: this.url.api.withdrawLogList,
+        url: this.url.api.applyWithdraw,
         data: params
       }).then(function (res) {
         let data = res.data
@@ -96,6 +168,16 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.$message({
+            message: '提现申请提交成功！',
+            type: 'success'
+          });
+          _this.amount = ''
+          if (_this.type === '2') {
+            _this.withdrawRateTeam()
+          } else {
+            _this.withdrawRate()
+          }
         }
       })
     }
@@ -158,7 +240,7 @@ export default {
       border-radius: 3px;
     }
   }
-  .payWay{
+  .payWay2{
     margin-right: 95px;
   }
   .puCashList li{

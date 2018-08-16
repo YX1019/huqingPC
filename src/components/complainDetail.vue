@@ -47,7 +47,7 @@
       <div class="ordInfoCont">
         <div class="myOrderItemCont ">
           <div class="orderItem1 orderItemName"><img :src="orderInfo.proImg"/>
-            <div class="oderItem_rg"><h3>{{orderInfo.proName}}</h3><p>{{orderInfo.attrNames}}：{{orderInfo.valueNames}}</p></div>
+            <div class="oderItem_rg"><h3>{{orderInfo.proName}}</h3><p v-show="orderInfo.attrNames">{{orderInfo.attrNames}}：{{orderInfo.valueNames}}</p></div>
           </div>
           <div class="orderItem2"><p>￥{{orderInfo.perPrice}}</p></div>
           <div class="orderItem3"><p>{{orderInfo.orderCount}}</p></div>
@@ -97,6 +97,7 @@ export default {
   created () {
     this.getParams()
     this.queryOrderDetails()
+    // this.queryComplaintsOrderDetails()
   },
   methods: {
     getParams () {
@@ -124,6 +125,25 @@ export default {
         } else {
           window.scrollTo(0, 0);
           _this.orderInfo = data.obj
+        }
+      })
+    },
+    queryComplaintsOrderDetails: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryComplaintsOrderDetails,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(res)
         }
       })
     },

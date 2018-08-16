@@ -3,7 +3,7 @@
   <div class="myInfo">
     <div class="myAcountNum">
       <p>胡币</p>
-      <h1>200</h1>
+      <h1>{{amount}}</h1>
       <a class="putCash" @click="putCash();">提现</a>
     </div>
     <div class="myAcountTable">
@@ -13,25 +13,100 @@
           <th>胡币变化</th>
           <th>日期</th>
         </tr>
-        <tr>
-          <td><img src="../common/img/productImg1.jpg" class="productImg"/>
-            <div class="myTableRg"><h3>胡庆余堂枇杷膏</h3><p>订单编号：154652451254621</p></div>
+        <tr v-for="(item,index) in tableList" :key="index">
+          <td>
+            <!--<img src="../common/img/productImg1.jpg" class="productImg"/>-->
+            <div class="myTableRg" style="margin-left: 20px;"><h3>{{item.typeMsg}}</h3>
+              <!--<p>订单编号：154652451254621</p>-->
+            </div>
           </td>
-          <td class="proMoney">+10</td>
-          <td class="proTime">2018年6月4日 09:20:30</td>
+          <td class="proMoney">{{item.amountStr}}</td>
+          <td class="proTime">{{item.time}}</td>
         </tr>
       </table>
+      <div style="width:100%;text-align: center;line-height: 80px;" v-show="!list">暂无记录</div>
     </div>
   </div>
+  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;" v-show="list">
+    <el-pagination
+      background
+      layout="prev, pager, next"
+      :total="total"
+      @current-change="handleCurrentChange"
+      :current-page.sync="pageNo"
+      :page-size="pageSize"
+    >
+    </el-pagination>
+  </div>
+  <el-dialog
+    title="提示"
+    :visible.sync="errorBox"
+    width="30%"
+    center>
+    <span>{{errMsg}}</span>
+    <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+  </el-dialog>
 </div>
 </template>
 <script type="text/ecmascript-6">
 export default {
   name: '',
   data () {
-    return {}
+    return {
+      tableList: [],
+      pageNo: 1,
+      pageSize: 10,
+      total: 5,
+      errMsg: '',
+      errorBox: false,
+      amount: '200',
+      list: true
+    }
   },
-  methods: {}
+  created () {
+    this.getMyAcount(1)
+  },
+  methods: {
+    putCash: function () {
+      this.$router.push({path: '/personal/putCash', query: {type: '1'}})
+    },
+    getMyAcount: function (pageNo) {
+      console.log(this.$store.state.userId, this.state)
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('logType', 2);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.accountLogList,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data, _this.state)
+          _this.total = data.totalItems
+          _this.tableList = data.listObject
+          if (_this.tableList.length === 0) {
+            _this.list = false
+          } else {
+            _this.list = true
+          }
+          _this.amount = data.accountResult.huBalance.amount
+        }
+      })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.getMyAcount(pageNum)
+    }
+  }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss">

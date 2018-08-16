@@ -1,4 +1,5 @@
 let apiUrl = '/api/fyapp/'
+// let apiUrl = process.env.API_ROOT
 let url = {
   api: {
     login: apiUrl + 'userLogin.do', // 登录
@@ -65,7 +66,11 @@ let url = {
     withdrawRate: apiUrl + 'withdrawRate.do', // 提现费率查询个人
     withdrawRateTeam: apiUrl + 'withdrawRateTeam.do', // 提现费率查询团队
     applyWithdraw: apiUrl + 'applyWithdraw.do', // 提现申请
-    withdrawLogList: apiUrl + 'withdrawLogList.do' // 提现记录
+    withdrawLogList: apiUrl + 'withdrawLogList.do', // 提现记录
+    sendOrder: apiUrl + 'sendOrder.do', // 发货
+    getUserChatRecord: apiUrl + 'getUserChatRecord.do', // 客服聊天列表
+    createUserChatRecord: apiUrl + 'createUserChatRecord.do', // 新增聊天记录
+    createCustomerChatRecord: apiUrl + 'createCustomerChatRecord.do' // 模拟客服聊天
   }
 }
 

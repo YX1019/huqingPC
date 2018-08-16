@@ -31,18 +31,19 @@
     <p>数量: <button @click="changeNum(-1)" class="hand">-</button><input type="text" v-model="num"/><button @click="changeNum(1)" class="hand">+</button> 剩余{{goodsNum}}</p>
     <p><a class="proBtn1 hand" @click="addCart(0)">立即购买</a><a class="proBtn2 hand" @click="addCart(1)">加入购物车</a><a class="proBtn3 hand" v-show="!collectionFlg" @click="addToCollect(obj.productId)">收藏</a><a class="proBtn3 hand" v-show="collectionFlg" @click="cancelCollect(obj.productId)">取消收藏</a></p>
   </div>
-  <div class="proRg">
-    <h5>胡庆余堂滨江店</h5>
-    <p>联系电话：0571-2222222</p>
-    <p>地址：杭州市滨江区2号</p>
-  </div>
+  <!--<div class="proRg">-->
+    <!--<h5>胡庆余堂滨江店</h5>-->
+    <!--<p>联系电话：0571-2222222</p>-->
+    <!--<p>地址：杭州市滨江区2号</p>-->
+  <!--</div>-->
   </div>
   <div class="proBottom clearfix">
-    <div class="proBtm_lf">
-      <ul>
-        <li v-for="item in 8" :key="item">药食同源</li>
-      </ul>
-    </div>
+    <!--<div class="proBtm_lf">-->
+      <!--<ul>-->
+        <!--<li v-for="item in 8" :key="item">药食同源</li>-->
+      <!--</ul>-->
+      <leftSort></leftSort>
+    <!--</div>-->
     <div class="proBtm_rg">
       <h3>商品名称：桃红四物汤<span>重量：0.25kg</span>体积：0.00m³</h3>
       <h5>桃红四物汤为调经要方之一，是《玉机微义》转引的《医垒元戎》中的一个方子，也称加味四物汤，桃红四物汤这一方名始于见《医宗金鉴》。该方由四物汤加味桃仁、红花而成，功效为养血活血。现代研究表明，桃红四物汤具有扩张血管、抗炎、抗疲劳、抗休克、调节免疫功能、降脂、补充微量元素、抗过敏等作用。</h5>
@@ -92,8 +93,12 @@
 </div>
 </template>
 <script type="text/ecmascript-6">
+import leftSort from './leftSort/leftSort'
 export default {
   name: '',
+  components: {
+    leftSort
+  },
   data () {
     return {
       productId: '',
@@ -188,7 +193,6 @@ export default {
           console.log(data)
           _this.obj = data.obj
           _this.headImgList = data.obj.headImgList
-          console.log(_this.headImgList)
           _this.attrAndValuees = data.obj.attrAndValuees
           _this.priceStocks = data.obj.priceStocks
           _this.goodsNum = data.obj.stock
@@ -298,7 +302,6 @@ export default {
         url: this.url.api.addToCollect,
         data: params
       }).then(function (res) {
-        console.log(res)
         let data = res.data
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
@@ -319,7 +322,6 @@ export default {
         url: this.url.api.cancelCollect,
         data: params
       }).then(function (res) {
-        console.log(res)
         let data = res.data
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
@@ -394,6 +396,7 @@ export default {
   .proTop{
     width:100%;
     height: auto;
+    min-height: 380px;
     margin-top: 20px;
   }
   .proLf{

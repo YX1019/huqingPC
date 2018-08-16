@@ -2,19 +2,12 @@
   <div class="store" style="border-top:1px solid #e70012;">
   <div class="curPosition">您现在的位置:商城</div>
     <div class="clearfix pList">
-    <div class="pList_lf">
-      <ul class="firstUl">
-        <li v-for="(item,index) in sortList" :key="index" class="firstLi">
-          <p @click="showToggle(item)">{{item.name}}<i class="iconfont rg" v-show="!item.isSubShow">&#xe62a;</i><i class="iconfont rg" v-show="item.isSubShow" style="font-size:28px;">&#xe602;</i></p>
-          <ul class="secondUl" v-show="item.isSubShow">
-            <li class="secondLi"  v-for="subItem in item.subItems" :key="subItem.name">{{subItem.name}}</li>
-          </ul>
-        </li>
-      </ul>
-    </div>
+      <div style="margin: 30px 15px 0 0;float: left;width: 220px;">
+        <leftSort></leftSort>
+      </div>
     <div class="pList_rg">
     <div class="conditions1">
-      排序:<span class="conditionsItem" @click="getColligate();">综合</span>
+      排序:
       <span class="conditionsItem"><span @click="priceDesc()">价格</span><i class="iconfont" @click="priceDesc(1)" :class="{'cur': priceState === 1}">&#xe630;</i><i class="iconfont" @click="priceDesc(2)" :class="{'cur': priceState === 2}">&#xe62f;</i></span>
       <span class="conditionsItem"><span @click="saleSort()">销量</span><i class="iconfont" @click="saleSort(1)" :class="{'cur': saleState === 1}">&#xe630;</i><i class="iconfont" @click="saleSort(2)" :class="{'cur': saleState === 2}">&#xe62f;</i></span>
     </div>
@@ -55,8 +48,12 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
+import leftSort from './leftSort/leftSort'
 export default {
   name: 'productList',
+  components: {
+    leftSort
+  },
   data () {
     return {
       active: 0,
@@ -124,9 +121,7 @@ export default {
     }
   },
   created () {
-    this.getcategory()
-    this.getProList()
-    console.log(this.cateList)
+    this.getProList(1)
   },
   mounted () {
 
@@ -134,17 +129,6 @@ export default {
   methods: {
     toProDetail: function (productId) {
       this.$router.push({path: '/productDetail', query: {productId: productId}})
-    },
-    getColligate: function () {
-      this.isShowColligate = true
-      this.priceState = ''
-      this.priceSort = ''
-      this.saleState = ''
-      this.salesSort = ''
-    },
-    closeColligate: function () {
-      this.isShowColligate = false
-      this.getProList(1)
     },
     handleCurrentChange: function (val) {
       this.getProList(val)
@@ -632,10 +616,8 @@ export default {
   .pList_lf{
     width:220px;
     float: left;
-    margin-right: 15px;
     box-sizing: border-box;
     border:1px solid #ccc;
-    margin-top: 30px;
   }
   .pList_rg{
     width:70%;

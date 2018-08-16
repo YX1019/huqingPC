@@ -7,7 +7,7 @@
     <div class="myAcountNum">
       <p>{{name}}</p>
       <h1>{{amount}}</h1>
-      <a class="putCash" v-if="name === '胡币' " @click="putCash();">提现</a>
+      <!--<a class="putCash" v-if="name === '胡币' " @click="putCash();">提现</a>-->
     </div>
     <div class="myAcountTable">
       <table cellspacing="0">
@@ -73,11 +73,12 @@ export default {
     }
   },
   created () {
-
-  },
-  mounted () {
     this.isCur = sessionStorage.getItem('isCur') || 0
     this.state = sessionStorage.getItem('state') || 1
+  },
+  mounted () {
+    // this.isCur = sessionStorage.getItem('isCur') || 0
+    // this.state = sessionStorage.getItem('state') || 1
     console.log(this.state)
     this.getMyAcount(1)
   },

@@ -70,7 +70,9 @@ export default {
     }
   },
   created () {
-    this.lookMyCart()
+    if (this.$store.state.userId) {
+      this.lookMyCart()
+    }
     this.getHotSearch()
     console.log(this.$store.state.isLogin, this.$store.state.name, this.$store.state.goodsNum)
     this.isActive = sessionStorage.getItem('sIndex') || 0

@@ -22,7 +22,7 @@
       </div>
       <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '3'">
         <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：已确认收货等待买家评价</span></p>
-        <h6>物流：中通快递 运单号：1567465435<br/>2018-06-21 18:20:12  <span class="orange">已签收</span></h6>
+        <h6>物流：{{wuliu.companyName}} 运单号：{{wuliu.nu}}<br/>{{wuliu.data[0].time}}<span class="orange" style="margin-left: 10px;">{{wuliu.data[0].context}}</span></h6>
       </div>
       <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '6'">
         <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：买家已评价</span></p>
@@ -61,11 +61,14 @@
   </div>
   <div class="bg" v-if="isShowBox"></div>
   <div class="deliveryBox" v-if="isShowBox">
-    <h3>填写物流信息<img src="../common/img/closed.png" @click="close()"/> </h3>
-    <p><span>选择物流公司</span><select><option>请选择物流公司</option></select></p>
-    <p><span>填写物流单号</span><input type="text"></p>
-    <a>发货</a>
-  </div>
+  <h3>填写物流信息<img src="../common/img/closed.png" @click="close()"/> </h3>
+  <p><span>选择物流公司</span>
+    <!--<select><option>请选择物流公司</option></select>-->
+    <select v-model="expressCom"><option value="0">请选择</option><option v-for="item in ExpressList" :value="item.expressNo" :key="item.expressNo">{{item.expressName}}</option></select>
+  </p>
+  <p><span>填写物流单号</span><input type="text" v-model="carriNo"></p>
+  <a @click="sendOrder()">发货</a>
+</div>
 </div>
 </template>
 <script type="text/ecmascript-6">
@@ -75,12 +78,18 @@ export default {
     return {
       isShowBox: false,
       orderId: '',
-      teamOrderInfo: {}
+      teamOrderInfo: {},
+      ExpressList: [],
+      expressCom: '',
+      carriNo: '',
+      wuliu: {}
     }
   },
   created () {
     this.getParams()
     this.queryTeamOrderDetails()
+  },
+  mounted () {
   },
   methods: {
     getParams () {
@@ -108,6 +117,12 @@ export default {
         } else {
           window.scrollTo(0, 0);
           _this.teamOrderInfo = data.obj
+          if (_this.teamOrderInfo.statusEnum === '1') {
+            _this.getExpress()
+          }
+          if (_this.teamOrderInfo.statusEnum === '3') {
+            _this.queryTeamOrderExpress()
+          }
         }
       })
     },
@@ -116,6 +131,72 @@ export default {
     },
     close: function () {
       this.isShowBox = false
+    },
+    sendOrder: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      params.append('carriCom', this.expressCom);
+      params.append('carriNo', this.carriNo);
+      console.log(this.expressCom, this.carriNo)
+      this.axios({
+        method: 'post',
+        url: this.url.api.sendOrder,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.isShowBox = false
+          _this.$message({
+            message: '发货成功',
+            type: 'success',
+            duration: 1000
+          })
+          _this.queryTeamOrderDetails()
+        }
+      })
+    },
+    getExpress: function () {
+      let _this = this;
+      this.axios({
+        method: 'post',
+        url: this.url.api.getExpress
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.ExpressList = data.obj
+        }
+      })
+    },
+    queryTeamOrderExpress: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryTeamOrderExpress,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+          console.log('yicahng')
+        } else {
+          console.log(data)
+          _this.wuliu = data.obj
+        }
+      })
     }
   }
 }
@@ -193,6 +274,9 @@ export default {
     &:last-child{
       margin-right: 10px;
     }
+  }
+  .orange{
+    color: #ff8a00;
   }
 .orderDetail{
   width:1150px;

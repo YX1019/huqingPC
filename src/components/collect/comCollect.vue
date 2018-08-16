@@ -3,7 +3,7 @@
     <div class="collectTop">
       <a :class="{'cur' : collectType == 0}" @click="toCollect()">产品收藏</a>
       <a :class="{'cur' : collectType == 1}" @click="toCollectStore()">店铺收藏</a>
-      <div class="collectSearch"><input type="text"/><button>搜索</button> </div>
+      <!--<div class="collectSearch"><input type="text"/><button>搜索</button> </div>-->
     </div>
     <div class="collectTitle"><span>全部<b>{{name}}</b>{{collectNum}}</span></div>
     <ul class="collectList" v-show="list">
@@ -163,6 +163,10 @@ export default {
         font-size: 14px;
         color: #101010;
         line-height: 40px;
+        height: 40px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       h5 {
         font-size: 16px;

@@ -29,7 +29,7 @@
         <!--<div class="orderItem6" v-else-if="item.statusEnum === '4'"><p>退货代收</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
         <!--<div class="orderItem6" v-else-if="item.statusEnum === '5'"><p>待评价</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
         <!--<div class="orderItem6" v-else><p>{{item.statusStr}}</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
-        <div class="orderItem7" v-if="item.statusEnum === '1' && item.proType != 2  && item.trans == 0 "><a class="returnGoods">发货</a></div>
+        <div class="orderItem7" v-if="item.statusEnum === '1' && item.proType != 2  && item.trans == 0 "><a class="returnGoods" @click="sendGoods(item.childOrderId)">发货</a></div>
         <div class="orderItem7" v-if="item.statusEnum == 1 && (item.proType == 2  || item.trans == 1) "><a class="returnGoods" @click="receiveServiceOrder(item.childOrderId)">接单</a><p class="hand">取消订单</p></div>
         <div class="orderItem7" v-if="item.statusEnum == 2 && item.proType != 2  && item.trans == 0 ">
           <!--<a class="returnGoods">查看物流</a>-->
@@ -72,6 +72,16 @@
     <el-button type="primary" @click="errorBox = false">确 定</el-button>
   </span>
     </el-dialog>
+    <div class="bg" v-if="isShowBox"></div>
+    <div class="deliveryBox" v-if="isShowBox">
+      <h3>填写物流信息<img src="../common/img/closed.png" @click="close()"/> </h3>
+      <p><span>选择物流公司</span>
+        <!--<select><option>请选择物流公司</option></select>-->
+        <select v-model="expressCom"><option value="0">请选择</option><option v-for="item in ExpressList" :value="item.expressNo" :key="item.expressNo">{{item.expressName}}</option></select>
+      </p>
+      <p><span>填写物流单号</span><input type="text" v-model="carriNo"></p>
+      <a @click="sendOrder()">发货</a>
+    </div>
   </div>
 
 </template>
@@ -90,11 +100,17 @@ export default {
       pageNo: 1,
       pageStation: '',
       teamList: [],
-      wli: {}
+      wli: {},
+      isShowBox: false,
+      childOrderId: '',
+      expressCom: '',
+      carriNo: '',
+      ExpressList: ''
     }
   },
   created () {
     this.queryTeamOrderList(0, 1)
+    this.getExpress()
   },
   methods: {
     changeOrderState: function (index) {
@@ -215,11 +231,134 @@ export default {
           }
         }
       })
+    },
+    sendGoods: function (childOrderId) {
+      this.isShowBox = true
+      this.childOrderId = childOrderId
+    },
+    close: function () {
+      this.isShowBox = false
+    },
+    sendOrder: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.childOrderId);
+      params.append('carriCom', this.expressCom);
+      params.append('carriNo', this.carriNo);
+      console.log(this.expressCom, this.carriNo)
+      this.axios({
+        method: 'post',
+        url: this.url.api.sendOrder,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.isShowBox = false
+          _this.$message({
+            message: '发货成功',
+            type: 'success',
+            duration: 1000
+          })
+          if (_this.active === '0' || _this.active === 0) {
+            _this.queryTeamOrderList(0, _this.pageStation)
+          } else {
+            _this.queryTeamOrderList(3, _this.pageStation)
+          }
+        }
+      })
+    },
+    getExpress: function () {
+      let _this = this;
+      this.axios({
+        method: 'post',
+        url: this.url.api.getExpress
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.ExpressList = data.obj
+        }
+      })
     }
   }
 }
 </script>
 <style lang="scss" rel="stylesheet/scss" scoped>
+  .bg{
+    width:100%;
+    height: 100%;
+    position: fixed;
+    top:0;
+    left: 0;
+    background: rgba(0,0,0,0.5);
+    z-index:10;
+  }
+  .deliveryBox {
+    position: fixed;
+    top: 20%;
+    left: 50%;
+    margin-left: -290px;
+    z-index: 11;
+    width: 580px;
+    background: #fff;
+    border-radius: 5px;
+    box-sizing: border-box;
+    padding: 45px 70px;
+    font-size:18px;
+    text-align: center;
+    h3{
+      font-size: 24px;
+      width:100%;
+      position: relative;
+      text-align: center;
+      margin-bottom: 60px;
+      img{
+        position: absolute;
+        right:-50px;
+        top:-30px;
+      }
+    }
+    p{
+      margin-bottom: 30px;
+      input{
+        width:300px;
+        height:45px;
+        border:1px solid #ddd;
+        margin-left: 15px;
+        box-sizing: border-box;
+        padding-left: 10px;
+      }
+      select{
+        width:300px;
+        height:45px;
+        border:1px solid #ddd;
+        margin-left: 15px;
+        box-sizing: border-box;
+        padding-left: 10px;
+      }
+    }
+    a{
+      cursor: pointer;
+      width:328px;
+      height: 55px;
+      margin:80px auto 0 auto;
+      background:#dd0011 ;
+      color: #fff;
+      display: inline-block;
+      text-align: center;
+      line-height: 55px;
+      border-radius: 5px;
+    }
+  }
+
   .personRg{
     margin-left: 250px;
     position: relative;

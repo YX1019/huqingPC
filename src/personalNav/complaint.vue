@@ -14,7 +14,7 @@
     </div>
     <div class="myOrderItemCont ">
       <div class="orderItem1 orderItemName"><img :src="item.proImg"/>
-        <div class="oderItem_rg"><h3>{{item.proName}}</h3><p>{{item.attrNames}}：{{item.valueNames}}</p></div>
+        <div class="oderItem_rg"><h3>{{item.proName}}</h3><p v-show="item.attrNames">{{item.attrNames}}：{{item.valueNames}}</p></div>
       </div>
       <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥{{item.perPrice}}</p></div>
       <div class="orderItem3"><p>{{item.orderCount}}</p></div>

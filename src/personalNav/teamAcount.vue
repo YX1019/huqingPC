@@ -20,31 +20,34 @@
           <th>{{name}}变化</th>
           <th>日期</th>
         </tr>
-        <tr>
-          <td><img src="../common/img/productImg1.jpg" class="productImg"/><span style="line-height: 55px;">张三</span>
+        <tr v-for="(item,index) in mxList" :key="index" v-show="list">
+          <td>
+            <img :src="item.headImg" class="productImg"/>
+            <span style="line-height: 55px;">{{item.nickName}}</span>
           </td>
-          <td class="proMoney">+10</td>
-          <td class="proTime">2018年6月4日 09:20:30</td>
+          <td class="proMoney">{{item.amountStr}}</td>
+          <td class="proTime">{{item.time}}</td>
         </tr>
       </table>
+      <div style="width:100%;text-align: center;line-height: 80px;" v-show="!list">暂无记录</div>
     </div>
+      <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;" v-show="list">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="total"
+          @current-change="handleCurrentChange"
+          :current-page.sync="pageNo"
+          :page-size="pageSize"
+        >
+        </el-pagination>
+      </div>
     </div>
     <div class="teamCont" v-show="teamName === 0 ">
        <ul class="teamList">
          <li v-for="(item,index) in userTeamList" :key="index"><img src="item.headImg" class="productImg"/>{{item.nickName}}</li>
        </ul>
     </div>
-  </div>
-  <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;">
-    <el-pagination
-      background
-      layout="prev, pager, next"
-      :total="total"
-      @current-change="handleCurrentChange"
-      :current-page.sync="pageNo"
-      :page-size="pageSize"
-    >
-    </el-pagination>
   </div>
   <el-dialog
     title="提示"
@@ -74,7 +77,9 @@ export default {
       pageSize: 10,
       total: 5,
       userTeamList: [],
-      amount: ''
+      amount: '',
+      mxList: [],
+      list: true
     }
   },
   created () {
@@ -95,7 +100,7 @@ export default {
       this.accountLogTeam(1)
     },
     putCash: function () {
-      this.$router.push({ path: '/personal/putCash' })
+      this.$router.push({path: '/personal/putCash', query: {type: '2'}})
     },
     getTeamInfo: function (index) {
       this.teamName = index
@@ -119,6 +124,13 @@ export default {
         } else {
           console.log(data)
           _this.userTeamList = data.userTeamList
+          _this.mxList = data.listObject
+          _this.total = data.totalItems
+          if (_this.total === 0 || _this.total === '0') {
+            _this.list = false
+          } else {
+            _this.list = true
+          }
           if (_this.state === 1 || _this.state === '1') {
             _this.amount = data.accountResult.devoteAmount.amount
           } else if (_this.state === 2 || _this.state === '2') {
