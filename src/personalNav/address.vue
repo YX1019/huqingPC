@@ -5,7 +5,7 @@
     <p v-show="isNew"><span class="red" style="margin-right: 30px;">新增收货地址</span>电话号码、手机号选填一项，其余均为必填项</p>
     <p v-show="!isNew"><span class="red" style="margin-right: 30px;">修改收货地址</span>电话号码、手机号选填一项，其余均为必填项</p>
     <div class="addrCont">
-      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="120px" class="demo-ruleForm">
+      <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="120px" class="demo-ruleForm" @submit.native.prevent>
       <el-form-item label="所在地区" prop="region">
         <div>
           <VDistpicker

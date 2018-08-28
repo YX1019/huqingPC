@@ -1,15 +1,19 @@
 <template>
   <div>
     <div class="pList_lf">
+
       <ul class="firstUl">
         <li v-for="(item,index) in sortList" :key="index" class="firstLi">
-          <p @click="showToggle(item)">{{item.name}}<i class="iconfont rg" v-show="!item.isSubShow">&#xe62a;</i><i
+          <p @click="showToggle(item)">{{item.cateName}}<i class="iconfont rg" v-show="!item.isSubShow">&#xe62a;</i><i
             class="iconfont rg" v-show="item.isSubShow" style="font-size:28px;">&#xe602;</i></p>
+          <transition name="slide-fade">
           <ul class="secondUl" v-show="item.isSubShow">
-            <li class="secondLi" v-for="subItem in item.subItems" :key="subItem.name">{{subItem.name}}</li>
+            <li class="secondLi" v-for="(subItem,indexx) in item.childList" :key="subItem" @click="selectProduct(item, subItem, index, indexx)" :class="{'cur': (isActive==index && isActive2 == indexx)}">{{subItem}}</li>
           </ul>
+          </transition>
         </li>
       </ul>
+
     </div>
     <el-dialog
       title="提示"
@@ -29,46 +33,26 @@ export default {
   data () {
     return {
       active: 0,
+      isActive: -1,
+      isActive2: -1,
       errorBox: false,
       errMsg: '',
       sortList: [
         {
-          name: '药食同源',
+          cateName: '药食同源',
           isSubShow: false,
-          subItems: [
-            {
-              name: '五味子'
-            },
-            {
-              name: '大黄'
-            },
-            {
-              name: '枸杞'
-            }
-          ]
+          childList: ['汤料1', '汤料2', '汤料3']
         },
         {
-          name: '养生汤料',
+          cateName: '养生汤料',
           isSubShow: false,
-          subItems: [
-            {
-              name: '汤料1'
-            },
-            {
-              name: '汤料2'
-            },
-            {
-              name: '汤料3'
-            }
-          ]
+          childList: ['汤料1', '汤料2', '汤料3']
         }
       ]
     }
   },
   created () {
     this.getcategory()
-    this.getProList()
-    console.log(this.cateList)
   },
   mounted () {
 
@@ -76,17 +60,24 @@ export default {
   methods: {
     getcategory: function () {
       let _this = this
-      this.axios.get(this.url.api.categoryQuery).then(function (res) {
+      this.axios.get(this.url.api.categoryQueryWeb).then(function (res) {
         let data = res.data
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
           console.log(res)
-          _this.cateList = data.obj.cateList
-          _this.cateSubList = data.obj.cateSubList
+          _this.sortList = data.obj.cateList
+          _this.sortList.forEach(function (item) {
+            _this.$set(item, 'isSubShow', false)
+          })
         }
       })
+    },
+    selectProduct: function (item, subItem, index, indexx) {
+      this.isActive = index
+      this.isActive2 = indexx
+      this.$router.push({path: '/productList', query: {sort: item.cateName, subSort: subItem, sortName: item.cateFatherName}})
     },
     showToggle: function (item) {
       item.isSubShow = !item.isSubShow
@@ -129,5 +120,20 @@ export default {
     &:first-child{
       border-top:none
     }
+    &.cur{
+      background: #f85c5c;
+      color: #fff;
+    }
+  }
+  .slide-fade-enter-active {
+    transition: all .3s ease;
+  }
+  .slide-fade-leave-active {
+    transition: all .3s ease;
+  }
+  .slide-fade-enter, .slide-fade-leave-to
+  {
+    transform: translateY(-10px);
+    opacity: 0;
   }
 </style>

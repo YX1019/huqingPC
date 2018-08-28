@@ -57,7 +57,7 @@
         </div>
       </div>
   <div class="orderCalc">
-    <span>返胡币10</span>
+    <!--<span>返胡币10</span>-->
     <div class="orderCalcRg">
       <p><label>商品总价：</label><span>￥{{orderInfo.allAmount}}</span></p>
       <p><label>运费(快递)：</label><span>￥0.00</span></p>

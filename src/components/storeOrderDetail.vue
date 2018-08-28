@@ -1,75 +1,122 @@
 <template>
-<div class="orderDetail clearfix">
-  <div class="curPosition">您现在的位置:首页>用户中心>门店订单>订单详情</div>
-  <p class="orderTime">2018-06-21 12:20:10</p>
-  <div class="orderContent">
-     <div class="order_lf">
-       <h2>订单信息</h2>
-       <p><span class="ordCont_lf">收货地址：</span><span class="ordCont_rg">
-         {{teamOrderInfo.receiveName}}，{{teamOrderInfo.receiveCell}}，{{teamOrderInfo.receiveProvince}} {{teamOrderInfo.receiveCity}} {{teamOrderInfo.receiveArea}} {{teamOrderInfo.receiveAddress}}</span></p>
-       <p><span class="ordCont_lf">订单编号：</span><span class="ordCont_rg">{{teamOrderInfo.orderId}}</span></p>
-       <p><span class="ordCont_lf">商家：</span><span class="ordCont_rg">胡庆余堂滨江店</span></p>
-       <p><span class="ordCont_lf">地址：</span><span class="ordCont_rg">杭州市滨江区</span></p>
-       <p><span class="ordCont_lf">电话：</span><span class="ordCont_rg">158458784520</span></p>
-     </div>
-    <div class="order_rg">
-      <div class="waitToPay" v-if="teamOrderInfo.statusEnum === '0'">
-        <img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待买家付款</span>
+  <div class="orderDetail clearfix">
+    <div class="curPosition">您现在的位置:首页>用户中心>门店订单>订单详情</div>
+    <p class="orderTime">2018-06-21 12:20:10</p>
+    <div class="orderContent">
+      <div class="order_lf">
+        <h2>订单信息</h2>
+        <p><span class="ordCont_lf">收货地址：</span><span class="ordCont_rg">
+         {{teamOrderInfo.receiveName}}，{{teamOrderInfo.receiveCell}}，{{teamOrderInfo.receiveProvince}} {{teamOrderInfo.receiveCity}} {{teamOrderInfo.receiveArea}} {{teamOrderInfo.receiveAddress}}</span>
+        </p>
+        <p><span class="ordCont_lf">订单编号：</span><span class="ordCont_rg">{{teamOrderInfo.orderId}}</span></p>
+        <p><span class="ordCont_lf">商家：</span><span class="ordCont_rg">胡庆余堂滨江店</span></p>
+        <p><span class="ordCont_lf">地址：</span><span class="ordCont_rg">杭州市滨江区</span></p>
+        <p><span class="ordCont_lf">电话：</span><span class="ordCont_rg">158458784520</span></p>
       </div>
-      <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '1'">
-       <p><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待卖家发货</span></p>
-        <p>您可以 <span class="rtnGoodsBtn" @click="sendGoods()">点击发货</span></p>
-      </div>
-      <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '3'">
-        <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：已确认收货等待买家评价</span></p>
-        <h6>物流：{{wuliu.companyName}} 运单号：{{wuliu.nu}}<br/>{{wuliu.data[0].time}}<span class="orange" style="margin-left: 10px;">{{wuliu.data[0].context}}</span></h6>
-      </div>
-      <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '6'">
-        <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：买家已评价</span></p>
-        <h6><i class="iconfont orange1">&#xe694;</i><i class="iconfont orange1">&#xe694;</i><i class="iconfont orange1">&#xe694;</i><i class="iconfont orange1">&#xe694;</i>
-          <i class="iconfont orange1">&#xe694;</i>东西非常好，很有效</h6>
-      </div>
-      <div class="waitToPay" v-else>
-        <img src="../common/img/icon.png"/><span>订单状态：{{teamOrderInfo.statusStr}}</span>
+      <div class="order_rg">
+        <div class="waitToPay" v-if="teamOrderInfo.statusEnum === '0'">
+          <img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待买家付款</span>
+        </div>
+        <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '1'">
+          <p><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待卖家发货</span></p>
+          <p>您可以 <span class="rtnGoodsBtn" @click="sendGoods()">点击发货</span></p>
+        </div>
+        <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '3'">
+          <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：已确认收货等待买家评价</span></p>
+          <h6>物流：{{wuliu.companyName}} 运单号：{{wuliu.nu}}<br/>{{wuliuNew.time}}<span class="orange"
+                                                                                   style="margin-left: 10px;">{{wuliuNew.context}}</span>
+          </h6>
+        </div>
+        <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '6'">
+          <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：买家已评价</span></p>
+          <h6><i class="iconfont orange1" v-for="item in star" :key="item">&#xe694;</i>
+            <!--<i class="iconfont orange1">&#xe694;</i>-->
+            <!--<i class="iconfont orange1">&#xe694;</i>-->
+            <!--<i class="iconfont orange1">&#xe694;</i>-->
+            <!--<i class="iconfont orange1">&#xe694;</i>-->
+            {{comment}}</h6>
+        </div>
+        <div class="waitToPay" v-else>
+          <img src="../common/img/icon.png"/><span>订单状态：{{teamOrderInfo.statusStr}}</span>
+        </div>
       </div>
     </div>
-  </div>
     <div class="orderTitle">
       <span class="orderItem1">商品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
       <span class="orderItem4">收货方式</span><span class="orderItem5">优惠</span><span class="orderItem6">状态</span>
     </div>
-      <div class="ordInfoCont">
-        <div class="myOrderItemCont ">
-          <div class="orderItem1 orderItemName"><img :src="teamOrderInfo.proImg"/>
-            <div class="oderItem_rg"><h3>{{teamOrderInfo.proName}}</h3><p v-show="teamOrderInfo.attrNames">{{teamOrderInfo.attrNames}}：{{teamOrderInfo.valueNames}}</p></div>
-          </div>
-          <div class="orderItem2"><p>￥{{teamOrderInfo.perPrice}}</p></div>
-          <div class="orderItem3"><p>{{teamOrderInfo.orderCount}}</p></div>
-          <div class="orderItem4"><p v-if="teamOrderInfo.trans === '0'">快递</p><p v-if="teamOrderInfo.trans === '1'">自提</p></div>
-          <div class="orderItem5"><p style="height: 40px;"></p></div>
-          <div class="orderItem6"><p>{{teamOrderInfo.statusStr}}</p></div>
+    <div class="ordInfoCont" v-if="way!= 'unpay'">
+      <div class="myOrderItemCont ">
+        <div class="orderItem1 orderItemName"><img :src="teamOrderInfo.proImg"/>
+          <div class="oderItem_rg"><h3>{{teamOrderInfo.proName}}</h3>
+            <p v-show="teamOrderInfo.attrNames">{{teamOrderInfo.attrNames}}：{{teamOrderInfo.valueNames}}</p></div>
+        </div>
+        <div class="orderItem2"><p>￥{{teamOrderInfo.perPrice}}<span style="color:#f7a53e; margin-left: 5px;" v-show="teamOrderInfo.perPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{teamOrderInfo.perPoint}}</span></p></div>
+        <div class="orderItem3"><p>{{teamOrderInfo.orderCount}}</p></div>
+        <div class="orderItem4"><p v-if="teamOrderInfo.trans === '0'">快递</p>
+          <p v-if="teamOrderInfo.trans === '1'">自提</p></div>
+        <div class="orderItem5"><p style="height: 40px;"></p></div>
+        <div class="orderItem6"><p>{{teamOrderInfo.statusStr}}</p></div>
+      </div>
+    </div>
+    <!--待付款-->
+    <div class="ordInfoCont" v-if="way === 'unpay'" >
+      <div style="position: relative;width: 100%;float: left;border-bottom: 1px solid #ccc;">
+      <div class="myOrderItemCont " v-for="item in teamOrderInfo.detailsGoodsResults" :key="item.childOrderId" style="border-bottom:0;">
+        <div class="orderItem1 orderItemName"><img :src="item.proImg"/>
+          <div class="oderItem_rg"><h3>{{item.proName}}</h3>
+            <p v-show="teamOrderInfo.attrNames">{{item.attrNames}}：{{item.valueNames}}</p></div>
+        </div>
+        <div class="orderItem2"><p>￥{{item.perPrice}}<span style="color:#f7a53e; margin-left: 5px;" v-show="item.perPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{item.perPoint}}</span></p></div>
+        <div class="orderItem3"><p>{{item.orderCount}}</p></div>
+        <div class="orderItem4"><p v-if="item.trans === '0'">快递</p>
+          <p v-if="item.trans === '1'">自提</p>
         </div>
       </div>
-  <div class="orderCalc">
-    <span>返胡币10</span>
-    <div class="orderCalcRg">
-      <p><label>商品总价：</label><span>￥{{teamOrderInfo.allAmount}}</span></p>
-      <p><label>运费(快递)：</label><span>￥0.00</span></p>
-      <p><label>订单总价：</label><span class="font18">￥{{teamOrderInfo.allAmount}}</span></p>
-      <p><label>需付款：</label><span class="red font18">￥{{teamOrderInfo.allAmount}}</span></p>
+        <div style="position: absolute;width: 100%;top: 45px;left: 0;">
+        <div class="orderItem5" style="margin-left:72%;"><p>优惠{{teamOrderInfo.youhuiAmount}}元</p></div>
+        <div class="orderItem6"><p>{{teamOrderInfo.statusStr}}</p></div>
+        </div>
+      </div>
     </div>
+    <div class="orderCalc">
+      <!--<span>返胡币10</span>-->
+      <div class="orderCalcRg">
+        <p><label>订单金额：</label><span>￥{{teamOrderInfo.orderAmount}}</span></p>
+        <p><label>运费：</label><span>￥{{teamOrderInfo.luggageAmount}}</span></p>
+        <p><label>胡币抵扣：</label><span>￥{{teamOrderInfo.reduceAmount}}</span></p>
+        <p><label>临时胡币：</label><span>￥{{teamOrderInfo.huTempAmount}}</span></p>
+        <p><label>优惠金额：</label><span>￥{{teamOrderInfo.youhuiAmount}}</span></p>
+        <p><label>总积分：</label><span>{{teamOrderInfo.allPoint}}</span></p>
+        <p v-show="teamOrderInfo.discount>0"><label>折扣：</label><span>{{teamOrderInfo.discount}}折</span></p>
+        <p><label>实付款：</label><span class="red font18">￥{{teamOrderInfo.allAmount}}</span></p>
+      </div>
+    </div>
+    <div class="bg" v-if="isShowBox"></div>
+    <div class="deliveryBox" v-if="isShowBox">
+      <h3>填写物流信息<img src="../common/img/closed.png" @click="close()"/></h3>
+      <p><span>选择物流公司</span>
+        <!--<select><option>请选择物流公司</option></select>-->
+        <select v-model="expressCom">
+          <option value="0">请选择</option>
+          <option v-for="item in ExpressList" :value="item.expressNo" :key="item.expressNo">{{item.expressName}}
+          </option>
+        </select>
+      </p>
+      <p><span>填写物流单号</span><input type="text" v-model="carriNo"></p>
+      <a @click="sendOrder()">发货</a>
+    </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="errorBox"
+      width="30%"
+      center>
+      <span>{{errMsg}}</span>
+      <span slot="footer" class="dialog-footer">
+    <el-button type="primary" @click="errorBox = false">确 定</el-button>
+  </span>
+    </el-dialog>
   </div>
-  <div class="bg" v-if="isShowBox"></div>
-  <div class="deliveryBox" v-if="isShowBox">
-  <h3>填写物流信息<img src="../common/img/closed.png" @click="close()"/> </h3>
-  <p><span>选择物流公司</span>
-    <!--<select><option>请选择物流公司</option></select>-->
-    <select v-model="expressCom"><option value="0">请选择</option><option v-for="item in ExpressList" :value="item.expressNo" :key="item.expressNo">{{item.expressName}}</option></select>
-  </p>
-  <p><span>填写物流单号</span><input type="text" v-model="carriNo"></p>
-  <a @click="sendOrder()">发货</a>
-</div>
-</div>
 </template>
 <script type="text/ecmascript-6">
 export default {
@@ -82,12 +129,22 @@ export default {
       ExpressList: [],
       expressCom: '',
       carriNo: '',
-      wuliu: {}
+      wuliu: {},
+      wuliuNew: {},
+      star: '',
+      comment: '',
+      way: '',
+      errorBox: false,
+      errMsg: ''
     }
   },
   created () {
     this.getParams()
-    this.queryTeamOrderDetails()
+    if (this.way === 'unpay') {
+      this.queryTeamOrderDetailsForWaitPay()
+    } else {
+      this.queryTeamOrderDetails()
+    }
   },
   mounted () {
   },
@@ -97,6 +154,7 @@ export default {
       let routerParams = this.$route.query.orderId
       // 将数据放在当前组件的数据内
       this.orderId = routerParams
+      this.way = this.$route.query.way
       console.log(this.orderId)
     },
     queryTeamOrderDetails: function () {
@@ -122,6 +180,54 @@ export default {
           }
           if (_this.teamOrderInfo.statusEnum === '3') {
             _this.queryTeamOrderExpress()
+          }
+          if (_this.teamOrderInfo.statusEnum === '6') {
+            _this.queryEvaluate()
+          }
+        }
+      })
+    },
+    queryTeamOrderDetailsForWaitPay: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryTeamOrderDetailsForWaitPay,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(res)
+          _this.teamOrderInfo = data.obj
+        }
+      })
+    },
+    queryEvaluate: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('type', 1);
+      params.append('childOrderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryEvaluate,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(res)
+          if (data.listObject.length > 0) {
+            _this.star = data.listObject[0].star
+            _this.comment = data.listObject[0].commentWord
           }
         }
       })
@@ -195,6 +301,8 @@ export default {
         } else {
           console.log(data)
           _this.wuliu = data.obj
+          _this.wuliuNew = data.obj.data[0]
+          console.log(_this.wuliu)
         }
       })
     }

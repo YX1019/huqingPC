@@ -4,11 +4,11 @@
     <div class="clearfix pList">
     <div class="pList_lf">
      <img src="../common/img/shopLogo.png"/>
-      <h4>胡庆余堂滨江店</h4>
+      <h4>{{store.teamName}}</h4>
       <p>营业时间：9:00-21:00</p>
-      <p>店铺地址：杭州市滨江区伟业路1号</p>
-      <p>联系电话：0571-8888888</p>
-      <div class="collectShop"><i class="iconfont collectIcon" v-show="!isCollect" @click="addToCollect(teamId, '1')">&#xe618;</i><i class="iconfont collectIcon" :class="{'collectRed': isCollect}" v-show="isCollect" @click="cancelCollect(teamId, '1')">&#xe694;</i><span :class="{'collectRed': isCollect}">收藏本店</span></div>
+      <p>店铺地址：{{store.address}}</p>
+      <p>联系电话：{{store.cell}}</p>
+      <div class="collectShop hand"><i class="iconfont collectIcon" v-show="!isCollect" @click="addToCollect(teamId, '1')">&#xe618;</i><i class="iconfont collectIcon" :class="{'collectRed': isCollect}" v-show="isCollect" @click="cancelCollect(teamId, '1')">&#xe694;</i><span :class="{'collectRed': isCollect}">收藏本店</span></div>
     </div>
     <div class="pList_rg">
       <div class="shopItem">
@@ -16,30 +16,30 @@
          <ul class="goodsList2 clearfix" v-show="list">
             <li v-for =" item in goodsList" :key="item.productId">
                <div @click="toProDetail(item.productId);">
-                 <img :src="item.imgList"/>
+                 <img :src="item.listImg"/>
                  <p>{{item.productName}}</p>
-                 <h5>￥{{item.productPrice}}元</h5>
-                 <h6><s>￥{{item.oldPrice}}元</s><span class="rg">月售{{item.mounthSales}}件</span></h6>
+                 <h5>￥{{item.amount}}元<span style="color:#f7a53e; margin-left: 5px;" v-show="item.point > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin-left: 5px;">&#xe674;</i>{{item.point}}</span></h5>
+                 <h6><s>￥{{item.oldAmount}}元</s><span class="rg">月售{{item.mounthCount}}件</span></h6>
                </div>
                <div><button @click="addToCollect(item.productId, '0')" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId, '0')"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
             </li>
+           <div v-show="!list" style="text-align: center;line-height: 80px;">暂无商品</div>
          </ul>
-         <div v-show="!list" style="text-align: center;line-height: 80px;">暂无商品</div>
        </div>
-      <div class="shopItem">
-        <div class="conditions2" >商家服务</div>
+      <div class="shopItem clearfix">
+        <div class="conditions2">商家服务</div>
         <ul class="goodsList2 clearfix" v-show="list">
-          <li v-for =" item in goodsList" :key="item.productId">
+          <li v-for =" item in severList" :key="item.productId">
             <div @click="toProDetail(item.productId);">
-              <img :src="item.imgList"/>
+              <img :src="item.listImg"/>
               <p>{{item.productName}}</p>
-              <h5>￥{{item.productPrice}}元</h5>
-              <h6><s>￥{{item.oldPrice}}元</s><span class="rg">月售{{item.mounthSales}}件</span></h6>
+              <h5>￥{{item.amount}}元<span style="color:#f7a53e; margin-left: 5px;" v-show="item.point > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin-left: 5px;">&#xe674;</i>{{item.point}}</span></h5>
+              <h6><s>￥{{item.oldAmount}}元</s><span class="rg">月售{{item.mounthCount}}件</span></h6>
             </div>
-            <div><button @click="addToCollect(item.productId)" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId)"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
+            <div><button @click="addToCollect(item.productId, '0')" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId, '0')"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
           </li>
+          <div v-show="!list2" style="text-align: center;line-height: 80px;">暂无商品</div>
         </ul>
-        <div v-show="!list" style="text-align: center;line-height: 80px;">暂无商品</div>
       </div>
     </div>
     </div>
@@ -61,16 +61,20 @@ export default {
   data () {
     return {
       goodsList: [],
+      severList: [],
       errorBox: false,
       errMsg: '',
       list: true,
+      list2: true,
       isCollect: false,
-      teamId: ''
+      teamId: '',
+      store: {}
     }
   },
   created () {
     this.getParams()
-    this.getProList()
+    this.getProList(2, 1)
+    this.getProList('', 2)
     this.queryMerchantDetails()
   },
   mounted () {
@@ -87,13 +91,17 @@ export default {
     toProDetail: function (productId) {
       this.$router.push({path: '/productDetail', query: {productId: productId}})
     },
-    getProList: function () {
+    getProList: function (type, proType) {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
+      params.append('teamId', this.teamId);
+      params.append('type', type);
+      params.append('proType', proType);
+      console.log(this.teamId, type, proType)
       this.axios({
         method: 'post',
-        url: this.url.api.queryProduct,
+        url: this.url.api.merchantProQuery,
         data: params
       }).then(function (res) {
         let data = res.data
@@ -102,11 +110,20 @@ export default {
           _this.errorBox = true
         } else {
           console.log(res)
-          _this.goodsList = data.listObject
-          if (_this.goodsList.length === 0) {
-            _this.list = false
+          if (type === '2' || type === 2) {
+            _this.goodsList = data.listObject
+            if (_this.goodsList.length === 0) {
+              _this.list = false
+            } else {
+              _this.list = true
+            }
           } else {
-            _this.list = true
+            _this.severList = data.listObject
+            if (_this.severList.length === 0) {
+              _this.list2 = false
+            } else {
+              _this.list2 = true
+            }
           }
         }
       })
@@ -115,6 +132,7 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       params.append('teamId', this.teamId);
+      params.append('userId', this.$store.state.userId);
       this.axios({
         method: 'post',
         url: this.url.api.queryMerchantDetails,
@@ -126,6 +144,8 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.store = data.obj
+          _this.isCollect = data.obj.collectionFlg
         }
       })
     },
@@ -133,7 +153,11 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('collectId', id);
+      if (type === '0') {
+        params.append('collectId', id);
+      } else {
+        params.append('collectId', this.teamId);
+      }
       params.append('collectType', type);
       this.axios({
         method: 'post',
@@ -145,7 +169,11 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
-          _this.getProList(1)
+          if (type === '0') {
+            _this.getProList()
+          } else {
+            _this.queryMerchantDetails()
+          }
         }
       })
     },
@@ -153,7 +181,11 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('collectId', id);
+      if (type === '0') {
+        params.append('collectId', id);
+      } else {
+        params.append('collectId', this.teamId);
+      }
       params.append('collectType', type);
       this.axios({
         method: 'post',
@@ -165,7 +197,11 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
-          _this.getProList(1)
+          if (type === '0') {
+            _this.getProList()
+          } else {
+            _this.queryMerchantDetails()
+          }
         }
       })
     }

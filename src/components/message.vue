@@ -17,11 +17,12 @@
     <!--</ul>-->
   <!--</div>-->
   <div class="news_rg" style="width:100%">
-   <ul>
+   <ul v-show="!loading">
      <li v-for="item in msgList" :key="item.activityId" @click="toMsgDetail(item.activityId)"><a class="hand"><span class="newsList_lf"><i>●</i>{{item.activityTitle}}</span><span class="newsList_rg">{{item.time}}</span></a></li>
    </ul>
   </div>
-  <div style="width: 100%;height: 50px;text-align: center;clear: both;padding-top:50px;">
+  <div class="loading" v-show="loading" style="text-align: center;margin: 50px auto;"><img src="../common/img/loading.gif" style="width:40px;"/></div>
+  <div style="width: 100%;height: 50px;text-align: center;clear: both;padding-top:50px;" v-show="!loading">
     <el-pagination
       background
       layout="prev, pager, next"
@@ -54,7 +55,8 @@ export default {
       pageSize: 20,
       msgList: [],
       errorBox: false,
-      errMsg: ''
+      errMsg: '',
+      loading: false
     }
   },
   created () {
@@ -67,6 +69,7 @@ export default {
       this.getMsgList(pageNum)
     },
     getMsgList: function (pageNo) {
+      this.loading = true
       let _this = this;
       let params = new URLSearchParams();
       // params.append('userId', this.$store.state.userId);
@@ -79,6 +82,7 @@ export default {
         data: params
       }).then(function (res) {
         let data = res.data
+        _this.loading = false
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
           _this.errorBox = true

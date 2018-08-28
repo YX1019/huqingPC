@@ -4,11 +4,9 @@
   <div class="newsDCont">
     <h1>{{msgInfo.activityTitle}}</h1>
     <h3>发布时间：{{msgInfo.time}}</h3>
-    <div class="newsDcontInfo" v-html="msgInfo.activityUrl">
-      我国大部门地区习惯自冬至起“数九”，每九天为一个小节，共分为九九八十一天。
-      民间流传着一首歌谣：一九、二九不出手，三九、四九冰上走，五九、六九沿河看柳，七九河开，八九燕来，九九加一九耕牛遍地走。
-      冬至后，阳气缓缓回升，白天慢慢变长，是阴阳转化的关键节气，也是夏病冬防、冬病冬治的最好时机。所有古时冬至也喻意为新生命的开始。
-      冬至养生食谱
+    <div class="newsDcontInfo">
+      <div>{{msgInfo.activityInfo}}</div>
+      <div v-html="msgInfo.activityUrl"></div>
     </div>
   </div>
   <el-dialog

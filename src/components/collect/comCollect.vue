@@ -6,14 +6,15 @@
       <!--<div class="collectSearch"><input type="text"/><button>搜索</button> </div>-->
     </div>
     <div class="collectTitle"><span>全部<b>{{name}}</b>{{collectNum}}</span></div>
-    <ul class="collectList" v-show="list">
+    <ul class="collectList" v-show="list && !loading">
       <li v-for="item in collectList" :key="item.collectId"><img :src="item.image"/>
         <p v-if="collectType == 0">{{item.productName}}</p>
         <p v-if="collectType == 1">{{item.teamName}}</p>
         <h5 v-show="collectType == 0">￥{{item.productPrice}}</h5>
       </li>
     </ul>
-    <div style="text-align: center;line-height: 80px;" v-show="!list">暂无收藏</div>
+    <div style="text-align: center;line-height: 80px;" v-show="!list && !loading">暂无收藏</div>
+    <div class="loading" v-show="loading" style="text-align: center;margin: 50px auto;"><img src="../../common/img/loading.gif" style="width:40px;"/></div>
     <el-dialog
       title="提示"
       :visible.sync="errorBox"
@@ -43,7 +44,8 @@ export default {
       errorBox: false,
       collectList: [],
       collectNum: 0,
-      list: true
+      list: true,
+      loading: false
     }
   },
   created () {
@@ -58,6 +60,7 @@ export default {
     },
     getCollect: function () {
       let _this = this;
+      _this.loading = true
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       params.append('type', this.collectType);
@@ -67,6 +70,7 @@ export default {
         data: params
       }).then(function (res) {
         let data = res.data
+        _this.loading = false
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
           _this.errorBox = true

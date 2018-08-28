@@ -8,6 +8,7 @@
   </div>
   <div class="goods" v-show="!noGoods">
     <h5 class="goodsTitle">
+      <span>积分</span>
       <span>单价</span>
       <span>数量</span>
       <span>金额</span>
@@ -36,7 +37,7 @@
             <!--<el-button slot="reference" style="background: none;border:none;padding: 0;"> <img src="../common/img/ticket.png" class="ticket"/></el-button>-->
           <!--</el-popover>-->
         </div>
-        <span style="margin-left:15px;">运送方式<select  @change="chooseMothod(item)" class="kdWay" v-model="item.delivery"><option value="0">快递</option><option value="1">自提</option></select></span>
+        <span style="margin-left:15px;">运送方式<select class="kdWay" v-model="item.delivery" disabled><option value="0">快递</option><option value="1">自提</option></select></span>
         <span class="rg" >
         <el-popover
           placement="left"
@@ -60,6 +61,7 @@
     <div class="goodsItem" v-for="iitem in item.cartInfo" :key="iitem.cartId">
       <div class="goodsItem1"><i class="checkIcon" :class="{checked:iitem.checked}" @click="selectedProduct(item, iitem)"></i> <img :src="iitem.productImg"/><span>{{iitem.productName}}</span></div>
       <div class="goodsItem2"><p v-for="itemm in iitem.attrValue" :key="itemm.attrName" v-show="itemm.attrName">{{itemm.attrName}}：{{itemm.values}}</p></div>
+      <div class="goodsItem7"><p>{{iitem.point}}</p></div>
       <div class="goodsItem3"><p>￥299.00</p><p>￥{{iitem.price}}</p></div>
       <div class="goodsItem4"><button @click="updateCartSum(iitem, 0)">-</button><input type="text" v-model="iitem.productNum" readonly/><button @click="updateCartSum(iitem, 1)">+</button> </div>
       <div class="goodsItem5 red">￥{{iitem.price * iitem.productNum}}</div>
@@ -70,8 +72,10 @@
       <i class="checkIcon" :class="{'checked':checkAllFlag}" @click="checkAll()"></i>全选
       <!--<span class="opera1 hand">删除</span>-->
       <!--<span class="hand">移入收藏夹</span>-->
-      <span class="opera3" style="margin-left: 45%;">已选商品<span class="red">{{selectGoodsNum}}</span>件</span>
+      <span class="opera3" style="margin-left: 40%;">已选商品<span class="red">{{selectGoodsNum}}</span>件</span>
+      <span style="margin-right: 3%;">总积分：<span class="red">{{totalPoint}}</span></span>
       <span class="opera4">合计（不含运费）:<span class="red">{{totalMoney | formatMoney}}</span></span>
+
       <a @click="createOrder()" :class="{'balance':isBanlance}">结算</a>
     </div>
   </div>
@@ -104,6 +108,7 @@ export default {
       cartList: [],
       checkAllFlag: false,
       totalMoney: 0,
+      totalPoint: 0,
       selectGoodsNum: 0,
       isBanlance: false,
       noGoods: false,
@@ -362,11 +367,13 @@ export default {
     calcTotalPrice: function () {
       var _this = this;
       _this.totalMoney = 0;
+      _this.totalPoint = 0;
       _this.selectGoodsNum = 0;
       _this.cartList.forEach(function (item) {
         item.cartInfo.forEach(function (iitem) {
           if (iitem.checked) {
             _this.totalMoney += iitem.price * iitem.productNum
+            _this.totalPoint += iitem.point * iitem.productNum
             _this.selectGoodsNum += parseInt(iitem.productNum)
           }
         })
@@ -428,25 +435,27 @@ export default {
       })
     },
     showStore: function (item) {
-      let _this = this;
-      let params = new URLSearchParams();
-      params.append('cartIds', item.cartIds);
-      this.curCartIds = item.cartIds
-      this.axios({
-        method: 'post',
-        url: this.url.api.nearQuery,
-        data: params
-      }).then(function (res) {
-        let data = res.data
-        if (!res.data.bizSucc) {
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
-        } else {
-          console.log(data)
-          _this.dialogVisible = true
-          _this.storeLists = data.listObject
-        }
-      })
+      this.dialogVisible = !this.dialogVisible
+      if (this.dialogVisible) {
+        let _this = this;
+        let params = new URLSearchParams();
+        params.append('cartIds', item.cartIds);
+        this.curCartIds = item.cartIds
+        this.axios({
+          method: 'post',
+          url: this.url.api.nearQuery,
+          data: params
+        }).then(function (res) {
+          let data = res.data
+          if (!res.data.bizSucc) {
+            _this.errMsg = data.errMsg
+            _this.errorBox = true
+          } else {
+            console.log(data)
+            _this.storeLists = data.listObject
+          }
+        })
+      }
     },
     chooseStore: function (item) {
       this.dialogVisible = false
@@ -546,13 +555,13 @@ export default {
     width:100%;
     .goodsTitle{
       height:40px;
-      width:48%;
-      margin-left: 49%;
+      width:55%;
+      margin-left: 44%;
       span{
         display: inline-block;
         text-align: center;
         font-weight: 100;
-        width:24%;
+        width:18%;
         line-height:40px;
       }
     }
@@ -592,7 +601,7 @@ export default {
     }
   }
   .goodsItem1{
-    width:40%;float: left;
+    width:35%;float: left;
     img{
       width:88px;
       margin-right: 10px;
@@ -611,15 +620,18 @@ export default {
     color: #818181;
     min-height: 20px;}
   .goodsItem3{
-    width:12%;float: left;
+    width:10%;float: left;
     p{
       &:first-child{
         text-decoration: line-through;
         color: #818181;}
     }
   }
+  .goodsItem7{
+    width:10%;float: left;
+  }
   .goodsItem4{
-    width:14%;
+    width:13%;
     float: left;
     button{
       float: left;
@@ -652,7 +664,7 @@ export default {
     }
   }
   .goodsItem5{width:10%;float: left;}
-  .goodsItem6{width:12%;float: left;}
+  .goodsItem6{width:10%;float: left;}
   .goodsOpera{
     box-sizing: border-box;
     float: left;

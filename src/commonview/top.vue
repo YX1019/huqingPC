@@ -6,8 +6,10 @@
       <div class="lf hand" :class="{'cartDiv' : isShowCart}">
       <div @click="showCartList()"><i class="iconfont red">&#xe887;</i>购物车<span class="red">{{this.$store.state.goodsNum}}</span>件<i class="iconfont">&#xe60b;</i></div>
        <div class="smallCart" v-show="isShowCart">
+         <div style="max-height: 140px;overflow: auto;">
          <div class="smallCartItem" v-for="item in cartList" :key="item.cartId">
            <span class="smallCart_lf">{{item.productName}}</span><span class="smallCart_Rg">{{item.price}}元×{{item.productNum}}</span>
+         </div>
          </div>
          <div style="border-top:1px solid #ccc;margin: 0 10px;"><button class="lookCart" @click="toCart()">查看我的购物车</button></div>
        </div>
@@ -26,7 +28,7 @@
         <img src="../common/img/logo.png"/>
         <div class="searchLine rg">
           <div class="search"><i class="iconfont searchIcon">&#xe627;</i><input type="text" placeholder="请输入搜索关键词" class="keyword" v-model="searchCont"><input type="button" value="搜索" class="searchBtn" @click="toStore()"></div>
-          <div class="hotWord"><span>鹿精蛹虫草膏</span><span>黄芪</span><span>甘草</span><span>艾叶</span><span>白术</span></div>
+          <div class="hotWord hand"><span v-for="item in hotWords" :key="item.id" @click="toProductList(item.keyWord)">{{item.keyWord}}</span></div>
         </div>
         </div>
       </div>
@@ -66,7 +68,8 @@ export default {
       cartList: [],
       searchCont: '',
       errorBox: false,
-      errMsg: ''
+      errMsg: '',
+      hotWords: []
     }
   },
   created () {
@@ -194,8 +197,12 @@ export default {
     },
     showCartList: function () {
       this.isShowCart = !this.isShowCart
+      if (this.isShowCart) {
+        this.lookMyCart()
+      }
     },
     toCart: function () {
+      this.isShowCart = false
       if (this.$store.state.isLogin) {
         this.$router.push({path: '/shopcart'})
       } else {
@@ -210,6 +217,10 @@ export default {
     toStore: function () {
       this.$router.push({path: '/productList', query: {searchCont: this.searchCont}})
     },
+    toProductList: function (keyWord) {
+      this.$router.push({path: '/productList', query: {searchCont: keyWord}})
+      this.searchCont = keyWord
+    },
     getHotSearch: function () {
       let _this = this;
       this.axios({
@@ -222,6 +233,7 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.hotWords = data.obj
         }
       })
     }
@@ -358,11 +370,12 @@ export default {
   .smallCart{
     position: absolute;
     top: 34px;
-    left:0;
+    left:-1px;
     width:270px;
     background: #fff;
     border: 1px solid #ccc;
     border-top: 0;
+    z-index:2;
   }
   .cartDiv{
     border-top: 1px solid #ccc;
@@ -373,6 +386,7 @@ export default {
   .smallCartItem{
     width:100%;
     height: auto;
+    float: left;
     &:first-child{
       .smallCart_Rg{
         border-top: 1px solid #ccc;
@@ -382,6 +396,11 @@ export default {
 
   .smallCart_lf{
     width:98px;
+    height: 35px;
+    float: left;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
     display: inline-block;
     box-sizing: border-box;
     padding-left: 10px;

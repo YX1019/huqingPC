@@ -3,8 +3,8 @@
  <div class="footCont">
    <div class="clearfix">
    <div class="lf">
-     <p class="lf code"><img src="../common/img/code1.png"/><br/>胡庆余堂公众号</p>
-     <p class="lf code"><img src="../common/img/code2.png"/><br/>中华老字号查询</p>
+     <p class="lf code"><img src="../common/img/code1.png"/><br/>胡庆余堂服务号</p>
+     <p class="lf code"><img src="../common/img/code2.png"/><br/>胡庆余堂参茸名补</p>
    </div>
    <div class="rg footTxt">
      <p>服务热线:400-321-2980</p>
@@ -41,6 +41,9 @@
     .code{
       margin-right: 20px;
       text-align: center;
+      img{
+        width:104px;
+      }
     }
     ul{
       font-size: 12px;

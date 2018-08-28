@@ -34,7 +34,8 @@
            </div>
        </div>
        <div v-show="menuIndex === 1">
-         支付宝支付
+         <p style="margin-left: 30px;line-height: 50px;">请按下面的按钮去支付宝支付</p>
+         <el-button type="primary" @click="webPageAliPay()" style="margin-left: 30px;">去支付</el-button>
        </div>
      </div>
   </div>
@@ -155,6 +156,9 @@ export default {
           }
         }
       })
+    },
+    webPageAliPay: function () {
+      window.location.href = process.env.API_ROOT + 'webPageAliPay.do?userId=' + this.$store.state.userId + '&orderNo=' + this.orderNo + '&orderType=' + this.type
     }
   }
 }

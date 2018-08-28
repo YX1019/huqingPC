@@ -6,11 +6,11 @@
   <div class="curPosition">您现在的位置:商城</div>
     <div class="myOffer">
       <div class="storeTitle">我的优惠 <i>MY OFFER</i>
-        <!--<span class="rg">查看更多</span>-->
+        <span class="rg hand" @click="toCouponList()">查看更多</span>
       </div>
       <div class="offerCont clearfix">
         <div class="offerLf"><img src="../common/img/storeImg1.jpg"/><div class="offerLfCont"><h1>会员福利</h1><p>注册送好礼</p></div></div>
-        <div class="offerMid" @click="toCoupon()"><img src="../common/img/storeImg2.jpg"/><div class="offerMidCont"><h1>代金券</h1><p>20元代50元</p></div></div>
+        <div class="offerMid"><img src="../common/img/storeImg2.jpg"/><div class="offerMidCont"><h1>代金券</h1><p>{{dicountList.title}}</p><a @click="toCoupon(dicountList.discountId)" class="hand">查看详情</a></div></div>
         <div class="offerRg"><img src="../common/img/storeImg3.jpg"/><div class="offerRgCont"><h1>活动名称</h1><p>活动详情简介</p></div></div>
       </div>
     </div>
@@ -55,19 +55,20 @@
         <h4><button @click="reset()">重置</button><button @click="closeColligate()">确定</button></h4>
       </div>
     </div>
-    <ul class="goodsList clearfix" v-show="list">
+    <ul class="goodsList clearfix" v-show="list && !loading">
       <li v-for =" item in goodsList" :key="item.productId">
         <div @click="toProDetail(item.productId);">
           <img :src="item.imgList"/>
           <p>{{item.productName}}</p>
-          <h5>￥{{item.productPrice}}元</h5>
+          <h5>￥{{item.productPrice}}元<span style="color:#f7a53e; margin-left: 5px;" v-show="item.pointPrice > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{item.pointPrice}}</span></h5>
           <h6><s>￥{{item.oldPrice}}元</s><span class="rg">月售{{item.mounthSales}}件</span></h6>
         </div>
-        <div><button @click="addToCollect(item.productId)" v-if="!item.collectionFlg"><i class="iconfont" style="margin-right:5px;">&#xe648;</i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId)"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i class="iconfont" style="margin-right: 5px;">&#xe625;</i>放入购物车</button></div>
+        <div><button @click="addToCollect(item)" v-if="!item.collectionFlg"><i class="iconfont" style="margin-right:5px;">&#xe648;</i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item)"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i class="iconfont" style="margin-right: 5px;">&#xe625;</i>放入购物车</button></div>
       </li>
     </ul>
-    <div v-show="!list" style="text-align: center;line-height: 80px;">暂无商品</div>
-    <div style="width: 100%;height: 50px;text-align: center;margin-bottom: 30px;" v-show="list">
+    <div v-show="!list && !loading" style="text-align: center;line-height: 80px;">暂无商品</div>
+    <div class="loading" v-show="loading" style="text-align: center;margin: 50px auto;"><img src="../common/img/loading.gif"/></div>
+    <div style="width: 100%;height: 50px;text-align: center;margin-bottom: 30px;" v-show="list && !loading">
       <el-pagination
         background
         @current-change="handleCurrentChange"
@@ -126,14 +127,17 @@ export default {
       list: true,
       cateList1: {},
       cateList2: {},
-      msgList: []
+      msgList: [],
+      curPage: 1,
+      loading: false,
+      dicountList: {}
     }
   },
   created () {
     this.getcategory()
     this.getProList()
     this.getMsgList()
-    console.log(this.cateList)
+    this.getDicountList()
   },
   mounted () {
 
@@ -147,8 +151,8 @@ export default {
     toProDetail: function (productId) {
       this.$router.push({path: '/productDetail', query: {productId: productId}})
     },
-    toCoupon: function () {
-      this.$router.push({path: '/coupon'})
+    toCoupon: function (discountId) {
+      this.$router.push({path: '/coupon', query: {discountId: discountId}})
     },
     getColligate: function () {
       this.isShowColligate = true
@@ -162,9 +166,11 @@ export default {
       this.getProList(1)
     },
     handleCurrentChange: function (val) {
+      this.curPage = val
       this.getProList(val)
     },
     getProList: function (pageNo) {
+      this.loading = true
       console.log(this.priceSort, this.salesSort)
       let _this = this;
       let params = new URLSearchParams();
@@ -185,6 +191,7 @@ export default {
         data: params
       }).then(function (res) {
         let data = res.data
+        _this.loading = false
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
           _this.errorBox = true
@@ -216,11 +223,11 @@ export default {
         }
       })
     },
-    addToCollect: function (id) {
+    addToCollect: function (item) {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('collectId', id);
+      params.append('collectId', item.productId);
       params.append('collectType', '0');
       this.axios({
         method: 'post',
@@ -232,15 +239,16 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
-          _this.getProList(1)
+          _this.$set(item, 'collectionFlg', true);
+          // _this.getProList(_this.curPage)
         }
       })
     },
-    cancelCollect: function (id) {
+    cancelCollect: function (item) {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('collectId', id);
+      params.append('collectId', item.productId);
       params.append('collectType', '0');
       this.axios({
         method: 'post',
@@ -252,7 +260,7 @@ export default {
           _this.errMsg = data.errMsg
           _this.errorBox = true
         } else {
-          _this.getProList(1)
+          _this.$set(item, 'collectionFlg', false);
         }
       })
     },
@@ -360,6 +368,22 @@ export default {
     },
     toMsgDetail: function (activityId) {
       this.$router.push({path: '/msgDetail', query: {activityId: activityId}})
+    },
+    toCouponList: function () {
+      this.$router.push({path: '/couponList'})
+    },
+    getDicountList: function () {
+      let _this = this
+      this.axios.get(this.url.api.getDicountList).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(res)
+          _this.dicountList = data.listObject[0]
+        }
+      })
     }
   }
 }
@@ -432,6 +456,16 @@ export default {
     img{
       width:100%;
       height: auto;
+    }
+    a{
+      display: inline-block;
+      width:100px;
+      height: 35px;
+      line-height: 35px;
+      text-align: center;
+      background: #fff;
+      border-radius: 3px;
+      margin-top:10px;
     }
   }
   .offerRg{

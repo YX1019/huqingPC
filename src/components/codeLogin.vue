@@ -11,6 +11,8 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
+// import wx from 'weixin-js-sdk'
+// import $ from 'jquery'
 export default {
   name: '',
   data () {

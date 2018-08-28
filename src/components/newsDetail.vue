@@ -16,10 +16,24 @@
     <textarea class="newsComment" v-model="knowComment"></textarea>
     <button class="putComment" @click="addKnowledgeComment()">发表评论</button>
     <div class="allComment">
-      <h1><span>全部评论({{commnetCount}})</span></h1>
+      <h1><span>全部评论({{total}})</span></h1>
       <ul>
-        <li><img src="../common/img/logo.png"/><div class="n_rg"><h2>张芳<span>9-14</span></h2><p>非常实用，谢谢分享</p></div> </li>
+        <li v-for="item in commentList" :key="item.id">
+          <img :src="item.headImg"/>
+          <div class="n_rg"><h2>{{item.nickName}}<span>{{item.dateStr}}</span></h2><p>{{item.commentWord}}</p></div>
+        </li>
       </ul>
+      <div style="width: 100%;line-height: 50px;text-align: center;" v-show="!list">暂无评论</div>
+      <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;" v-show="list">
+        <el-pagination
+          background
+          layout="prev, pager, next"
+          :total="total"
+          @current-change="handleCurrentChange"
+          :current-page.sync="pageNo"
+          :page-size="pageSize">
+        </el-pagination>
+      </div>
       <p class="anotherNews"><span>上一篇：</span><span>下一篇：</span></p>
     </div>
   </div>
@@ -46,16 +60,20 @@ export default {
       newsInfo: {},
       isZan: false,
       praiseCount: '',
-      commnetCount: '',
       knowComment: '',
       newsType: 1,
-      title: ''
+      title: '',
+      pageSize: 10,
+      total: 0,
+      pageNo: 1,
+      list: true,
+      commentList: []
     }
   },
   created () {
     this.getParams()
     this.getKnowledgeDetails()
-    // this.knowledgeCommentQuery()
+    this.knowledgeCommentQuery(1)
   },
   methods: {
     getParams () {
@@ -87,6 +105,7 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          window.scrollTo(0, 0);
           _this.newsInfo = data.obj
           _this.isZan = data.obj.zanOrNot
           _this.praiseCount = data.obj.praiseCount
@@ -94,13 +113,16 @@ export default {
         }
       })
     },
-    knowledgeCommentQuery: function () { // 评论列表
+    knowledgeCommentQuery: function (pageNum) { // 评论列表
       let _this = this;
       let params = new URLSearchParams();
-      params.append('knowId', this.knowId);
+      params.append('linkId', this.knowId);
+      params.append('type', 3);
+      params.append('pageNum', pageNum);
+      params.append('pageSize', this.pageSize);
       this.axios({
         method: 'post',
-        url: this.url.api.knowledgeCommentQuery,
+        url: this.url.api.queryEvaluate,
         data: params
       }).then(function (res) {
         let data = res.data
@@ -109,8 +131,19 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
+          _this.total = data.totalItems
+          _this.commentList = data.listObject
+          if (_this.commentList.length === 0 || _this.commentList.length === '0') {
+            _this.list = false
+          } else {
+            _this.list = true
+          }
         }
       })
+    },
+    handleCurrentChange (val) {
+      var pageNum = val
+      this.queryEvaluate(pageNum)
     },
     knowledgeZan: function (type) { // 点赞
       let _this = this;
@@ -150,8 +183,11 @@ export default {
           _this.errorBox = true
         } else {
           console.log(data)
-          _this.errMsg = data.errMsg
-          _this.errorBox = true
+          _this.$message({
+            message: '评论成功！',
+            type: 'success',
+            duration: 1000
+          });
           _this.knowComment = ''
           _this.knowledgeCommentQuery()
         }

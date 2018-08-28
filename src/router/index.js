@@ -26,6 +26,8 @@ import productList from '@/components/productList'
 import productDetail from '@/components/productDetail'
 import shop from '@/components/shop'
 import coupon from '@/components/coupon'
+import couponList from '@/components/couponList'
+import paySucess from '@/components/paySucess'
 import personInfo from '@/personalNav/personInfo'
 import myAcount from '@/personalNav/myAcount'
 import teamAcount from '@/personalNav/teamAcount'
@@ -39,11 +41,12 @@ import myCollect from '@/personalNav/myCollect'
 import complaint from '@/personalNav/complaint'
 import cashExchange from '@/personalNav/cashExchange'
 import address from '@/personalNav/address'
+import NotFoundComponent from '@/components/NotFoundComponent'
 
 Vue.use(Router)
 
 export default new Router({
-  // mode: 'history',
+  mode: 'history',
   routes: [
     {
       path: '/',
@@ -96,67 +99,67 @@ export default new Router({
       redirect: '/personal/userCenter',
       children: [
         {
-          path: '/personal/userCenter',
+          path: 'userCenter',
           name: 'userCenter',
           component: userCenter
         },
         {
-          path: '/personal/personInfo',
+          path: 'personInfo',
           name: 'personInfo',
           component: personInfo
         },
         {
-          path: '/personal/myAcount',
+          path: 'myAcount',
           name: 'myAcount',
           component: myAcount
         },
         {
-          path: '/personal/putCash',
+          path: 'putCash',
           name: 'putCash',
           component: putCash
         },
         {
-          path: '/personal/teamAcount',
+          path: 'teamAcount',
           name: 'teamAcount',
           component: teamAcount
         },
         {
-          path: '/personal/myOder',
+          path: 'myOder',
           name: 'myOder',
           component: myOder
         },
         {
-          path: '/personal/storeOder',
+          path: 'storeOder',
           name: 'storeOder',
           component: storeOder
         },
         {
-          path: '/personal/feedback',
+          path: 'feedback',
           name: 'feedback',
           component: feedback
         },
         {
-          path: '/personal/myDiscount',
+          path: 'myDiscount',
           name: 'myDiscount',
           component: myDiscount
         },
         {
-          path: '/personal/myCollect',
+          path: 'myCollect',
           name: 'myCollect',
           component: myCollect
         },
         {
-          path: '/personal/complaint',
+          path: 'complaint',
           name: 'complaint',
           component: complaint
         },
         {
-          path: '/personal/cashExchange',
+          path: 'cashExchange',
           name: 'cashExchange',
           component: cashExchange
         },
         {
-          path: '/personal/address',
+          path: 'address',
           name: 'address',
           component: address
         }
@@ -246,6 +249,17 @@ export default new Router({
       path: '/coupon',
       name: 'coupon',
       component: coupon
-    }
+    },
+    {
+      path: '/couponList',
+      name: 'couponList',
+      component: couponList
+    },
+    {
+      path: '/paySucess',
+      name: 'paySucess',
+      component: paySucess
+    },
+    { path: '*', component: NotFoundComponent }
   ]
 })

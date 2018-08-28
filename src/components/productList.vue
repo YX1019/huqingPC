@@ -2,7 +2,7 @@
   <div class="store" style="border-top:1px solid #e70012;">
   <div class="curPosition">您现在的位置:商城</div>
     <div class="clearfix pList">
-      <div style="margin: 30px 15px 0 0;float: left;width: 220px;">
+      <div style="margin: 30px 15px 30px 0;float: left;width: 220px;">
         <leftSort></leftSort>
       </div>
     <div class="pList_rg">
@@ -117,16 +117,29 @@ export default {
             }
           ]
         }
-      ]
+      ],
+      sort: '',
+      subSort: '',
+      sortName: ''
     }
   },
   created () {
+    this.getParams()
     this.getProList(1)
   },
   mounted () {
 
   },
   methods: {
+    getParams () {
+      // 取到路由带过来的参数
+      let routerParams = this.$route.query.searchCont
+      // 将数据放在当前组件的数据内
+      this.productName = routerParams
+      this.sort = this.$route.query.sort
+      this.subSort = this.$route.query.subSort
+      this.sortName = this.$route.query.sortName
+    },
     toProDetail: function (productId) {
       this.$router.push({path: '/productDetail', query: {productId: productId}})
     },
@@ -134,16 +147,34 @@ export default {
       this.getProList(val)
     },
     getProList: function (pageNo) {
-      console.log(this.priceSort, this.salesSort)
+      if (!this.$store.state.userId) {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({ path: '/login' })
+        return
+      }
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       params.append('priceSort', this.priceSort);
       params.append('salesSort', this.salesSort);
-      params.append('fatherCate', this.fatherCate);
-      params.append('childCate', this.childCate);
-      params.append('fatherEfectCate', this.fatherEfectCate);
-      params.append('childEfectCate', this.childEfectCate);
+      if (this.productName) {
+        params.append('productName', this.productName);
+      }
+      if (this.sortName === '商品分类') {
+        if (this.sort) {
+          params.append('fatherCate', this.sort);
+          params.append('childCate', this.subSort);
+        }
+      } else {
+        if (this.sort) {
+          params.append('fatherEfectCate', this.sort);
+          params.append('childEfectCate', this.subSort);
+        }
+      }
       params.append('leastPrice', this.leastPrice);
       params.append('mostPrice', this.mostPrice);
       params.append('pageNum', pageNo);
@@ -265,6 +296,15 @@ export default {
     },
     showToggle: function (item) {
       item.isSubShow = !item.isSubShow
+    }
+  },
+  watch: {
+    $route: {
+      handler: function (val) {
+        console.log(val);
+        this.getParams()
+        this.getProList(1)
+      }
     }
   }
 }

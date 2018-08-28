@@ -4,6 +4,10 @@
     <h1>提现</h1>
     <p><label>提现金额:</label><input type="text" v-model="amount"/><span class="red">{{amountStr}}</span> <span class="red marginLeft20">{{rateStr}}</span></p>
     <p><label>提现至:</label><span class="payWay2"><el-radio v-model="radio" label="1"><img src="../common/img/zfb.png"/> </el-radio></span><span><el-radio v-model="radio" label="2"><img src="../common/img/wechat.png"/> 微信</el-radio></span></p>
+    <div class="zfbInfo" v-show="radio == 1">
+      <p><label>真实姓名:</label><input type="text" v-model="zfbName" placeholder="请输入您的真实姓名"/></p>
+      <p><label>支付宝账号:</label><input type="text" v-model="zfbNum" placeholder="请输入您的支付宝账号"/></p>
+    </div>
     <button @click="applyWithdraw()">提现</button>
   </div>
   <div class="putCashCont">
@@ -56,7 +60,9 @@ export default {
       list: true,
       pageNo: 1,
       pageSize: 10,
-      total: 5
+      total: 5,
+      zfbNum: '',
+      zfbName: ''
     }
   },
   created () {
@@ -216,7 +222,7 @@ export default {
       padding: 20px 25px;
       label{
         margin-right: 25px;
-        width:70px;
+        width:86px;
         display: inline-block;
         font-size: 16px;
       }

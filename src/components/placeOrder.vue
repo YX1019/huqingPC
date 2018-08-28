@@ -10,6 +10,28 @@
       </div>
     </div>
   </div>
+  <div class="fapai">
+    <p>发票
+      <el-switch
+      v-model="isOpen"
+      active-color="#ff4949"
+      inactive-color="#ccc"
+      style="float: right;margin-right: 30%;"
+      @click="isNeedTax()"
+      >
+    </el-switch>
+    </p>
+    <div class="fpCont" v-show="isOpen">
+      <h4>发票类型</h4>
+      <p>普通发票</p>
+      <h4>发票抬头</h4>
+      <ul><li v-for="(item,index) in typeList" :class="{'cur': index == active}" :key="index" @click="chooseType(index)">{{item}}</li></ul>
+      <div><span>发票抬头</span><input type="text" v-model="invoiceTitle"></div>
+      <div v-show="active == 1"><span>税号</span><input type="text" v-model="taxNumber"></div>
+      <h4>收票人信息</h4>
+      <p>收票人手机号：{{fpCell}}</p>
+    </div>
+  </div>
   <div class="orderTitle">
     <span>店铺宝贝</span>
     <span>商品属性</span>
@@ -24,13 +46,14 @@
       <div class="orderItem1"><img :src="itemm.proImg"/><span>{{itemm.proName}}</span> </div>
       <div class="orderItem2" v-show="itemm.attrNames">{{itemm.attrNames}}:{{itemm.valueNames}}</div>
       <div class="orderItem2" v-show="itemm.attrNames == null ">无</div>
-      <div class="orderItem3">{{itemm.perPrice}}</div>
+      <div class="orderItem3">{{itemm.perPrice}}<span style="color:#f7a53e; margin-left: 5px;" v-show="itemm.perPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{itemm.perPoint}}</span></div>
       <div class="orderItem4">{{itemm.perCount}}</div>
-      <div class="orderItem5"><select disabled><option selected></option></select></div>
-      <div class="orderItem6">{{itemm.perPrice * itemm.perCount}}</div>
+      <div class="orderItem5">&nbsp;</div>
+      <div class="orderItem6">{{itemm.perPrice * itemm.perCount}}<span style="color:#f7a53e; margin-left: 5px;" v-show="itemm.perPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{itemm.perPoint * itemm.perCount}}</span></div>
     </div>
     <div class="methods">运送方式<select v-model="item.trans" disabled><option value="0">快递</option><option value="1">自提</option></select>
-      <select disabled class="rg" style="margin-right:12%"><option selected>{{item.giveMessage}}</option></select>
+      <!--<select disabled class="rg" style="margin-right:12%"><option selected>{{item.giveMessage}}</option></select>-->
+      <span class="rg" style="margin-right:12%;color: #dd0011;">{{item.giveMessage}}</span>
     </div>
     <!--<div class="address" v-show="isExpress"><label class="lf">收货地址</label>-->
       <!--<div class="addrOption">-->
@@ -44,9 +67,9 @@
     <!--</div>-->
     <div class="address" v-show="!isExpress">门店地址 <span style="margin-left: 20px">浙江省杭州市滨江区胡庆余堂滨江店</span>
     </div>
-    <div class="address"><p class="total">店铺合计:<span> ￥{{item.orderMerchantPrice}}</span></p></div>
+    <div class="address"><p class="total">店铺合计:<span> ￥{{item.orderMerchantPrice}}</span><span style="color:#f7a53e; margin-left: 5px;" v-show="item.orderMerchantPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{item.orderMerchantPoint}}</span></p></div>
   </div>
-  <p class="realPayment">实付款:<span>￥{{orderObj.orderAllAmount}}</span></p>
+  <p class="realPayment">实付款:<span>￥{{orderObj.orderAllAmount}}<span style="color:#f7a53e; margin-left: 5px;" v-show="orderObj.orderAllPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{orderObj.orderAllPoint}}</span></span></p>
   <p class="clearfix"><button class="putOrder" @click="completeOrder()">提交订单</button></p>
   <el-dialog
     title="提示"
@@ -93,7 +116,16 @@ export default {
       city: '',
       area: '',
       addr: '',
-      cell: ''
+      cell: '',
+      mrAddrMsg: '',
+      isOpen: false,
+      typeList: ['个人', '单位'],
+      active: 0,
+      taxNumber: '',
+      invoiceTitle: '',
+      fpCell: '',
+      hasInvoice: '0',
+      invoiceType: '1'
     }
   },
   created () {
@@ -146,6 +178,14 @@ export default {
           _this.orderObj = data.obj
           _this.orderCartList = data.obj.orderMerchantList
           _this.orderNo = data.obj.orderNo
+          // _this.address = data.obj.reName + '  ' + data.obj.reProvince + data.obj.reCity + data.obj.reArea + data.obj.reAddr + '  ' + data.obj.reCell
+          _this.name = data.obj.reName
+          _this.province = data.obj.reProvince
+          _this.city = data.obj.reCity
+          _this.area = data.obj.reArea
+          _this.addr = data.obj.reAddr
+          _this.cell = data.obj.reCell
+          _this.fpCell = data.obj.cell
         }
       })
     },
@@ -173,10 +213,34 @@ export default {
       let msg = ''
       msg = this.name + ';' + this.cell + ';' + this.province + ';' + this.city + ';' + this.area + ';' + this.addr
       console.log(msg)
+      if (this.province === '') {
+        this.$message({
+          message: '请先选择地址！',
+          type: 'warning',
+          duration: '1000'
+        });
+        return
+      }
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       params.append('orderNo', this.orderNo);
       params.append('msg', msg);
+      if (this.isOpen) {
+        _this.hasInvoice = '1'
+      } else {
+        _this.hasInvoice = '0'
+        this.invoiceTitle = ''
+        this.taxNumber = ''
+      }
+      if (this.active === 0 || this.active === '0') {
+        _this.invoiceType = '2'
+      } else {
+        _this.invoiceType = '1'
+      }
+      params.append('hasInvoice', _this.hasInvoice);
+      params.append('invoiceType', _this.invoiceType);
+      params.append('invoiceTitle', this.invoiceTitle);
+      params.append('taxNumber', this.taxNumber);
       this.axios({
         method: 'post',
         url: this.url.api.completeOrder,
@@ -191,6 +255,14 @@ export default {
           _this.$router.push({path: '/payOrder', query: {orderNo: _this.orderNo, type: '0'}})
         }
       })
+    },
+    chooseType: function (index) {
+      this.active = index
+    }
+  },
+  watch: {
+    addressList: function (curVal, oldVal) {
+      this.addressList = curVal
     }
   }
 }
@@ -356,6 +428,51 @@ img{
       color: #dd0011;
       font-size:13px;
       display: block;
+    }
+  }
+  .fapai{
+    width:100%;
+    clear: both;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  .fpCont{
+    width:600px;
+    height:auto;
+    border: 1px solid #ccc;
+    padding: 10px 20px 20px 20px;
+    margin: 20px 0;
+    h4{
+      line-height: 25px;
+      margin-top: 10px;
+    }
+    span{
+      width:70px;
+      display: inline-block;
+    }
+    input{
+      width:300px;
+      height:30px;
+      padding: 2px 5px;
+      border:1px solid #ccc;
+      border-radius: 3px;
+      margin-left: 10px;
+      margin-bottom: 10px;
+    }
+    li{
+      width:50px;
+      height: 30px;
+      border:1px solid #ccc;
+      display: inline-block;
+      margin-right: 10px;
+      text-align: center;
+      line-height: 30px;
+      border-radius: 3px;
+      margin-bottom: 10px;
+      &.cur{
+        border: 1px solid #d30d0d;
+        color: #d30d0d;
+      }
     }
   }
 </style>

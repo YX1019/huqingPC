@@ -28,7 +28,7 @@
     <div class="newsCont">
     <el-carousel :interval="4000" type="card" height="320px" arrow="always">
       <el-carousel-item v-for="item in newsBannerList" :key="item.knowId">
-        <div class="newsItem">
+        <div class="newsItem" @click="toKnowDetail(item.knowId, 1)">
           <div class="newsItemLf"><h1>{{item.title}}</h1><h3>{{item.subTitle}}</h3><p>{{item.time}}</p></div>
           <div class="newsItemRg"><img :src="item.imgList[0]"/></div>
         </div>
@@ -43,7 +43,7 @@
         <div class="v_show">
           <div class="v_cont">
             <ul>
-              <li v-bind:index="index" v-for="(item,index) in knowBannerList" :key="item.knowId"><img :src="item.imgList[0]"/><p>{{item.title}}</p></li>
+              <li v-bind:index="index" v-for="(item,index) in knowBannerList" :key="item.knowId" @click="toKnowDetail(item.knowId, 2)"><img :src="item.imgList[0]"/><p>{{item.title}}</p></li>
               <!--<li index="1" style="background:#ff0">[第2讲]</li>-->
               <!--<li index="2" style="background:#f0f">[第3讲]</li>-->
               <!--<li index="3" style="background:#999">[第4讲]</li>-->
@@ -72,20 +72,21 @@
   <div class="productPart">
     <h1 class="title">精选商品</h1>
     <div class="productCont">
-    <ul class="productList clearfix">
+      <div class="loading" v-show="loading" style="text-align: center;margin: 50px auto;"><img src="../common/img/loading.gif"/></div>
+    <ul class="productList clearfix" v-show="!loading">
       <li v-for="item in pickGoodsList" :key="item.productId">
         <div class="proItem" @click="toProDetail(item.productId)">
           <div>
             <div class="proImg"><img :src="item.listImg"/></div>
             <h4>{{item.productName}}</h4>
-            <h5>￥{{item.amount}}</h5>
+            <h5>￥{{item.amount}}<span style="color:#f7a53e; margin-left: 5px;" v-show="item.point > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{item.point}}</span></h5>
           </div>
         <p>月售{{item.mounthCount}}<span class="joinCart hand"><i class="iconfont">&#xe887;</i></span></p>
         <a class="hand">立即购买</a>
         </div>
       </li>
     </ul>
-      <div style="width: 100%;height: 50px;float: left;text-align: center;position: relative;">
+      <div style="width: 100%;height: 50px;float: left;text-align: center;position: relative;" v-show="!loading">
         <el-pagination
           background
           layout="prev, pager, next"
@@ -156,7 +157,8 @@ export default {
       }],
       totalPages: 0,
       pageNo: 1,
-      pageSize: 6
+      pageSize: 6,
+      loading: false
     }
   },
   created () {
@@ -190,7 +192,7 @@ export default {
       toAnypage()
     },
     getBanner: function () {
-      this.axios.get(this.url.api.bannerQuery, {params: {bannerPosition: 0, status: 'ENABLED'}}).then(res => {
+      this.axios.get(this.url.api.bannerQuery, {params: {bannerPosition: 2, status: 'ENABLED'}}).then(res => {
         let data = res.data
         if (!data.bizSucc) {
           this.errMsg = data.errMsg
@@ -216,11 +218,22 @@ export default {
       }).catch(error => console.log(error))
     },
     toStore: function () {
+      if (!this.$store.state.userId) {
+        this.$message({
+          message: '请先登录！',
+          type: 'warning',
+          duration: 1000
+        });
+        this.$router.push({ path: '/login' })
+        return
+      }
       this.$router.push({ path: '/store' })
     },
     getPickGoods: function (pageNo) {
+      this.loading = true
       this.axios.get(this.url.api.pickGoods, {params: {pageNum: pageNo, pageSize: this.pageSize, type: 2}}).then(res => {
         let data = res.data
+        this.loading = false
         if (!data.bizSucc) {
           this.errMsg = data.errMsg
           this.errorBox = true
@@ -246,6 +259,9 @@ export default {
         });
         this.$router.push({ path: '/login' })
       }
+    },
+    toKnowDetail: function (knowId, type) {
+      this.$router.push({path: '/newsDetail', query: {knowId: knowId, type: type}})
     }
   }
 }
@@ -435,6 +451,7 @@ export default {
   }
   .productList{
     width:100%;
+    min-height: 950px;
     height:auto;
     float: left;
     li{

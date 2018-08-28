@@ -21,8 +21,8 @@
   <div class="proMid">
    <h1>{{obj.productName}}</h1>
     <div class="proPrice">
-      <p>价格<span class="p_newPrice">{{obj.productPrice}}</span></p>
-      <p>原价<span class="p_oldPrice">{{obj.oldPrice}}</span></p>
+      <p>价格<span class="p_newPrice">{{buyPrice}}</span><span style="color:#f7a53e; margin-left: 5px;" v-show="point > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{point}}</span></p>
+      <p>原价<span class="p_oldPrice">{{oldPrice}}</span></p>
     </div>
     <h5>累计销量<span class="red">{{obj.sales}}</span></h5>
     <div class="sortItem" v-for="(item,index) in attrAndValuees" :key="item.attrId"><span>{{item.attrName}}:</span>
@@ -59,14 +59,18 @@
         <h1>商品评价</h1>
         <div class="commentCont">
           <div class="clearfix">
-          <div class="commentLf"><p>与描述相符</p><h2>5.0</h2></div>
+          <div class="commentLf"><p>与描述相符</p><h2>{{score}}</h2></div>
           <div class="commentRg"><img src="../common/img/grade.jpg"/> </div>
           </div>
           <ul class="commentList clearfix">
-            <li v-for="(item,index) in commentList" :key="index"><div class="comList_lf">{{item.commentWord}}</div><div class="comList_rg"><h6>{{item.nickName}}</h6><p>{{item.dateStr}}</p></div></li>
+            <li v-for="(item,index) in commentList" :key="index">
+              <div class="comList_lf"><p>{{item.commentWord}}</p>
+                <p v-show="item.imgList" ><img :src="iitem" style="width: 80px;height: 80px;margin-right: 5px;margin-top: 10px;" v-for="iitem in item.imgList" :key="iitem"/></p>
+              </div>
+              <div class="comList_rg"><h6>{{item.nickName}}</h6><p>{{item.dateStr}}</p></div></li>
 
           </ul>
-          <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;">
+          <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;" v-show="list">
             <el-pagination
               background
               layout="prev, pager, next"
@@ -150,7 +154,13 @@ export default {
       pageSize: 10,
       total: 5,
       pageNo: 1,
-      station: 0
+      station: 0,
+      score: '',
+      list: true,
+      point: 0,
+      buyPrice: '',
+      oldPrice: ''
+
     }
   },
   beforeCreated () {
@@ -160,6 +170,7 @@ export default {
     this.getParams()
     this.getProDetail()
     this.queryEvaluate()
+    this.queryEvaluateAverage()
     console.log(this.headImgList)
   },
   mounted () {
@@ -197,6 +208,9 @@ export default {
           _this.priceStocks = data.obj.priceStocks
           _this.goodsNum = data.obj.stock
           _this.collectionFlg = data.obj.collectionFlg
+          _this.point = data.obj.pointPrice
+          _this.buyPrice = data.obj.productPrice
+          _this.oldPrice = data.obj.oldPrice
         }
       })
     },
@@ -238,6 +252,9 @@ export default {
         if (this.idString === this.priceStocks[i].valueIds) {
           this.goodsNum = this.priceStocks[i].stock
           this.stockId = this.priceStocks[i].stockId
+          this.point = this.priceStocks[i].buyPoint
+          this.buyPrice = this.priceStocks[i].buyprice
+          this.oldPrice = this.priceStocks[i].price
           return
         }
       }
@@ -351,6 +368,31 @@ export default {
           console.log(data)
           _this.total = data.totalItems
           _this.commentList = data.listObject
+          if (_this.commentList.length === 0 || _this.commentList.length === '0') {
+            _this.list = false
+          } else {
+            _this.list = true
+          }
+        }
+      })
+    },
+    queryEvaluateAverage: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('linkId', this.productId);
+      params.append('type', 1);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryEvaluateAverage,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.score = data.obj
         }
       })
     },

@@ -1,4 +1,4 @@
-let apiUrl = '/api/fyapp/'
+let apiUrl = '/api/hqyt/'
 // let apiUrl = process.env.API_ROOT
 let url = {
   api: {
@@ -31,11 +31,11 @@ let url = {
     delCart: apiUrl + 'delCart.do', // 删除购物车商品
     updateCartSum: apiUrl + 'updateCartSum.do', // 购物车单件数量加减
     cancelCollect: apiUrl + 'cancleCollect.do', // 取消收藏
-    createOrder: apiUrl + 'createOrder.do', // 创建订单 购物车里的去结算
+    createOrder: apiUrl + 'createOrderS.do', // 创建订单 购物车里的去结算
     queryCartOrderList: apiUrl + 'queryCartOrderListS.do', // 结算页面信息列表
     updateCartDelivery: apiUrl + 'updateCartDeliveryS.do', // 修改购物车中的商品的配送方式
     nearQuery: apiUrl + 'nearQueryS.do', // 店铺列表查询
-    queryUserOrderList: apiUrl + 'queryUserOrderList.do', // 查询用户订单列表
+    // queryUserOrderList: apiUrl + 'queryUserOrderList.do', // 查询用户订单列表
     completeOrder: apiUrl + 'completeOrderS.do', // 完善用户信息，提交订单
     completeOrderReturn: apiUrl + 'completeOrderReturn.do', // 订单地址
     getCompleteOrderDetails: apiUrl + 'getCompleteOrderDetails.do', // 提交订单后到支付页面的信息
@@ -43,7 +43,8 @@ let url = {
     updateUserSomeInfo: apiUrl + 'updateUserSomeInfo.do', // 用户修改信息
     queryUserComplaintsOrderList: apiUrl + 'queryUserComplaintsOrderList.do', // 查询用户可投诉维权订单列表
     queryOrderDetails: apiUrl + 'queryOrderDetails.do', // 查询订单详情
-    cancleOrder: apiUrl + 'cancleOrder.do', // 取消订单
+    queryUserOrderDetails: apiUrl + 'queryUserOrderDetails.do', // 查询待付款的订单详情
+    cancleOrder: apiUrl + 'cancleOrderS.do', // 取消订单
     returnOrder: apiUrl + 'returnOrder.do', // 申请退货
     getReturnReason: apiUrl + 'getReturnReason.do', // 退货理由列表查询
     getExpress: apiUrl + 'getExpress.do', // 物流列表查询
@@ -55,7 +56,9 @@ let url = {
     activityQuery: apiUrl + 'activityQuery.do', // 活动列表
     activityDetailQuery: apiUrl + 'activityDetailQuery.do', // 活动详情
     queryTeamOrderList: apiUrl + 'queryTeamOrderList.do', // 门店订单
+    queryTeamOrderListForWaitPay: apiUrl + 'queryTeamOrderListForWaitPay.do', // 待付款的门店订单
     queryTeamOrderDetails: apiUrl + 'queryTeamOrderDetails.do', // 团队订单列表查看详情
+    queryTeamOrderDetailsForWaitPay: apiUrl + 'queryTeamOrderDetailsForWaitPay.do', // 团队订单（待付款）查看详情
     queryTeamOrderExpress: apiUrl + 'queryTeamOrderExpress.do', // 团队查看物流
     queryMerchantDetails: apiUrl + 'queryMerchantDetails.do', // 店铺详情
     getHotSearch: apiUrl + 'getHotSearch.do', // 搜索热词
@@ -70,7 +73,20 @@ let url = {
     sendOrder: apiUrl + 'sendOrder.do', // 发货
     getUserChatRecord: apiUrl + 'getUserChatRecord.do', // 客服聊天列表
     createUserChatRecord: apiUrl + 'createUserChatRecord.do', // 新增聊天记录
-    createCustomerChatRecord: apiUrl + 'createCustomerChatRecord.do' // 模拟客服聊天
+    createCustomerChatRecord: apiUrl + 'createCustomerChatRecord.do', // 模拟客服聊天
+    queryEvaluateAverage: apiUrl + 'queryEvaluateAverage.do', // 评价分数查询
+    merchantProQuery: apiUrl + 'merchantProQuery.do', // 店铺推荐商品及服务
+    categoryQueryWeb: apiUrl + 'categoryQueryWeb.do', // 分类列表
+    queryUserOrderListS: apiUrl + 'queryUserOrderListS.do', // 我的订单待付款列表合并(查询用户订单列表)
+    getDicountList: apiUrl + 'getDicountList.do', // 获取优惠列表
+    getDiscountDetails: apiUrl + 'getDiscountDetails.do', // 优惠详情
+    payByWeixinGzhWithDiscountQr: apiUrl + 'payByWeixinGzhWithDiscountQr.do', // 优惠券现金支付
+    payByOnlyPointDiscount: apiUrl + 'payByOnlyPointDiscount.do', // 积分支付
+    getDiscountWithNoThing: apiUrl + 'getDiscountWithNoThing.do', // 直接领取
+    payByWeixinGzhWithDiscountQrSearch: apiUrl + 'payByWeixinGzhWithDiscountQrSearch.do', // 积分支付结果查询
+    newDiscountOrder: apiUrl + 'newDiscountOrder.do', // 创建优惠券订单
+    payByAliPayWithDiscountQr: apiUrl + 'payByAliPayWithDiscountQr.do', // 支付宝支付
+    webPageAliPay: apiUrl + 'webPageAliPay.do' // 商品支付宝支付
   }
 }
 

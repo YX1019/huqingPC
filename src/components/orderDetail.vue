@@ -32,8 +32,10 @@
       </div>
       <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 2 && orderInfo.proType != 2">
         <p><img src="../common/img/icon2.png"/><span>订单状态：商家已发货，等待买家确认</span></p>
-        <h6 v-show="orderInfo.trans == 0">最新物流消息：{{orderInfo.transTime}}  <br/><span class="orange">{{orderInfo.transMsg}}</span></h6>
-        <p>您可以 <span class="rtnGoodsBtn" @click="receiveOrder()">确认收货</span><span class="cancelBtn hand" @click="returnGoods(orderInfo.orderId)">申请退款</span></p>
+        <h6 v-show="orderInfo.trans == 0">最新物流消息：{{orderInfo.transTime}}  <br/><span class="orange" style="display: inline-block;padding: 10px 50px 0 20px;">{{orderInfo.transMsg}}</span></h6>
+        <p>您可以 <span class="rtnGoodsBtn" @click="receiveOrder()">确认收货</span>
+          <!--<span class="cancelBtn hand" @click="returnGoods(orderInfo.orderId)">申请退款</span>-->
+        </p>
       </div>
       <div class="waitToDeliver" v-else>
         <p><img src="../common/img/icon.png"/><span>订单状态：{{orderInfo.statusStr}}</span></p>
@@ -44,25 +46,44 @@
       <span class="orderItem1">商品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
       <span class="orderItem4">收货方式</span><span class="orderItem5">优惠</span><span class="orderItem6">状态</span>
     </div>
-      <div class="ordInfoCont">
-        <div class="myOrderItemCont ">
-          <div class="orderItem1 orderItemName"><img :src="orderInfo.proImg"/>
-            <div class="oderItem_rg"><h3>{{orderInfo.proName}}</h3><p v-show="orderInfo.attrNames">{{orderInfo.attrNames}}：{{orderInfo.valueNames}}</p></div>
+
+      <div class="ordInfoCont" v-if="teamId" style="position:relative;float: left;width: 100%;border-bottom: 1px solid #ddd;">
+        <div class="myOrderItemCont" v-for="item in orderInfo.detailsGoodsResults" :key="item.childOrderId">
+          <div class="orderItem1 orderItemName"><img :src="item.proImg"/>
+            <div class="oderItem_rg"><h3>{{item.proName}}</h3><p v-show="item.attrNames">{{item.attrNames}}：{{item.valueNames}}</p></div>
           </div>
-          <div class="orderItem2"><p>￥{{orderInfo.perPrice}}</p></div>
-          <div class="orderItem3"><p>{{orderInfo.orderCount}}</p></div>
-          <div class="orderItem4"><p v-if="orderInfo.trans === '0'">快递</p><p v-if="orderInfo.trans === '1'">自提</p></div>
-          <div class="orderItem5"><p style="height: 40px;"></p></div>
-          <div class="orderItem6"><p>{{orderInfo.statusStr}}</p></div>
+          <div class="orderItem2"><p>￥{{item.perPrice}}<span style="color:#f7a53e; margin-left: 5px;" v-show="item.perPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{item.perPoint}}</span></p></div>
+          <div class="orderItem3"><p>{{item.orderCount}}</p></div>
+          <div class="orderItem4"><p v-if="item.trans === '0'">快递</p><p v-if="item.trans === '1'">自提</p></div>
         </div>
+      <div style="position: absolute;width: 100%;top: 45px;left: 0;">
+        <div class="orderItem5" style="margin-left:72%;height: 40px;"><p>优惠{{orderInfo.youhuiAmount}}元</p></div>
+        <div class="orderItem6"><p>{{orderInfo.statusStr}}</p></div>
+      </div>
+  </div>
+      <div class="ordInfoCont" v-if="!teamId">
+         <div class="myOrderItemCont ">
+            <div class="orderItem1 orderItemName"><img :src="orderInfo.proImg"/>
+            <div class="oderItem_rg"><h3>{{orderInfo.proName}}</h3><p v-show="orderInfo.attrNames">{{orderInfo.attrNames}}：{{orderInfo.valueNames}}</p></div>
+            </div>
+            <div class="orderItem2"><p>￥{{orderInfo.perPrice}}<span style="color:#f7a53e; margin-left: 5px;" v-show="orderInfo.perPoint > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin:0 5px;">&#xe674;</i>{{orderInfo.perPoint}}</span></p></div>
+            <div class="orderItem3"><p>{{orderInfo.orderCount}}</p></div>
+            <div class="orderItem4"><p v-if="orderInfo.trans === '0'">快递</p><p v-if="orderInfo.trans === '1'">自提</p></div>
+           <div class="orderItem5 red"><p style="height: 40px;">优惠{{orderInfo.youhuiAmount}}元</p></div>
+           <div class="orderItem6"><p>{{orderInfo.statusStr}}</p></div>
+         </div>
       </div>
   <div class="orderCalc">
-    <span>返胡币10</span>
+    <!--<span>返胡币10</span>-->
     <div class="orderCalcRg">
-      <p><label>商品总价：</label><span>￥{{orderInfo.allAmount}}</span></p>
-      <p><label>运费(快递)：</label><span>￥0.00</span></p>
-      <p><label>订单总价：</label><span class="font18">￥{{orderInfo.allAmount}}</span></p>
-      <p><label>需付款：</label><span class="red font18">￥{{orderInfo.allAmount}}</span></p>
+      <p><label>订单金额：</label><span>￥{{orderInfo.orderAmount}}</span></p>
+      <p><label>运费：</label><span>￥{{orderInfo.luggageAmount}}</span></p>
+      <p><label>胡币抵扣：</label><span>￥{{orderInfo.reduceAmount}}</span></p>
+      <p><label>临时胡币：</label><span>￥{{orderInfo.huTempAmount}}</span></p>
+      <p><label>优惠金额：</label><span>￥{{orderInfo.youhuiAmount}}</span></p>
+      <p><label>总积分：</label><span>{{orderInfo.allPoint}}</span></p>
+      <p v-show="orderInfo.discount>0"><label>折扣：</label><span>{{orderInfo.discount}}折</span></p>
+      <p><label>实付款：</label><span class="red font18">￥{{orderInfo.allAmount}}</span></p>
     </div>
   </div>
   <div class="bg" v-if="dialogVisible"></div>
@@ -80,23 +101,73 @@
     <el-button type="primary" @click="errorBox = false">确 定</el-button>
   </span>
   </el-dialog>
+  <el-dialog
+    title="请完善您的订单信息"
+    :visible.sync="completeAddr"
+    width="50%">
+    <div class="address" style="background: #fff;"><label class="lf">收货地址</label>
+      <div class="addrOption">
+        <h2 @click="showAddr()" >{{address}}</h2>
+        <div v-show="isShowAddr">
+          <p @click="getAttr(item)" v-for="item in addressList" :key="item.addressId"><span>{{item.name}}</span><span>{{item.province}}{{item.city}}{{item.area}}</span><span>{{item.addr}}</span><span>{{item.cell}}</span></p>
+          <a @click="toAddr()">新增收货地址</a>
+        </div>
+      </div>
+    </div>
+    <div style="clear: both;"></div>
+    <span slot="footer" class="dialog-footer">
+    <el-button @click="completeAddr = false">取 消</el-button>
+    <el-button type="primary" @click="completeOrder()">确 定</el-button>
+  </span>
+  </el-dialog>
+  <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+    <addAddress v-on:refreshbizlines="tochildrenAdrr"></addAddress>
+    <div slot="footer" class="dialog-footer">
+      <el-button @click="dialogFormVisible = false">取 消</el-button>
+      <!--<el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>-->
+    </div>
+  </el-dialog>
+
 </div>
 </template>
 <script type="text/ecmascript-6">
+import addAddress from './address/addAddress.vue'
 export default {
   name: '',
+  components: {
+    addAddress
+  },
   data () {
     return {
       dialogVisible: false,
       orderId: '',
       errorBox: false,
       errMsg: '',
-      orderInfo: {}
+      orderInfo: {},
+      teamId: '',
+      completeAddr: false,
+      address: '请选择收货地址',
+      isShowAddr: false,
+      name: '',
+      province: '',
+      city: '',
+      area: '',
+      addr: '',
+      cell: '',
+      addressList: [],
+      dialogFormVisible: false,
+      needAddress: false
     }
   },
   created () {
     this.getParams()
-    this.queryOrderDetails()
+    if (this.teamId) {
+      this.queryUserOrderDetails()
+      this.addressQuery()
+    } else {
+      this.queryOrderDetails()
+    }
+
     // this.queryOrderExpress()
   },
   mounted () {
@@ -107,6 +178,7 @@ export default {
       let routerParams = this.$route.query.orderId
       // 将数据放在当前组件的数据内
       this.orderId = routerParams
+      this.teamId = this.$route.query.teamId
       console.log(this.orderId)
     },
     queryOrderDetails: function () {
@@ -130,6 +202,28 @@ export default {
         }
       })
     },
+    queryUserOrderDetails: function () { // 待付款详情
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryUserOrderDetails,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          window.scrollTo(0, 0);
+          _this.orderInfo = data.obj
+          _this.needAddress = data.obj.needAddress
+        }
+      })
+    },
     lookCode: function () {
       this.dialogVisible = true
     },
@@ -146,7 +240,8 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
-      params.append('orderId', this.orderId);
+      params.append('orderNo', this.orderId);
+      params.append('teamId', this.teamId);
       this.axios({
         method: 'post',
         url: this.url.api.cancleOrder,
@@ -162,7 +257,7 @@ export default {
             message: '订单取消成功！',
             type: 'success'
           });
-          _this.queryOrderDetails()
+          _this.queryUserOrderDetails()
         }
       })
     },
@@ -211,7 +306,82 @@ export default {
       })
     },
     toPayPage: function () {
-      this.$router.push({path: '/payOrder', query: {orderNo: this.orderId, type: '1'}})
+      console.log(this.needAddress)
+      if (this.needAddress) {
+        this.completeAddr = true
+      } else {
+        this.$router.push({path: '/payOrder', query: {orderNo: this.orderId, type: '0'}})
+      }
+    },
+    addressQuery: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.addressQuery,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.addressList = data.listObject
+        }
+      })
+    },
+    showAddr: function () {
+      this.isShowAddr = !this.isShowAddr
+    },
+    getAttr: function (item) {
+      console.log(item)
+      this.isShowAddr = false
+      this.address = item.name + '  ' + item.province + item.city + item.area + item.addr + '  ' + item.cell
+      this.name = item.name
+      this.province = item.province
+      this.city = item.city
+      this.area = item.area
+      this.addr = item.addr
+      this.cell = item.cell
+    },
+    toAddr: function () {
+      // this.$router.push({path: '/personal/address'})
+      this.dialogFormVisible = true
+    },
+    tochildrenAdrr: function () {
+      this.addressQuery()
+      this.dialogFormVisible = false
+    },
+    completeOrder: function () {
+      let _this = this;
+      let msg = ''
+      msg = this.name + ';' + this.cell + ';' + this.province + ';' + this.city + ';' + this.area + ';' + this.addr
+      console.log(msg)
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderNo', this.orderId);
+      params.append('msg', msg);
+      this.axios({
+        method: 'post',
+        url: this.url.api.completeOrder,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$router.push({path: '/payOrder', query: {orderNo: _this.orderId, type: '0'}})
+        }
+      })
+    }
+  },
+  watch: {
+    addressList: function (curVal, oldVal) {
+      this.addressList = curVal
     }
   }
 }
@@ -352,6 +522,10 @@ export default {
   float: left;
   border:1px solid #ddd;
   border-top:0;
+  border-bottom: 0;
+  &:last-child{
+    border-bottom:1px solid #ddd;
+  }
   p{
     line-height: 80px;
   }
@@ -445,6 +619,37 @@ export default {
           color: #000;
         }
       }
+    }
+  }
+  .addrOption{
+    float: left;
+    width:65%;
+    border: 1px solid #ccc;
+    background: #fff;
+    margin-left:15px;
+    h2{
+      width:100%;
+      height: 30px;
+      line-height: 35px;
+      border-bottom: 1px solid #ccc;
+      padding: 0 10px;
+      font-weight:100;
+      font-size: 12px;
+      box-sizing: border-box;
+    }
+    p{
+      font-size: 13px;
+      padding:5px 10px;
+      border-bottom: 1px solid #ddd;
+      span{
+        margin-right: 10px;
+      }
+    }
+    a{
+      padding:5px 10px;
+      color: #dd0011;
+      font-size:13px;
+      display: block;
     }
   }
 </style>

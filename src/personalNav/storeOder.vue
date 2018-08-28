@@ -7,8 +7,9 @@
       <span class="orderItem1">产品</span><span class="orderItem2">单价</span><span class="orderItem3">数量</span>
       <span class="orderItem4">商品操作</span><span class="orderItem5">实付款</span><span class="orderItem6">交易状态</span><span class="orderItem7">交易操作</span>
     </div>
-    <div v-show="!isList" style="width:100%;line-height: 80px;text-align: center;float: left;">暂无订单</div>
-    <div class="myOderItem " v-for="item in teamList" :key="item.childOrderId">
+    <div v-show="!isList && !loading" style="width:100%;line-height: 80px;text-align: center;float: left;">暂无订单</div>
+    <div class="loading" v-show="loading" style="text-align: center;margin: 50px auto;"><img src="../common/img/loading.gif"/></div>
+    <div class="myOderItem " v-for="item in teamList" :key="item.childOrderId" v-show="isList && !loading && active!=1">
       <div class="myOrderTop">
         <input type="checkbox"/>
         <!--张三-->
@@ -48,11 +49,35 @@
             <el-button slot="reference" class="returnGoods" @click="queryTeamOrderExpress(item.childOrderId)">查询物流</el-button>
           </el-popover>
         </div>
-        <div class="orderItem7" v-if="item.statusEnum == 6 "><a class="returnGoods">查看评价</a></div>
+        <div class="orderItem7" v-if="item.statusEnum == 6 "><a class="returnGoods" @click="toOrderDetail(item.childOrderId)">查看评价</a></div>
       </div>
     </div>
     <!--<div class="orderBottom"><input type="checkbox"/>全选 <span class="orderPayBtn">合并付款</span></div>-->
-    <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;float: left;" v-show="isList">
+    <div class="myOderItem " v-for="item in teamListUnpay" :key="item.orderId" v-show="isList && !loading && active==1">
+      <div class="myOrderTop">
+        <input type="checkbox"/>
+        <!--张三-->
+        <span class="orderNo">订单号:{{item.orderId}}</span>
+        <span @click="toShop(item.teamId)"><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span><span class="rg"><span v-if="item.trans === '0'">快递</span><span v-if="item.trans === '1'">自提</span></span>
+      </div>
+      <div style="position: relative;">
+      <div class="myOrderItemCont" v-for="iitem in item.listDetailsResults" :key="iitem.childOrderId">
+        <div class="orderItem1 orderItemName"><img :src="iitem.proImg"/>
+          <div class="oderItem_rg"><h3>{{iitem.proName}}</h3><p v-show="item.attrNames">{{iitem.attrNames}}：{{iitem.valueNames}}</p></div>
+        </div>
+        <div class="orderItem2"><p class="oldProPrice">￥199.00</p><p>￥{{iitem.perPrice}}</p></div>
+        <div class="orderItem3"><p>{{iitem.orderCount}}</p></div>
+        <div class="orderItem4"></div>
+      </div>
+        <div style="position: absolute;left: 0;top: 20px;width:100%;">
+        <div class="orderItem5" style="margin-left: 64%;"><p>￥{{item.allAmount}}</p></div>
+        <div class="orderItem6"><p>{{item.statusStr}}</p><p @click="toOrderDetail2(item.orderId)">订单详情</p></div>
+        </div>
+
+      </div>
+    </div>
+
+    <div style="width: 100%;height: 50px;text-align: center;margin-top: 30px;float: left;" v-show="isList && !loading">
       <el-pagination
         background
         layout="prev, pager, next"
@@ -105,7 +130,9 @@ export default {
       childOrderId: '',
       expressCom: '',
       carriNo: '',
-      ExpressList: ''
+      ExpressList: '',
+      loading: false,
+      teamListUnpay: []
     }
   },
   created () {
@@ -119,7 +146,8 @@ export default {
       if (index === 0) {
         this.queryTeamOrderList(0, 1)
       } else if (index === 1) {
-        this.queryTeamOrderList(1, 1)
+        // this.queryTeamOrderList(1, 1)
+        this.queryTeamOrderListForWaitPay(1)
       } else if (index === 2) {
         this.queryTeamOrderList(2, 1)
       } else if (index === 3) {
@@ -133,11 +161,15 @@ export default {
     toOrderDetail: function (orderId) {
       this.$router.push({path: '/storeOrderDetail', query: {orderId: orderId}})
     },
+    toOrderDetail2: function (orderId) {
+      this.$router.push({path: '/storeOrderDetail', query: {orderId: orderId, way: 'unpay'}})
+    },
     toShop: function (teamId) {
       this.$router.push({path: '/shop', query: {teamId: teamId}})
     },
     queryTeamOrderList: function (orderStatus, pageNo) {
       let _this = this;
+      _this.loading = true
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       params.append('orderStatus', orderStatus);
@@ -150,6 +182,7 @@ export default {
       }).then(function (res) {
         console.log(res)
         let data = res.data
+        _this.loading = false
         if (!res.data.bizSucc) {
           _this.errMsg = data.errMsg
           _this.errorBox = true
@@ -157,6 +190,35 @@ export default {
           _this.total = data.totalItems
           _this.teamList = data.listObject
           if (_this.teamList.length === 0) {
+            _this.isList = false
+          } else {
+            _this.isList = true
+          }
+        }
+      })
+    },
+    queryTeamOrderListForWaitPay: function (pageNo) {
+      let _this = this;
+      _this.loading = true
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
+      this.axios({
+        method: 'post',
+        url: this.url.api.queryTeamOrderListForWaitPay,
+        data: params
+      }).then(function (res) {
+        console.log(res)
+        let data = res.data
+        _this.loading = false
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          _this.total = data.totalItems
+          _this.teamListUnpay = data.listObject
+          if (_this.teamListUnpay.length === 0) {
             _this.isList = false
           } else {
             _this.isList = true
