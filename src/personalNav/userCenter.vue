@@ -13,14 +13,14 @@
         <h1>您的账户</h1>
         <div class="perItemCont">
           <p>您的贡献值:<span>{{devoteAmount}}</span></p>
-          <p>积分:<span>{{huPoint}}</span>优惠积分:<span>{{huPointTemp}}</span></p>
-          <p>胡币:<span>{{huBalance}}</span>优惠胡币:<span>{{huBalanceTemp}}</span></p>
+          <p>积分:<span>{{huPoint}}</span>临时积分:<span>{{huPointTemp}}</span></p>
+          <p>胡币:<span>{{huBalance}}</span>临时胡币:<span>{{huBalanceTemp}}</span></p>
         </div>
       </div>
       <div class="personInfoItem">
         <h1>用户提醒</h1>
         <div class="perItemCont">
-          <p>您最近30天内提交了0个订单</p>
+          <p>您最近30天内提交了{{orderCount}}个订单</p>
         </div>
       </div>
     </div>
@@ -51,7 +51,8 @@ export default {
       huPoint: '',
       huPointTemp: '',
       huBalance: '',
-      huBalanceTemp: ''
+      huBalanceTemp: '',
+      orderCount: ''
     }
   },
   created () {
@@ -83,6 +84,8 @@ export default {
           _this.huPointTemp = data.obj.userAccountInfo.huPointTemp.amount
           _this.huBalance = data.obj.userAccountInfo.huBalance.amount
           _this.huBalanceTemp = data.obj.userAccountInfo.huBalanceTemp.amount
+          _this.loginTime = data.obj.lastLoginTime
+          _this.orderCount = data.obj.orderCount
         }
       })
     }

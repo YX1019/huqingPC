@@ -6,6 +6,7 @@
         <h1>{{title}}</h1>
         <div class="loginInfo">
           <p><label>手机号:</label><input type="text" v-model="cell"/> </p>
+          <!--<p><label>图形验证码:</label><input type="text" v-model="imgCode"/><img src="" class="imgCode"/> </p>-->
           <p><label>验证码:</label><input type="text" v-model="code"/><input type="button" v-model="btnTxt" :disabled="disabled" class="sendPwd" :class="{'btnGray' : disabled }" @click="getCode()"/> </p>
           <p><label>密码:</label><input type="password" v-model="pwd"/> </p>
           <div class="loginBtn" v-if="type === 1">
@@ -30,6 +31,7 @@
   </div>
 </template>
 <script type="text/ecmascript-6">
+// import CryptoJS from 'crypto-js'
 export default {
   name: 'regComponents',
   props: {
@@ -49,7 +51,8 @@ export default {
       btnTxt: '发送验证码',
       disabled: false,
       errorBox: false,
-      errMsg: ''
+      errMsg: '',
+      imgCode: ''
     }
   },
   mounted () {
@@ -268,5 +271,10 @@ export default {
       border-radius: 3px;
       margin-right: 30px;
     }
+  }
+  .imgCode{
+    width: auto;
+    height: 35px;
+    margin-left: 10px;
   }
 </style>

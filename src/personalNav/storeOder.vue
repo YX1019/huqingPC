@@ -31,7 +31,7 @@
         <!--<div class="orderItem6" v-else-if="item.statusEnum === '5'"><p>待评价</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
         <!--<div class="orderItem6" v-else><p>{{item.statusStr}}</p><p @click="toOrderDetail(item.childOrderId)">订单详情</p></div>-->
         <div class="orderItem7" v-if="item.statusEnum === '1' && item.proType != 2  && item.trans == 0 "><a class="returnGoods" @click="sendGoods(item.childOrderId)">发货</a></div>
-        <div class="orderItem7" v-if="item.statusEnum == 1 && (item.proType == 2  || item.trans == 1) "><a class="returnGoods" @click="receiveServiceOrder(item.childOrderId)">接单</a><p class="hand">取消订单</p></div>
+        <div class="orderItem7" v-if="item.statusEnum == 1 && (item.proType == 2  || item.trans == 1) "><a class="returnGoods" @click="receiveServiceOrder(item.childOrderId)">接单</a><p class="hand" @click="cancleOrderForTeam(item.childOrderId)">取消订单</p></div>
         <div class="orderItem7" v-if="item.statusEnum == 2 && item.proType != 2  && item.trans == 0 ">
           <!--<a class="returnGoods">查看物流</a>-->
           <el-popover
@@ -286,6 +286,34 @@ export default {
             type: 'success'
           });
           console.log(_this.pageStation)
+          if (_this.active === '0' || _this.active === 0) {
+            _this.queryTeamOrderList(0, _this.pageStation)
+          } else {
+            _this.queryTeamOrderList(2, _this.pageStation)
+          }
+        }
+      })
+    },
+    cancleOrderForTeam: function (childOrderId) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', childOrderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.cancleOrderForTeam,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            message: '取消成功！',
+            type: 'info'
+          });
           if (_this.active === '0' || _this.active === 0) {
             _this.queryTeamOrderList(0, _this.pageStation)
           } else {

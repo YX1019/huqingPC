@@ -62,7 +62,7 @@ export default {
       isShowColligate: false,
       pageNo: 1,
       totalNum: 5,
-      pageSize: 10,
+      pageSize: 12,
       goodsList: [],
       teamId: '', // 搜索条件
       productName: '',
@@ -178,6 +178,7 @@ export default {
       params.append('leastPrice', this.leastPrice);
       params.append('mostPrice', this.mostPrice);
       params.append('pageNum', pageNo);
+      params.append('pageSize', this.pageSize);
       console.log(this.priceSort, this.salesSort)
       this.axios({
         method: 'post',
@@ -273,6 +274,7 @@ export default {
       }
       console.log(this.saleState, this.priceState)
       this.getProList(1)
+      this.pageNo = 1
     },
     saleSort: function (index) {
       this.priceState = ''
@@ -293,6 +295,7 @@ export default {
       }
       console.log(this.saleState, this.priceState)
       this.getProList(1)
+      this.pageNo = 1
     },
     showToggle: function (item) {
       item.isSubShow = !item.isSubShow

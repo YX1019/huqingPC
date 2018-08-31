@@ -11,7 +11,7 @@
     <div class="loading" v-show="loading" style="text-align: center;margin: 50px auto;"><img src="../common/img/loading.gif"/></div>
     <div class="myOderItem " v-for="item in myOrderList" :key="item.childOrderId" v-show="isList && !loading">
       <div class="myOrderTop">
-        <input type="checkbox"/>{{item.createTime}}<span class="orderNo">订单号:{{item.childOrderId}}</span>
+        <input type="checkbox"/>{{item.createTime}}<span class="orderNo">订单号:{{item.orderId}}</span>
         <span @click="toShop(item.teamId)" class="hand"><img src="../common/img/storeIcon.png" class="storeIcon"/> {{item.merchantName}}</span>
         <span class="rg" v-if="item.trans === '0'">快递</span>
         <span class="rg" v-if="item.trans === '1'">自提</span>
@@ -24,13 +24,12 @@
         <div class="orderItem3"><p>{{iitem.orderCount}}</p></div>
         <div class="orderItem4"></div>
         <div class="orderItem5"><p>￥{{item.allAmount}}</p></div>
-        <!--<div class="orderItem6" v-if="item.statusEnum == 0"><p>等待买家付款</p><p @click="toOderDteail(iitem.childOrderId)">订单详情</p></div>-->
         <div class="orderItem6" v-if="item.statusEnum == 1"><p>待发货</p><p @click="toOderDteail(iitem.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else-if="item.statusEnum == 2"><p>待收货</p><p @click="toOderDteail(iitem.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else-if="item.statusEnum == 3"><p>待评价</p><p @click="toOderDteail(iitem.childOrderId)">订单详情</p></div>
         <div class="orderItem6" v-else><p>{{item.statusStr}}</p><p @click="toOderDteail(iitem.childOrderId)">订单详情</p></div>
-        <!--<div class="orderItem7" v-if="item.statusEnum == 0"><a class="returnGoods" @click="toPayPage(item.childOrderId)">立即付款</a><p @click="cancleOrder(item.childOrderId)" class="hand">取消订单</p></div>-->
         <div class="orderItem7" v-if="item.statusEnum == 1 && iitem.proType != 2"><a class="returnGoods" @click="returnGoods(iitem.childOrderId)">申请退货</a></div>
+        <!--<div class="orderItem7" v-if="item.statusEnum == 1 && iitem.proType == 2"><a class="returnGoods" @click="returnGoods(iitem.childOrderId)">申请退款</a></div>-->
         <div class="orderItem7" v-else-if="item.statusEnum == 2 && iitem.proType == 2">
           <el-popover
             placement="bottom"
@@ -117,7 +116,7 @@ export default {
       pageSize: 10,
       total: 5,
       pageNo: 1,
-      pageStation: '',
+      pageStation: 1,
       wli: {},
       loading: false,
       UnpayOrderList: []
@@ -130,6 +129,7 @@ export default {
     changeOrderState: function (index) {
       this.active = index
       this.pageNo = 1
+      this.pageStation = 1
       if (index === 0) {
         this.queryUserOrderListS(-1, 1)
       } else if (index === 1) {
@@ -250,18 +250,10 @@ export default {
             message: '交易完成！',
             type: 'success'
           });
-          if (_this.active === 0) {
-            _this.queryUserOrderListS(-1, _this.pageStation)
-          } else if (_this.active === 1) {
-            _this.queryUserOrderListS(0, _this.pageStation)
-          } else if (this.active === 2) {
-            _this.queryUserOrderListS(1, _this.pageStation)
-          } else if (this.active === 3) {
+          if (_this.active === 3) {
             _this.queryUserOrderListS(2, _this.pageStation)
-          } else if (this.active === 4) {
-            _this.queryUserOrderListS(3, _this.pageStation)
           } else {
-            _this.queryUserOrderListS(-1, 1)
+            _this.queryUserOrderListS(-1, _this.pageStation)
           }
         }
       })

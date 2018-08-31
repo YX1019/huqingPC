@@ -28,7 +28,9 @@
       </div>
       <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 2 && orderInfo.proType == 2">
         <p><img src="../common/img/icon.png"/><span>订单状态：买家已付款，待使用</span></p>
-        <p>您可以 <span class="rtnGoodsBtn hand" @click="lookCode()">点击凭证</span><span class="cancelBtn hand" @click="returnGoods(orderInfo.orderId)">申请退款</span></p>
+        <p>您可以 <span class="rtnGoodsBtn hand" @click="lookCode()">点击凭证</span>
+          <!--<span class="cancelBtn hand" @click="returnGoods(orderInfo.orderId)">申请退款</span>-->
+        </p>
       </div>
       <div class="waitToDeliver" v-else-if="orderInfo.statusEnum == 2 && orderInfo.proType != 2">
         <p><img src="../common/img/icon2.png"/><span>订单状态：商家已发货，等待买家确认</span></p>
@@ -257,7 +259,7 @@ export default {
             message: '订单取消成功！',
             type: 'success'
           });
-          _this.queryUserOrderDetails()
+          _this.$router.push({ path: '/personal/myOder' })
         }
       })
     },

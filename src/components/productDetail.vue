@@ -28,7 +28,7 @@
     <div class="sortItem" v-for="(item,index) in attrAndValuees" :key="item.attrId"><span>{{item.attrName}}:</span>
       <ul><li v-for="(itemm,ind) in item.valuees" :key="itemm.attrId" :class="{'cur':sel[index] == ind}" @click="select(index,ind)" class="hand" >{{itemm.value}}</li></ul>
     </div>
-    <p>数量: <button @click="changeNum(-1)" class="hand">-</button><input type="text" v-model="num"/><button @click="changeNum(1)" class="hand">+</button> 剩余{{goodsNum}}</p>
+    <p>数量: <button @click="changeNum(-1)" class="hand">-</button><input type="number" v-model="num" @change="setNum()"/><button @click="changeNum(1)" class="hand">+</button> 剩余{{goodsNum}}</p>
     <p><a class="proBtn1 hand" @click="addCart(0)">立即购买</a><a class="proBtn2 hand" @click="addCart(1)">加入购物车</a><a class="proBtn3 hand" v-show="!collectionFlg" @click="addToCollect(obj.productId)">收藏</a><a class="proBtn3 hand" v-show="collectionFlg" @click="cancelCollect(obj.productId)">取消收藏</a></p>
   </div>
   <!--<div class="proRg">-->
@@ -177,7 +177,14 @@ export default {
     this.$nextTick(function () {
     })
   },
+  computed: {
+  },
   methods: {
+    setNum: function () {
+      if (this.num < 1) {
+        this.num = 1
+      }
+    },
     getParams () {
       // 取到路由带过来的参数
       let routerParams = this.$route.query.productId

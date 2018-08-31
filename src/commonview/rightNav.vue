@@ -49,8 +49,12 @@ export default {
       errMsg: '',
       errorBox: false,
       nickName: '',
-      headImg: ''
+      headImg: '',
+      beginTime: ''
     }
+  },
+  created () {
+
   },
   methods: {
     toCart: function () {
@@ -114,6 +118,9 @@ export default {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
+      params.append('id', '');
+      params.append('dateTime', localStorage.getItem('dateTime'));
+      console.log(localStorage.getItem('dateTime'))
       this.axios({
         method: 'post',
         url: this.url.api.getUserChatRecord,
@@ -130,6 +137,7 @@ export default {
           _this.headImg = data.obj.headImg
           _this.nickName = data.obj.nickName
           _this.chatRecordList = data.obj.chatRecordList
+          localStorage.setItem('dateTime', data.obj.beginTime)
           let chat = document.getElementById('chat')
           chat.scrollTop = chat.scrollHeight
         }

@@ -1,5 +1,5 @@
-let apiUrl = '/api/hqyt/'
-// let apiUrl = process.env.API_ROOT
+// let apiUrl = '/api/hqyt/'
+let apiUrl = process.env.API_ROOT
 let url = {
   api: {
     login: apiUrl + 'userLogin.do', // 登录
@@ -86,7 +86,8 @@ let url = {
     payByWeixinGzhWithDiscountQrSearch: apiUrl + 'payByWeixinGzhWithDiscountQrSearch.do', // 积分支付结果查询
     newDiscountOrder: apiUrl + 'newDiscountOrder.do', // 创建优惠券订单
     payByAliPayWithDiscountQr: apiUrl + 'payByAliPayWithDiscountQr.do', // 支付宝支付
-    webPageAliPay: apiUrl + 'webPageAliPay.do' // 商品支付宝支付
+    webPageAliPay: apiUrl + 'webPageAliPay.do', // 商品支付宝支付
+    cancleOrderForTeam: apiUrl + 'cancleOrderForTeam.do' // 取消接单订单
   }
 }
 

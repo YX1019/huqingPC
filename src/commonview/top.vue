@@ -127,10 +127,13 @@ export default {
     },
     loginOut: function () {
       this.$store.commit('changeLogin', false)
+      this.$store.commit('changeGoodsNum', 0)
       window.localStorage.removeItem('isLogin')
       window.localStorage.removeItem('name')
       window.localStorage.removeItem('userId')
       window.localStorage.removeItem('goodsNum')
+      window.localStorage.removeItem('dateTime')
+      this.$router.push({ path: '/login' })
     },
     toLogin: function () {
       this.$router.push({ path: '/login' })

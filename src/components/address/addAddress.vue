@@ -109,7 +109,6 @@ export default {
       this.$refs[formName].validate((valid) => {
         if (valid) {
           _this.updateUserAddress()
-          _this.$emit('refreshbizlines')
         } else {
           console.log('error submit!!')
           return false
@@ -151,6 +150,7 @@ export default {
           _this.ruleForm.desc = ''
           _this.ruleForm.postalCode = ''
           _this.ruleForm.tel = ''
+          _this.$emit('refreshbizlines')
         }
       })
     }

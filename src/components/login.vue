@@ -40,7 +40,8 @@ export default {
       cell: '',
       pwd: '',
       errorBox: false,
-      errMsg: ''
+      errMsg: '',
+      cartList: []
     }
   },
   mounted () {
@@ -74,6 +75,7 @@ export default {
           _this.$store.commit('changeLogin', true)
           _this.$store.commit('changeName', name)
           _this.$store.commit('changeId', userId)
+          _this.lookMyCart()
           _this.$router.push({ path: '/index' })
         }
       })
@@ -92,6 +94,36 @@ export default {
     },
     closeErrorBox: function () {
       this.errorBox = false;
+    },
+    lookMyCart: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      _this.axios({
+        method: 'post',
+        url: _this.url.api.myCart,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+          return false
+        } else {
+          console.log(data)
+          _this.cartList = data.obj.cartAllInfo
+          let goodsNum = 0;
+          if (_this.cartList.length > 0) {
+            for (let i = 0; i < _this.cartList.length; i++) {
+              goodsNum = parseInt(goodsNum) + parseInt(_this.cartList[i].productNum)
+            }
+          } else {
+            goodsNum = 0
+          }
+          window.localStorage.setItem('goodsNum', goodsNum)
+          _this.$store.commit('changeGoodsNum', goodsNum)
+        }
+      })
     }
   }
 }

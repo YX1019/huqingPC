@@ -7,7 +7,7 @@
     </div>
     <div class="collectTitle"><span>全部<b>{{name}}</b>{{collectNum}}</span></div>
     <ul class="collectList" v-show="list && !loading">
-      <li v-for="item in collectList" :key="item.collectId"><img :src="item.image"/>
+      <li v-for="item in collectList" :key="item.collectId" @click="toProductDetail(item.collectId)"><img :src="item.image"/>
         <p v-if="collectType == 0">{{item.productName}}</p>
         <p v-if="collectType == 1">{{item.teamName}}</p>
         <h5 v-show="collectType == 0">￥{{item.productPrice}}</h5>
@@ -85,6 +85,13 @@ export default {
           }
         }
       })
+    },
+    toProductDetail: function (id) {
+      if (this.collectType === 0 || this.collectType === '0') {
+        this.$router.push({path: '/productDetail', query: {'productId': id}})
+      } else {
+        this.$router.push({path: '/shop', query: {'teamId': id}})
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 <template>
   <div class="store" style="border-top:1px solid #e70012;">
-    <div class="shopName"><div class="shopNameCont"><img src="../common/img/shopIcon.png"/><span>胡庆余堂滨江店</span></div> </div>
+    <div class="shopName"><div class="shopNameCont"><img src="../common/img/shopIcon.png"/><span>{{store.teamName}}</span></div> </div>
     <div class="clearfix pList">
     <div class="pList_lf">
      <img src="../common/img/shopLogo.png"/>
@@ -13,7 +13,8 @@
     <div class="pList_rg">
       <div class="shopItem">
         <div class="conditions2" >商家推荐</div>
-         <ul class="goodsList2 clearfix" v-show="list">
+         <ul class="goodsList2 clearfix">
+           <div v-show="list">
             <li v-for =" item in goodsList" :key="item.productId">
                <div @click="toProDetail(item.productId);">
                  <img :src="item.listImg"/>
@@ -21,14 +22,16 @@
                  <h5>￥{{item.amount}}元<span style="color:#f7a53e; margin-left: 5px;" v-show="item.point > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin-left: 5px;">&#xe674;</i>{{item.point}}</span></h5>
                  <h6><s>￥{{item.oldAmount}}元</s><span class="rg">月售{{item.mounthCount}}件</span></h6>
                </div>
-               <div><button @click="addToCollect(item.productId, '0')" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId, '0')"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
+               <div><button @click="addToCollect(item, '0')" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item, '0')"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
             </li>
+           </div>
            <div v-show="!list" style="text-align: center;line-height: 80px;">暂无商品</div>
          </ul>
        </div>
       <div class="shopItem clearfix">
         <div class="conditions2">商家服务</div>
-        <ul class="goodsList2 clearfix" v-show="list">
+        <ul class="goodsList2 clearfix">
+          <div v-show="list">
           <li v-for =" item in severList" :key="item.productId">
             <div @click="toProDetail(item.productId);">
               <img :src="item.listImg"/>
@@ -36,8 +39,9 @@
               <h5>￥{{item.amount}}元<span style="color:#f7a53e; margin-left: 5px;" v-show="item.point > 0"><b style="color: #333;font-weight: 300;">+</b><i class="iconfont" style="color:#f7a53e;margin-left: 5px;">&#xe674;</i>{{item.point}}</span></h5>
               <h6><s>￥{{item.oldAmount}}元</s><span class="rg">月售{{item.mounthCount}}件</span></h6>
             </div>
-            <div><button @click="addToCollect(item.productId, '0')" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item.productId, '0')"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
+            <div><button @click="addToCollect(item, '0')" v-if="!item.collectionFlg"><i></i>加入收藏</button><button v-if="item.collectionFlg" @click="cancelCollect(item, '0')"><i></i>取消收藏</button><button class="rg" @click="toProDetail(item.productId);"><i></i>放入购物车</button></div>
           </li>
+          </div>
           <div v-show="!list2" style="text-align: center;line-height: 80px;">暂无商品</div>
         </ul>
       </div>
@@ -112,14 +116,14 @@ export default {
           console.log(res)
           if (type === '2' || type === 2) {
             _this.goodsList = data.listObject
-            if (_this.goodsList.length === 0) {
+            if (_this.goodsList.length === 0 || _this.severList.length === '0') {
               _this.list = false
             } else {
               _this.list = true
             }
           } else {
             _this.severList = data.listObject
-            if (_this.severList.length === 0) {
+            if (_this.severList.length === 0 || _this.severList.length === '0') {
               _this.list2 = false
             } else {
               _this.list2 = true
@@ -149,12 +153,12 @@ export default {
         }
       })
     },
-    addToCollect: function (id, type) {
+    addToCollect: function (item, type) {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       if (type === '0') {
-        params.append('collectId', id);
+        params.append('collectId', item.productId);
       } else {
         params.append('collectId', this.teamId);
       }
@@ -170,19 +174,19 @@ export default {
           _this.errorBox = true
         } else {
           if (type === '0') {
-            _this.getProList()
+            _this.$set(item, 'collectionFlg', true);
           } else {
             _this.queryMerchantDetails()
           }
         }
       })
     },
-    cancelCollect: function (id, type) {
+    cancelCollect: function (item, type) {
       let _this = this;
       let params = new URLSearchParams();
       params.append('userId', this.$store.state.userId);
       if (type === '0') {
-        params.append('collectId', id);
+        params.append('collectId', item.productId);
       } else {
         params.append('collectId', this.teamId);
       }
@@ -198,7 +202,7 @@ export default {
           _this.errorBox = true
         } else {
           if (type === '0') {
-            _this.getProList()
+            _this.$set(item, 'collectionFlg', false);
           } else {
             _this.queryMerchantDetails()
           }

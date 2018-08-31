@@ -305,6 +305,7 @@ export default {
       this.childEfectCate = ''
       this.leastPrice = ''
       this.mostPrice = ''
+      this.pageNo = 1
     },
     priceDesc: function (index) {
       this.saleState = ''
@@ -325,6 +326,7 @@ export default {
       }
       console.log(this.saleState, this.priceState)
       this.getProList(1)
+      this.pageNo = 1
     },
     saleSort: function (index) {
       this.priceState = ''
@@ -345,6 +347,7 @@ export default {
       }
       console.log(this.saleState, this.priceState)
       this.getProList(1)
+      this.pageNo = 1
     },
     getMsgList: function () {
       let _this = this;

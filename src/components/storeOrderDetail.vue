@@ -17,14 +17,18 @@
         <div class="waitToPay" v-if="teamOrderInfo.statusEnum === '0'">
           <img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待买家付款</span>
         </div>
-        <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '1'">
+        <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '1' && teamOrderInfo.proType !=2 && teamOrderInfo.trans == 0">
           <p><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待卖家发货</span></p>
           <p>您可以 <span class="rtnGoodsBtn" @click="sendGoods()">点击发货</span></p>
         </div>
+        <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '1' && (teamOrderInfo.proType == 2 || teamOrderInfo.trans == 1)">
+          <p><img src="../common/img/icon.png"/><span>订单状态：商品已拍下，等待卖家接单</span></p>
+          <p>您可以 <span class="rtnGoodsBtn" @click="receiveServiceOrder()" style="margin-right: 15px;">接单</span><span @click="cancleOrderForTeam()" class="hand">取消订单</span></p>
+        </div>
         <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '3'">
           <p style="margin-bottom:0;"><img src="../common/img/icon.png"/><span>订单状态：已确认收货等待买家评价</span></p>
-          <h6>物流：{{wuliu.companyName}} 运单号：{{wuliu.nu}}<br/>{{wuliuNew.time}}<span class="orange"
-                                                                                   style="margin-left: 10px;">{{wuliuNew.context}}</span>
+          <h6>物流：{{wuliu.companyName}} 运单号：{{wuliu.nu}}<br/>{{wuliuNew.time}}
+            <span class="orange" style="margin-left: 10px;">{{wuliuNew.context}}</span>
           </h6>
         </div>
         <div class="waitToDeliver" v-else-if="teamOrderInfo.statusEnum === '6'">
@@ -303,6 +307,54 @@ export default {
           _this.wuliu = data.obj
           _this.wuliuNew = data.obj.data[0]
           console.log(_this.wuliu)
+        }
+      })
+    },
+    receiveServiceOrder: function () {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.receiveServiceOrder,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            message: '接单成功！',
+            type: 'success'
+          });
+          _this.queryTeamOrderDetails()
+        }
+      })
+    },
+    cancleOrderForTeam: function (childOrderId) {
+      let _this = this;
+      let params = new URLSearchParams();
+      params.append('userId', this.$store.state.userId);
+      params.append('orderId', this.orderId);
+      this.axios({
+        method: 'post',
+        url: this.url.api.cancleOrderForTeam,
+        data: params
+      }).then(function (res) {
+        let data = res.data
+        if (!res.data.bizSucc) {
+          _this.errMsg = data.errMsg
+          _this.errorBox = true
+        } else {
+          console.log(data)
+          _this.$message({
+            message: '取消成功！',
+            type: 'info'
+          });
+          _this.queryTeamOrderDetails()
         }
       })
     }

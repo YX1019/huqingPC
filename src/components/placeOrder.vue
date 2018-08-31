@@ -178,7 +178,9 @@ export default {
           _this.orderObj = data.obj
           _this.orderCartList = data.obj.orderMerchantList
           _this.orderNo = data.obj.orderNo
-          // _this.address = data.obj.reName + '  ' + data.obj.reProvince + data.obj.reCity + data.obj.reArea + data.obj.reAddr + '  ' + data.obj.reCell
+          if (data.obj.reName) {
+            _this.address = data.obj.reName + '  ' + data.obj.reProvince + data.obj.reCity + data.obj.reArea + data.obj.reAddr + '  ' + data.obj.reCell
+          }
           _this.name = data.obj.reName
           _this.province = data.obj.reProvince
           _this.city = data.obj.reCity
@@ -212,8 +214,8 @@ export default {
       let _this = this;
       let msg = ''
       msg = this.name + ';' + this.cell + ';' + this.province + ';' + this.city + ';' + this.area + ';' + this.addr
-      console.log(msg)
-      if (this.province === '') {
+      console.log(msg, this.province)
+      if (this.province === '' || !this.province) {
         this.$message({
           message: '请先选择地址！',
           type: 'warning',
