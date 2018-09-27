@@ -11,6 +11,17 @@
         <!--性能优化 track-by 数据不改变时不会重新渲染-->
       </ul>
     </div>
+    <div class="photos" style="margin-top: 30px;">
+      <el-upload
+        action="https://jsonplaceholder.typicode.com/posts/"
+        list-type="picture-card"
+        :on-remove="handleRemove">
+        <i class="el-icon-plus"></i>
+      </el-upload>
+      <el-dialog :visible.sync="dialogVisible">
+        <img width="100%" :src="dialogImageUrl" alt="">
+      </el-dialog>
+    </div>
   </div>
   <div style="text-align: center"><button class="putEva" @click="addOrderEvaluate()">提交评价</button></div>
 </div>
@@ -23,7 +34,9 @@ export default {
       score: 0,
       orderId: '',
       comment: '',
-      orderInfo: {}
+      orderInfo: {},
+      dialogImageUrl: '',
+      dialogVisible: false
     }
   },
   created () {
@@ -43,6 +56,13 @@ export default {
     }
   },
   methods: {
+    handleRemove (file, fileList) {
+      console.log(file, fileList)
+    },
+    handlePictureCardPreview (file) {
+      this.dialogImageUrl = file.url
+      this.dialogVisible = true
+    },
     getParams () {
       // 取到路由带过来的参数
       let routerParams = this.$route.query.orderId

@@ -25,8 +25,11 @@
       <p>原价<span class="p_oldPrice">{{oldPrice}}</span></p>
     </div>
     <h5>累计销量<span class="red">{{obj.sales}}</span></h5>
-    <div class="sortItem" v-for="(item,index) in attrAndValuees" :key="item.attrId"><span>{{item.attrName}}:</span>
-      <ul><li v-for="(itemm,ind) in item.valuees" :key="itemm.attrId" :class="{'cur':sel[index] == ind}" @click="select(index,ind)" class="hand" >{{itemm.value}}</li></ul>
+    <div class="sortItem" v-for="(item,index) in attrAndValuees" :key="item.attrId">
+      <span>{{item.attrName}}:</span>
+      <ul>
+        <li v-for="(itemm,ind) in item.valuees" :key="itemm.attrId" :class="{'cur':sel[index] == ind}" @click="select(index,ind)" class="hand" >{{itemm.value}}</li>
+      </ul>
     </div>
     <p>数量: <button @click="changeNum(-1)" class="hand">-</button><input type="number" v-model="num" @change="setNum()"/><button @click="changeNum(1)" class="hand">+</button> 剩余{{goodsNum}}</p>
     <p><a class="proBtn1 hand" @click="addCart(0)">立即购买</a><a class="proBtn2 hand" @click="addCart(1)">加入购物车</a><a class="proBtn3 hand" v-show="!collectionFlg" @click="addToCollect(obj.productId)">收藏</a><a class="proBtn3 hand" v-show="collectionFlg" @click="cancelCollect(obj.productId)">取消收藏</a></p>
@@ -243,8 +246,12 @@ export default {
       window.scrollTo(0, 0);
     },
     select: function (index, ind) {
+      console.log(index, ind)
       this.sel[index] = ind; // 让数组sel的第index+1的元素的值等于ind
-      this.sel = this.sel.concat([]); // 因为数组是引用类型，对其中一个变量直接赋值不会影响到另一个变量（并未操作引用的对象），使用concat（操作了应用对象）
+      console.log(this.sel)
+      this.$set(this.sel, index, ind)
+      // this.sel = this.sel.concat([]); // 因为数组是引用类型，对其中一个变量直接赋值不会影响到另一个变量（并未操作引用的对象），使用concat（操作了应用对象）
+      // console.log(this.sel)
       this.id[index] = this.attrAndValuees[index].valuees[ind].attrId; // 获取选中的id
       this.id = this.id.concat([]);
       var idArr = []
