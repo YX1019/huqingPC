@@ -42,6 +42,9 @@ import complaint from '@/personalNav/complaint'
 import cashExchange from '@/personalNav/cashExchange'
 import address from '@/personalNav/address'
 import NotFoundComponent from '@/components/NotFoundComponent'
+import goodsAllocation from '@/components/goodsAllocation'
+import collectMoney from '@/components/collectMoney'
+import shopTicket from '@/components/shopTicket'
 
 Vue.use(Router)
 
@@ -259,6 +262,21 @@ export default new Router({
       path: '/paySucess',
       name: 'paySucess',
       component: paySucess
+    },
+    {
+      path: '/goodsAllocation',
+      name: 'goodsAllocation',
+      component: goodsAllocation
+    },
+    {
+      path: '/collectMoney',
+      name: 'collectMoney',
+      component: collectMoney
+    },
+    {
+      path: '/shopTicket',
+      name: 'shopTicket',
+      component: shopTicket
     },
     { path: '*', component: NotFoundComponent }
   ]

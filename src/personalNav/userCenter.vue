@@ -5,6 +5,11 @@
       <p>{{userCell}} 欢迎您回到胡庆余堂商城！</p>
       <p>您的上一次登录时间：{{loginTime}}</p>
       <p>您的会员等级是 <span class="grade">V{{grade}}</span></p>
+      <div class="serverLine">
+        <a><img src="../common/img/myIcon1.png" @click="toCollectMoney()"/>收银</a>
+        <a><img src="../common/img/myIcon2.png" @click="toShopTickect()"/>购物券</a>
+        <a @click="toGoodsAllocation()"><img src="../common/img/myIcon3.png"/>商品调拨</a>
+      </div>
       <div class="profile2">
         胡庆余堂商城是中药材一站式网购服务平台，配送各类常用药1000余种，包括各类中药饮片，养生药膳和名贵药材，品种齐全，质量可靠，价格实惠，是您放心的网上中药店。
         因为药材品种的繁多，请使用本站搜索您需要的品种，如果搜索不到你所需要的药材，请直接联系客服详细咨询，本店还提供按方抓药服务！ 本店的网上支付方式为支付宝，提供安全有保障的交易服务。
@@ -88,6 +93,15 @@ export default {
           _this.orderCount = data.obj.orderCount
         }
       })
+    },
+    toGoodsAllocation: function () {
+      this.$router.push({path: '/goodsAllocation'})
+    },
+    toCollectMoney: function () {
+      this.$router.push({path: '/collectMoney'})
+    },
+    toShopTickect: function () {
+      this.$router.push({path: '/shopTicket'})
     }
   }
 }
@@ -111,6 +125,7 @@ export default {
     box-sizing: border-box;
     border:1px solid #ddd;
     padding: 16px;
+    position: relative;
     p{
       font-size: 14px;
       color: #000;
@@ -150,5 +165,25 @@ export default {
   }
   .grade{
     color: #f7ba00;
+  }
+  .serverLine{
+    position: absolute;
+    right: 10px;
+    top:30px;
+    a{
+      display: inline-block;
+      color: #fff;
+      background: #dd0011;
+      padding: 6px 10px;
+      margin-right: 10px;
+      border-radius: 3px;
+      font-size: 14px;
+      img{
+        height: 15px;
+        width:auto;
+        margin-right: 6px;
+        vertical-align: text-top;
+      }
+    }
   }
 </style>

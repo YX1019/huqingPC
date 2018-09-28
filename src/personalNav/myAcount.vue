@@ -7,7 +7,7 @@
     <div class="myAcountNum">
       <p>{{name}}</p>
       <h1>{{amount}}</h1>
-      <!--<a class="putCash" v-if="name === '胡币' " @click="putCash();">提现</a>-->
+      <a class="putCash" v-if="name === '积分' " @click="putCash();">提现</a>
     </div>
     <div class="myAcountTable">
       <table cellspacing="0">
@@ -60,7 +60,7 @@ export default {
     return {
       isCur: 0,
       name: '贡献值',
-      myAcountList: ['贡献值', '胡币', '积分'],
+      myAcountList: ['贡献值', '积分'],
       tableList: [],
       pageNo: 1,
       pageSize: 10,
@@ -122,9 +122,8 @@ export default {
           }
           if (_this.state === 1 || _this.state === '1') {
             _this.amount = data.accountResult.devoteAmount.amount
-          } else if (_this.state === 2 || _this.state === '2') {
-            _this.amount = data.accountResult.huBalance.amount
           } else {
+            // _this.amount = data.accountResult.huBalance.amount
             _this.amount = data.accountResult.huPoint.amount
           }
         }

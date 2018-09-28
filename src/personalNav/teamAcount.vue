@@ -7,7 +7,7 @@
     <div class="myAcountNum">
       <p>{{name}}</p>
       <h1>{{amount}}</h1>
-      <a class="putCash" v-if="name === '胡币' " @click="putCash();">提现</a>
+      <a class="putCash" v-if="name === '积分' " @click="putCash();">提现</a>
     </div>
     <ul class="teamNav">
       <li v-for="(item,index) in teamList" :key="index" @click="getTeamInfo(index)" :class="{'cur':index == teamName}">{{item}}</li>
@@ -69,7 +69,7 @@ export default {
       isCur: 0,
       teamName: 0,
       name: '贡献值',
-      myAcountList: ['贡献值', '胡币', '积分'],
+      myAcountList: ['贡献值', '积分'],
       teamList: ['团队人员', '明细记录'],
       errorBox: false,
       errMsg: '',
@@ -133,8 +133,6 @@ export default {
           }
           if (_this.state === 1 || _this.state === '1') {
             _this.amount = data.accountResult.devoteAmount.amount
-          } else if (_this.state === 2 || _this.state === '2') {
-            _this.amount = data.accountResult.huBalance.amount
           } else {
             _this.amount = data.accountResult.huPoint.amount
           }
